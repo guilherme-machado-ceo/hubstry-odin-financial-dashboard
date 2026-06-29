@@ -1,10 +1,10 @@
-# ODIN Financial Dashboard v2.3
+# ODIN Financial Dashboard v2.4
 
 **Dashboard de Inteligencia Financeira BRICS+** — LC Bonds, Ouro, Petroleo, Clima e Noticias em tempo real.
 
 ## Deploy ao vivo
 - **Kimi Page**: https://zql5spkdoior4.kimi.page
-- **GitHub**: https://github.com/guilherme-machado-ceo/odin-financial-dashboard
+- **GitHub**: https://github.com/guilherme-machado-ceo/hubstry-odin-financial-dashboard
 
 ## Stack
 - React 19 + TypeScript + Vite
@@ -16,9 +16,10 @@
 ## APIs sem chave utilizadas
 | API | Proposito |
 |-----|-----------|
-| Google News RSS | Noticias financeiras em tempo real |
+| BCB SGS (serie 10813) | Ptax BRL/USD ao vivo |
+| Yahoo Finance | Cotacoes de petroleo Brent/WTI (BZ=F, CL=F) |
 | Open-Meteo | Dados climaticos e anomalias de temperatura |
-| allorigins.win | Proxy CORS para feeds RSS |
+| Google News RSS + allorigins.win | Noticias financeiras via proxy CORS |
 
 ## 14 Secoes do Dashboard
 1. **ContextBanner** — Manchete geopolitica do Panda Bond BR em CNY
@@ -32,7 +33,7 @@
 9. **DebtComposition** — Divida ML vs ME com Debt-to-GDP
 10. **StabilityScatter** — Estabilidade economica vs participacao ML
 11. **GoldReservesChart** — Reservas de ouro BRICS+ (2015-2025) + % nas reservas
-12. **OilVectorChart** — Brent, WTI, producao BRICS+, petroyuan
+12. **OilVectorChart** — Brent, WTI, producao BRICS+, petroyuan (dados ao vivo)
 13. **ClimateVectorChart** — Anomalias climaticas BRICS+ (Open-Meteo, sem chave)
 14. **Footer** — Fontes primarias, disclaimer Hubstry/Overall 720°
 
@@ -49,7 +50,7 @@ npm i -g vercel
 vercel login
 
 # 3. Deploy (na raiz do projeto)
-cd /caminho/para/odin-financial-dashboard
+cd /caminho/para/hubstry-odin-financial-dashboard
 vercel --prod
 
 # Pronto! URL gerada automaticamente
@@ -57,7 +58,7 @@ vercel --prod
 
 ### Opcao B: Deploy via Git (integracao nativa)
 1. Acesse https://vercel.com/new
-2. Importe o repositorio `guilherme-machado-ceo/odin-financial-dashboard`
+2. Importe o repositorio `guilherme-machado-ceo/hubstry-odin-financial-dashboard`
 3. Framework Preset: **Vite**
 4. Deploy!
 
@@ -78,4 +79,4 @@ A Vercel faz deploy automatico a cada `git push` para `main` — sem precisar de
 - Dogma editorial: siglas expandidas na 1a ocorrencia
 
 ## License
-© 2026 Hubstry Deep Tech · Overall 720°
+AGPL-3.0 © 2026 Hubstry Deep Tech · Overall 720°
