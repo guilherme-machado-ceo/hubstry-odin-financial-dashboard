@@ -7,6 +7,71 @@ import { ArrowRight, ChevronRight, Share2 } from "lucide-react";
 
 interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; }
 
+function FXInfrastructureSVG() {
+  const nodes = [
+    { id: "B3", label: "B3", labelPt: "B3", x: 50, y: 280, color: "#00FFFF" },
+    { id: "CFETS", label: "CFETS", labelPt: "CFETS", x: 250, y: 100, color: "#FF8C00" },
+    { id: "CIPS", label: "CIPS", labelPt: "CIPS", x: 450, y: 200, color: "#00FFFF" },
+    { id: "NDB", label: "NDB", labelPt: "NDB", x: 350, y: 380, color: "#FF8C00" },
+    { id: "TCX", label: "TCX", labelPt: "TCX", x: 150, y: 420, color: "#00FF88" },
+  ];
+  const edges = [
+    { from: "B3", to: "CFETS", label: "Bond Connect" },
+    { from: "CFETS", to: "CIPS", label: "CNY Settlement" },
+    { from: "CIPS", to: "NDB", label: "ML Disbursement" },
+    { from: "NDB", to: "TCX", label: "Hedge" },
+    { from: "TCX", to: "B3", label: "BRL Flow" },
+  ];
+  return (
+    <svg viewBox="0 0 500 500" className="w-full h-full opacity-80 group-hover:opacity-100 transition-opacity duration-700">
+      <defs>
+        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#00FFFF" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#00FFFF" stopOpacity="0" />
+        </radialGradient>
+        <filter id="blur">
+          <feGaussianBlur stdDeviation="2" />
+        </filter>
+      </defs>
+      <rect width="500" height="500" fill="#0a0a0a" />
+      {/* Grid background */}
+      <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+        <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#1a1a1a" strokeWidth="0.5" />
+      </pattern>
+      <rect width="500" height="500" fill="url(#grid)" />
+      {/* Edges */}
+      {edges.map((e) => {
+        const a = nodes.find((n) => n.id === e.from)!;
+        const b = nodes.find((n) => n.id === e.to)!;
+        return (
+          <g key={`${e.from}-${e.to}`}>
+            <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#1a1a1a" strokeWidth="1.5" />
+            <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={a.color} strokeWidth="1" strokeOpacity="0.3" strokeDasharray="4 4">
+              <animate attributeName="stroke-dashoffset" from="0" to="8" dur="2s" repeatCount="indefinite" />
+            </line>
+            <text x={(a.x + b.x) / 2} y={(a.y + b.y) / 2 - 5} fill="#555" fontSize="7" fontFamily="JetBrains Mono, monospace" textAnchor="middle">{e.label}</text>
+          </g>
+        );
+      })}
+      {/* Nodes */}
+      {nodes.map((n) => (
+        <g key={n.id}>
+          <circle cx={n.x} cy={n.y} r="30" fill="url(#glow)" />
+          <circle cx={n.x} cy={n.y} r="8" fill={n.color} fillOpacity="0.2" stroke={n.color} strokeWidth="1" />
+          <text x={n.x} y={n.y - 18} fill={n.color} fontSize="10" fontFamily="JetBrains Mono, monospace" fontWeight="bold" textAnchor="middle">{n.id}</text>
+        </g>
+      ))}
+      {/* Pulse rings */}
+      {nodes.map((n, i) => (
+        <circle key={`pulse-${n.id}`} cx={n.x} cy={n.y} r="8" fill="none" stroke={n.color} strokeWidth="0.5" opacity="0.6">
+          <animate attributeName="r" from="8" to="25" dur="3s" begin={`${i * 0.6}s`} repeatCount="indefinite" />
+          <animate attributeName="opacity" from="0.6" to="0" dur="3s" begin={`${i * 0.6}s`} repeatCount="indefinite" />
+        </circle>
+      ))}
+    </svg>
+  );
+}
+
 export default function BrazilSpotlight({ onSourceClick, onEmbedClick }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
   const locale = getLocale();
@@ -95,7 +160,7 @@ export default function BrazilSpotlight({ onSourceClick, onEmbedClick }: Props) 
 
           <div className="lg:col-span-5 relative">
             <div className="border border-[#1a1a1a] bg-[#0a0a0a] h-full min-h-[400px] relative overflow-hidden group">
-              <img src="/3d-infra.jpg" alt="FX Infrastructure" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700" />
+              <FXInfrastructureSVG />
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
                 <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-[#00FFFF]">FOREIGN EXCHANGE INFRASTRUCTURE</span>
                 <div className="text-[10px] font-mono text-[#555] mt-1">B3 / CFETS / CIPS / NDB / TCX</div>
