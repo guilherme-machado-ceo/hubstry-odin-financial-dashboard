@@ -1,5 +1,5 @@
 // ============================================================
-// LC BONDS DASHBOARD — DATA ENGINE v2.1
+// LC BONDS DASHBOARD — DATA ENGINE v2.4
 // Refreshed 2025-2026 data matching Perplexity reference
 // Sources: BIS, IMF WEO, CEPAL, Bloomberg, BCB, PBOC, NDB, TCX, Alpha Vantage
 // ============================================================
@@ -17,10 +17,10 @@ export interface VolatilityDetail { currency: string; country: string; countryPt
 export interface StabilityScore { country: string; countryPt: string; flag: string; stabilityScore: number; lcDebtShare: number; }
 
 export const kpis: KPIData = {
-  lcBondMarketTotal: "$25.7T", lcBondMarketValue: 25700, lcBondGrowthPct: 124.8, bricsTradeLCShare: 80,
-  ndbLCShare: 25, ndbLCTarget: 30, ndbLCDisbursed: "$12.2B", ndbLCDisbursedValue: 12.2,
-  tcxHedgedCumulative: "$12.2B", tcxHedgedValue: 12.2, tcxCurrencies: 71, cipsThroughput: "¥175T", cipsValue: 175,
-  brlUsdPtax: 5.1689, brlUsdDate: "26/06/2026", dividaBrutaBR: 80.2, dividaBrutaBRDate: "01/04/2026",
+  lcBondMarketTotal: "$25.7T", lcBondMarketValue: 25700, lcBondGrowthPct: 124.8, bricsTradeLCShare: 45,
+  ndbLCShare: 25, ndbLCTarget: 30, ndbLCDisbursed: "~$12B (est.)", ndbLCDisbursedValue: 12.0,
+  tcxHedgedCumulative: "$8.1B", tcxHedgedValue: 8.1, tcxCurrencies: 71, cipsThroughput: "¥175T (2024)", cipsValue: 175,
+  brlUsdPtax: 5.1689, brlUsdDate: "26/06/2026", dividaBrutaBR: 80.4, dividaBrutaBRDate: "01/04/2026",
 };
 
 export const bricsLatamTotal: YearlyTotal[] = [
@@ -38,7 +38,7 @@ export const bricsLatamBilateral: BilateralTrade[] = [
   { year: 2019, brics: 34, latamBilateral: 31 }, { year: 2020, brics: 38, latamBilateral: 33 },
   { year: 2021, brics: 44, latamBilateral: 36 }, { year: 2022, brics: 52, latamBilateral: 39 },
   { year: 2023, brics: 65, latamBilateral: 42 }, { year: 2024, brics: 75, latamBilateral: 46 },
-  { year: 2025, brics: 80, latamBilateral: 50 },
+  { year: 2025, brics: 45, latamBilateral: 50 },
 ];
 
 export const tcxHedgingData: TCXData[] = [
@@ -60,7 +60,7 @@ export const volatilityData: VolatilityData[] = [
 ];
 
 export const countryDebtData: CountryDebt[] = [
-  { country: "Brazil", countryPt: "Brasil", region: "LATAM", flag: "BR", localCurrencyDebt: [65,68,72,74,75,96,98,94,88,87,88], foreignCurrencyDebt: [12,13,14,15,14,18,17,15,14,13,12], totalDebt: [77,81,86,89,89,114,115,109,102,100,100], debtToGDP: 80.2, debtToGDPLabel: "80.2%", debtToGDPSource: "BCB", debtToGDPSnapshot: "01/04/2026" },
+  { country: "Brazil", countryPt: "Brasil", region: "LATAM", flag: "BR", localCurrencyDebt: [65,68,72,74,75,96,98,94,88,87,88], foreignCurrencyDebt: [12,13,14,15,14,18,17,15,14,13,12], totalDebt: [77,81,86,89,89,114,115,109,102,100,100], debtToGDP: 80.4, debtToGDPLabel: "80.4%", debtToGDPSource: "BCB", debtToGDPSnapshot: "01/04/2026" },
   { country: "Mexico", countryPt: "Mexico", region: "LATAM", flag: "MX", localCurrencyDebt: [35,36,38,40,42,52,53,51,49,50,51], foreignCurrencyDebt: [11,12,11,11,11,12,11,11,10,10,10], totalDebt: [46,48,49,51,53,64,64,62,59,60,61], debtToGDP: 49.6, debtToGDPLabel: "49.6%", debtToGDPSource: "IMF", debtToGDPSnapshot: "2024" },
   { country: "Argentina", countryPt: "Argentina", region: "LATAM", flag: "AR", localCurrencyDebt: [38,42,50,66,74,89,78,67,62,58,55], foreignCurrencyDebt: [14,17,28,44,63,74,59,51,45,41,38], totalDebt: [52,59,78,110,137,163,137,118,107,99,93], debtToGDP: 93.0, debtToGDPLabel: "93%", debtToGDPSource: "2025e", debtToGDPSnapshot: "2025e" },
   { country: "Colombia", countryPt: "Colombia", region: "LATAM", flag: "CO", localCurrencyDebt: [32,34,35,38,40,56,58,55,53,52,53], foreignCurrencyDebt: [12,13,14,15,15,17,16,15,14,13,13], totalDebt: [44,47,49,53,55,73,74,70,67,65,66], debtToGDP: 71.5, debtToGDPLabel: "71.5%", debtToGDPSource: "IMF", debtToGDPSnapshot: "2024" },
@@ -72,7 +72,7 @@ export const countryDebtData: CountryDebt[] = [
 ];
 
 export const inflectionPoints: InflectionPoint[] = [
-  { year: 2025, event: "Brazil Panda Bond (sovereign) CNY 6bi", eventPt: "Panda Bond soberano do Brasil CNY 6bi", value: "R$ 2.8bi / ¥ 3.5bi", source: "Min. Fazenda / BCB", isEstimated: false },
+  { year: 2025, event: "Brazil Panda Bond (sovereign) up to CNY 5B", eventPt: "Panda Bond soberano do Brasil até CNY 5B", value: "Letter of Presentation to NAFMII", source: "Min. Fazenda / NAFMII", isEstimated: false },
   { year: 2024, event: "CIPS throughput", eventPt: "Throughput CIPS", value: "¥ 175 tri (2024)", source: "CIPS / PBOC", isEstimated: false },
   { year: 2026, event: "NDB LC target 30%", eventPt: "Meta LC do NDB 30%", value: "25% → 30% by 2026", source: "NDB Strategy 2022-2026", isEstimated: true },
   { year: 2025, event: "PBOC↔BCB swap line", eventPt: "Swap PBOC↔BCB", value: "R$ 157bi / ¥ 190bi", source: "BCB Press Release", isEstimated: false },
