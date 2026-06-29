@@ -1,6 +1,6 @@
 // ============================================================
-// GOLD & OIL DATA ENGINE v2.2
-// Sources: World Gold Council, IMF COFER, EIA, OPEC, Shanghai INE
+// GOLD & OIL DATA ENGINE v2.4
+// Sources: World Gold Council, IMF COFER, EIA, OPEC, Shanghai INE, B3, CFETS
 // ============================================================
 
 export interface GoldReserve { year: number; China: number; Russia: number; India: number; Brazil: number; Turkey: number; Poland: number; }
@@ -49,11 +49,13 @@ export const oilData: OilData[] = [
 ];
 
 export const contextBanner: ContextBannerData = {
-  tag: "GEOPOLITICAL ECONOMY", tagPt: "ECONOMIA GEOPOLITICA",
-  headline: "Brazil Issues First Sovereign Panda Bond in CNY 6 Billion — Landmark Shift from USD Financing",
-  headlinePt: "Brasil emite primeiro Panda Bond soberano em CNY 6 bilhoes — Marco na saida do financiamento em USD (Dolar Americano)",
-  summary: "For the first time, Brazil raises sovereign debt denominated in Chinese yuan (CNY) rather than US dollars (USD). This signals a structural shift: Local Currency (LC) bonds are replacing dollar-denominated instruments as BRICS nations build parallel financial infrastructure (CIPS — Chinese payment system, NDB — New Development Bank, Bond Connect — B3-Shanghai Stock Exchange link).",
-  summaryPt: "Pela primeira vez, o Brasil levanta divida soberana em yuan chines (CNY) em vez de dolares (USD). Isso sinaliza uma mudanca estrutural: titulos de Moeda Local (ML) substituem instrumentos em dolar, enquanto nacoes BRICS constroem infraestrutura paralela (CIPS — sistema de pagamentos chines, NDB — Novo Banco de Desenvolvimento, Bond Connect — conexao entre B3 e bolsa de Xangai).",
-  source: "Reuters / Bloomberg / Valor Economico", sourceUrl: "https://www.reuters.com/business/finance/brazil-panda-bond-cny-2025",
-  date: "June 2025",
+  tag: "GEOPOLITICAL ECONOMY",
+  tagPt: "ECONOMIA GEOPOLITICA",
+  headline: "Brazil Files Intent Letter for Sovereign Panda Bond up to CNY 5 Billion — Pilot in China's Domestic Debt Market",
+  headlinePt: "Brasil entrega carta de intencao para Panda Bond soberano de ate CNY 5 bilhoes — Piloto no mercado de divida domestico chines",
+  summary: "Brazil filed an intent letter to issue up to CNY 5 billion in sovereign Panda Bonds in China's domestic interbank market. The operation is structured by ICBC and Bank of China, pricing referenced to AIIB (1.70%) and Barclays (1.95%) recent issuances. If executed, Brazil becomes one of the first Latin American sovereigns to access the CNY-denominated market — institutional layer of the BRICS+ parallel financial infrastructure (CIPS, NDB, Bond Connect bilateral pilot).",
+  summaryPt: "O Brasil entregou carta de intencao para emitir ate CNY 5 bilhoes em Panda Bonds soberanos no mercado interbancario domestico chines. A operacao tem estruturacao do ICBC e Bank of China, com referencia de precificacao em emissoes recentes do AIIB (1,70%) e Barclays (1,95%). Se executada, o Brasil se torna um dos primeiros soberanos latino-americanos a acessar o mercado denominado em CNY — camada institucional da infraestrutura financeira paralela BRICS+ (CIPS, NDB, Bond Connect bilateral em piloto).",
+  source: "B3 (Brasil Bolsa Balcao) / CFETS (China Foreign Exchange Trade System)",
+  sourceUrl: "https://www.b3.com.br/pt_br/noticias/",
+  date: "June 2026",
 };
