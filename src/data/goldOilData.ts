@@ -1,6 +1,6 @@
 // ============================================================
 // GOLD & OIL DATA ENGINE v2.4
-// Sources: World Gold Council, IMF COFER, EIA, OPEC, Shanghai INE, B3, CFETS
+// Sources: World Gold Council, IMF COFER, EIA, OPEC, Shanghai INE, G1, Bloomberg
 // ============================================================
 
 export interface GoldReserve { year: number; China: number; Russia: number; India: number; Brazil: number; Turkey: number; Poland: number; }
@@ -55,7 +55,7 @@ export const contextBanner: ContextBannerData = {
   headlinePt: "Brasil entrega carta de intencao para Panda Bond soberano de ate CNY 5 bilhoes — Piloto no mercado de divida domestico chines",
   summary: "Brazil filed an intent letter to issue up to CNY 5 billion in sovereign Panda Bonds in China's domestic interbank market. The operation is structured by ICBC and Bank of China, pricing referenced to AIIB (1.70%) and Barclays (1.95%) recent issuances. If executed, Brazil becomes one of the first Latin American sovereigns to access the CNY-denominated market — institutional layer of the BRICS+ parallel financial infrastructure (CIPS, NDB, Bond Connect bilateral pilot).",
   summaryPt: "O Brasil entregou carta de intencao para emitir ate CNY 5 bilhoes em Panda Bonds soberanos no mercado interbancario domestico chines. A operacao tem estruturacao do ICBC e Bank of China, com referencia de precificacao em emissoes recentes do AIIB (1,70%) e Barclays (1,95%). Se executada, o Brasil se torna um dos primeiros soberanos latino-americanos a acessar o mercado denominado em CNY — camada institucional da infraestrutura financeira paralela BRICS+ (CIPS, NDB, Bond Connect bilateral em piloto).",
-  source: "B3 (Brasil Bolsa Balcao) / CFETS (China Foreign Exchange Trade System)",
-  sourceUrl: "https://www.b3.com.br/pt_br/noticias/",
+  source: "G1 / Bloomberg / Reuters",
+  sourceUrl: "https://g1.globo.com/economia/",
   date: "June 2026",
 };

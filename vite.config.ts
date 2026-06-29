@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 import { inspectAttr } from 'kimi-plugin-inspect-react'
 
-// Dynamic base: GitHub Pages needs /odin-financial-dashboard/, others use /
+// Dynamic base: GitHub Pages needs /hubstry-odin-financial-dashboard/, others use /
 const base = process.env.VITE_BASE_PATH || '/';
 
 export default defineConfig({

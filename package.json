@@ -1,5 +1,5 @@
 {
-  "name": "odin-financial-dashboard",
+  "name": "hubstry-odin-financial-dashboard",
   "private": true,
   "version": "2.4.0",
   "type": "module",
@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:kimi": "tsc -b && vite build",
-    "build:github": "tsc -b && VITE_BASE_PATH=/odin-financial-dashboard/ vite build",
+    "build:github": "tsc -b && VITE_BASE_PATH=/hubstry-odin-financial-dashboard/ vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
