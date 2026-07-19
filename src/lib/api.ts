@@ -37,12 +37,13 @@ export async function fetchJson<T>(url: string, timeoutMs = 6000): Promise<T> {
   return (await res.json()) as T;
 }
 
-/** Formata ISO do snapshot para exibição curta no badge. */
+/** Formata ISO do snapshot para exibição curta no badge, com fuso explícito
+ *  (armazenamento sempre em UTC ISO 8601; renderização no fuso do visitante). */
 export function formatUpdatedAt(iso: string | null, locale: string): string {
   if (!iso) return "";
   try {
     return new Date(iso).toLocaleString(locale === "pt" ? "pt-BR" : "en-US", {
-      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
+      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZoneName: "short",
     });
   } catch {
     return iso;
