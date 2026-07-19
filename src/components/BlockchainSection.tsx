@@ -8,6 +8,7 @@ import { useEffect, useState, useRef } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { t, getLocale } from "@/i18n";
 import ExportButton from "./ExportButton";
+import InsightBox from "./InsightBox";
 import EstBadge from "./EstBadge";
 import { Share2, Radio, Bitcoin, Coins, Layers, Leaf } from "lucide-react";
 import { fetchSnapshot, fetchJson, formatUpdatedAt } from "@/lib/api";
@@ -82,6 +83,8 @@ export default function BlockchainSection({ onSourceClick, onEmbedClick }: Props
             <button onClick={() => onEmbedClick("blockchain")} className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono text-[#555] hover:text-[#00FFFF] transition-colors border border-[#222] hover:border-[#00FFFF]/40"><Share2 size={12} /></button>
           </div>
         </div>
+
+        <InsightBox section="blockchain" />
 
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[#1a1a1a] border border-[#1a1a1a] mb-6">
