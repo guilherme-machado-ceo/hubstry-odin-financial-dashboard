@@ -104,7 +104,7 @@ const pt: T = {
     title: "GANHO DE ESTABILIDADE ECONÔMICA vs PARTICIPAÇÃO DE DÍVIDA EM MOEDA LOCAL",
     subtitle: "Score composto de estabilidade (0-100) vs. %% da dívida em ML — Países com mais dívida em moeda própria tendem a ser mais estáveis economicamente.",
     xAxis: "Participação de Dívida em Moeda Local (ML) — 2025e", yAxis: "Score de Estabilidade Econômica (0-100)",
-    embedLabel: "Embed", exportPNG: "Exportar PNG", exportPDF: "Exportar PDF", exportJSON: "Exportar JSON",
+    embedLabel: "Incorporar", exportPNG: "Exportar PNG", exportPDF: "Exportar PDF", exportJSON: "Exportar JSON",
     source: "Fonte", estBadge: "⚠️ est. (estimado)",
   },
   gold: {
@@ -203,7 +203,7 @@ const en: T = {
   climate: {
     title: "CLIMATE VECTOR: ANOMALIES & ENVIRONMENTAL RISKS BRICS+",
     subtitle: "Temperature and precipitation anomalies (Open-Meteo — keyless API) vs. historical averages. Climate affects agricultural commodities, energy, and currencies.",
-    avgTempAnomaly: "Avg. Temp. Anomaly", precipAnomaly: "Precip. Anomaly", avgPrecipAnomaly: "Precip. Anomaly", highRiskCities: "High Risk Cities",
+    avgTempAnomaly: "Avg. Temp. Anomaly", avgPrecipAnomaly: "Precip. Anomaly", highRiskCities: "High Risk Cities",
     riskScoreTitle: "Climate Risk Index (0-100)", tempAnomalyTitle: "Temperature Anomaly (°C vs. historical avg.)",
     risk: "Risk", tempAnomaly: "Temp. Anomaly", source: "Source: Open-Meteo (open data) / NASA GISS",
     scoreNote: "Heuristic score based on approximate fixed references; not an official climatological classification.",
