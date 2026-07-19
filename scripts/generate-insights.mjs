@@ -7,8 +7,10 @@
 //   MAAS_KEY="sua_chave" node scripts/generate-insights.mjs
 //   MAAS_MODEL="glm-5.1" MAAS_KEY="..." node scripts/generate-insights.mjs
 //
-// Saída: public/data/insights.json (PT/EN por seção). Se MAAS_KEY
-// não estiver definida, o script avisa e sai sem erro (exit 0).
+// Saída: public/data/insights.json (PT/EN por seção). Faz MERGE com o
+// arquivo existente: seções que falharem são preservadas da rodada
+// anterior, nunca apagadas. Se MAAS_KEY não estiver definida, o script
+// avisa e sai sem erro (exit 0).
 // ============================================================
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
@@ -56,6 +58,14 @@ async function readJson(file) {
   return JSON.parse(await readFile(path.join(OUT_DIR, file), "utf8"));
 }
 
+async function readJsonSafe(file) {
+  try {
+    return await readJson(file);
+  } catch {
+    return null;
+  }
+}
+
 function fmtUsd(v) {
   if (v >= 1e12) return `US$ ${(v / 1e12).toFixed(2)} trilhões`;
   if (v >= 1e9) return `US$ ${(v / 1e9).toFixed(1)} bilhões`;
@@ -94,7 +104,7 @@ async function ctxClimate() {
       new Date(Date.now() - 370 * 864e5).toISOString().slice(0, 10) +
       "&end_date=" + new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10) +
       "&daily=temperature_2m_mean,precipitation_sum&timezone=auto",
-    { signal: AbortSignal.timeout(15000) }
+    { signal: AbortSignal.timeout(30000) }
   );
   const json = await res.json();
   const temps = json.daily?.temperature_2m_mean ?? [];
@@ -119,7 +129,8 @@ async function main() {
     process.exit(0);
   }
   console.log(`Modelo: ${MODEL} · Endpoint: ${ENDPOINT}`);
-  const sections = {};
+  const existing = (await readJsonSafe("insights.json"))?.data?.sections ?? {};
+  const sections = { ...existing };
   for (const [id, ctxFn] of SECTIONS) {
     try {
       const context = await ctxFn();
@@ -127,11 +138,11 @@ async function main() {
       sections[id] = await chat(context);
       console.log(`OK  ${id} (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
     } catch (err) {
-      console.warn(`SKIP ${id}: ${err.message}`);
+      console.warn(`SKIP ${id}: ${err.message}${existing[id] ? " — versão anterior preservada" : ""}`);
     }
   }
   if (Object.keys(sections).length === 0) {
-    console.warn("Nenhuma seção gerada — insights.json não alterado.");
+    console.warn("Nenhuma seção disponível — insights.json não alterado.");
     process.exit(0);
   }
   await mkdir(OUT_DIR, { recursive: true });
