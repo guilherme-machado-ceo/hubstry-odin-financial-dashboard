@@ -26,7 +26,7 @@ export default function Navbar() {
             ))}
           </div>
           <button onClick={toggleLocale} className="px-3 py-1 text-[10px] font-mono border border-[#222] text-[#aaa] hover:text-[#00FFFF] hover:border-[#00FFFF]/40 transition-colors">{locale === "pt" ? "PT" : "EN"}</button>
-          <span className="text-[10px] font-mono text-[#444] hidden md:inline">2026.06</span>
+          <span className="text-[10px] font-mono text-[#444] hidden md:inline">2026.07</span>
         </div>
       </div>
     </nav>
