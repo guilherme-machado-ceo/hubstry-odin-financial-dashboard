@@ -18,9 +18,14 @@
 // Faz MERGE com o arquivo existente: seções que falharem são preservadas
 // da rodada anterior e marcadas como "preserved_after_timeout" ou
 // "preserved_after_error", mantendo promptVersion/generatedAt originais.
+//
+// Auditoria: cada run é anexada a logs/insights-runs.jsonl (uma linha
+// JSON por execução: modelo, promptVersion, status e tokens por seção —
+// campo "usage" da API). Commite o arquivo junto: é o extrato de consumo
+// reconciliável com o painel MaaS (ver docs/README.md).
 // Se MAAS_KEY não estiver definida, o script avisa e sai sem erro.
 // ============================================================
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
 const ENDPOINT = process.env.MAAS_ENDPOINT || "https://ldgllm.digiti.net.br/v1/chat/completions";
@@ -28,6 +33,7 @@ const MODEL = process.env.MAAS_MODEL || "deepseek-v4-flash";
 const PROMPT_VERSION = "2.3.1";
 const KEY = process.env.MAAS_KEY;
 const OUT_DIR = path.resolve(process.cwd(), "public/data");
+const LOGS_DIR = path.resolve(process.cwd(), "logs");
 // Filtro opcional: SECTIONS="carbon,blockchain" limita a regeneração
 const ONLY = process.env.SECTIONS?.split(",").map((s) => s.trim()).filter(Boolean);
 
@@ -86,6 +92,11 @@ async function chat(userPrompt) {
     confidence: {
       data: valid(parsed.confidence?.data),
       interpretation: valid(parsed.confidence?.interpretation),
+    },
+    usage: {
+      prompt: json.usage?.prompt_tokens ?? null,
+      completion: json.usage?.completion_tokens ?? null,
+      total: json.usage?.total_tokens ?? null,
     },
   };
 }
@@ -176,15 +187,26 @@ async function main() {
   const prev = await readJsonSafe("insights.json");
   const existing = prev?.data?.sections ?? {};
   const sections = { ...existing };
+  // Registro de auditoria da execução (anexado a logs/insights-runs.jsonl)
+  const runLog = {
+    ts: new Date().toISOString(),
+    model: MODEL,
+    promptVersion: PROMPT_VERSION,
+    filter: ONLY ?? null,
+    sections: [],
+    tokens: { prompt: 0, completion: 0, total: 0 },
+  };
   for (const [id, ctxFn] of SECTIONS) {
     if (ONLY && !ONLY.includes(id)) {
       console.log(`---- ${id}: fora do filtro SECTIONS — preservada sem nova chamada.`);
+      runLog.sections.push({ id, status: "skipped_filter" });
       continue;
     }
     try {
       const { context, dataAsOf } = await ctxFn();
       const t0 = Date.now();
       const result = await chat(context);
+      const durationSec = (Date.now() - t0) / 1000;
       sections[id] = {
         ...result,
         dataAsOf,
@@ -193,7 +215,14 @@ async function main() {
         generatedAt: new Date().toISOString(),
         generationStatus: "generated",
       };
-      console.log(`OK  ${id} (${((Date.now() - t0) / 1000).toFixed(1)}s) [${sections[id].freshness}, dados:${result.confidence.data} interp:${result.confidence.interpretation}]`);
+      delete sections[id].usage; // consumo vai para o run log, não para o JSON público
+      if (result.usage.total) {
+        runLog.tokens.prompt += result.usage.prompt ?? 0;
+        runLog.tokens.completion += result.usage.completion ?? 0;
+        runLog.tokens.total += result.usage.total;
+      }
+      runLog.sections.push({ id, status: "generated", promptVersion: PROMPT_VERSION, durationSec: Number(durationSec.toFixed(1)), tokens: result.usage });
+      console.log(`OK  ${id} (${durationSec.toFixed(1)}s) [${sections[id].freshness}, dados:${result.confidence.data} interp:${result.confidence.interpretation}]${result.usage.total ? ` · ${result.usage.total} tokens` : ""}`);
     } catch (err) {
       if (existing[id]) {
         // Preserva o conteúdo anterior SEM reivindicar a versão atual do prompt:
@@ -205,8 +234,10 @@ async function main() {
           generatedAt: existing[id].generatedAt ?? prev?.updatedAt,
           generationStatus: status,
         };
+        runLog.sections.push({ id, status, promptVersion: sections[id].promptVersion, error: err.message });
         console.warn(`SKIP ${id}: ${err.message} — versão anterior preservada [${status}, prompt v${sections[id].promptVersion}]`);
       } else {
+        runLog.sections.push({ id, status: "failed", error: err.message });
         console.warn(`SKIP ${id}: ${err.message}`);
       }
     }
@@ -218,7 +249,10 @@ async function main() {
   await mkdir(OUT_DIR, { recursive: true });
   const payload = { updatedAt: new Date().toISOString(), source: "ODIN Insights (MaaS)", model: MODEL, promptVersion: PROMPT_VERSION, data: { sections } };
   await writeFile(path.join(OUT_DIR, "insights.json"), JSON.stringify(payload));
-  console.log(`insights.json gravado com ${Object.keys(sections).length} seção(ões). Commit e push para publicar.`);
+  await mkdir(LOGS_DIR, { recursive: true });
+  await appendFile(path.join(LOGS_DIR, "insights-runs.jsonl"), JSON.stringify(runLog) + "\n");
+  console.log(`insights.json gravado com ${Object.keys(sections).length} seção(ões).`);
+  console.log(`Run registrada em logs/insights-runs.jsonl${runLog.tokens.total ? ` — ${runLog.tokens.total} tokens consumidos nesta execução` : " — API não retornou campo usage"}. Commite os dois arquivos.`);
 }
 
 main();
