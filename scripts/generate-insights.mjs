@@ -98,7 +98,7 @@ async function ctxCarbon() {
   const dataAsOf = "2026-07-06"; // publicação oficial Q2 2026 (Comissão Europeia)
   const context = `Dados da seção Precificação de Carbono e CBAM (regime definitivo desde 01/01/2026):
 - currentPeriod: "Q2 2026"; currentPrice: 75,28 €/tCO2e (publicação oficial da Comissão Europeia em 06/07/2026).
-- previousPeriod: "Q1 2026"; previousPrice: 75,36 €/tCO2e. Q3 2026 publica em 05/10/2027? NÃO — publica em 05/10/2026.
+- previousPeriod: "Q1 2026"; previousPrice: 75,36 €/tCO2e. Q3 2026 publica em 05/10/2026.
 - Escopo: 6 setores; limiar de minimis de 50 t/ano ANUAL E AGREGADO por importador (massa total de mercadorias cobertas, Reg. 2025/2083); quem responde às obrigações é o importador autorizado na UE, não o exportador; primeira declaração e entrega em 30/09/2027.
 - dataAsOf: ${dataAsOf}.
 Escreva a análise para um exportador brasileiro: efeitos indiretos (exigência de dados verificáveis de emissões embutidas, custos de comprovação, competitividade). Não use emissões per capita.`;
