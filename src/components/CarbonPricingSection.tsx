@@ -8,8 +8,7 @@ import { useEffect, useState, useRef } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from "recharts";
 import { t, getLocale } from "@/i18n";
 import ExportButton from "./ExportButton";
-import EstBadge from "./EstBadge";
-import { Share2, Radio, Landmark, Globe2, Scale, CalendarClock } from "lucide-react";
+import { Share2, Landmark, Globe2, Scale, CalendarClock } from "lucide-react";
 import { fetchSnapshot, formatUpdatedAt } from "@/lib/api";
 import { CBAM_CERT_PRICES, CBAM_TIMELINE, CBAM_SECTORS, CARBON_INSTRUMENTS, FALLBACK_OWID } from "@/data/carbonData";
 import type { OwidSeries } from "@/data/carbonData";
@@ -22,13 +21,12 @@ const STATUS_COLORS: Record<string, string> = { done: "#00FF88", next: "#FF8C00"
 export default function CarbonPricingSection({ onSourceClick, onEmbedClick }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
   const [owid, setOwid] = useState<OwidSeries[]>(FALLBACK_OWID);
-  const [isLive, setIsLive] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const locale = getLocale();
 
   useEffect(() => {
     fetchSnapshot<{ series: OwidSeries[] }>("owid-co2.json", { series: FALLBACK_OWID })
-      .then((res) => { setOwid(res.data.series); setIsLive(res.isLive); setUpdatedAt(res.updatedAt); });
+      .then((res) => { setOwid(res.data.series); setUpdatedAt(res.updatedAt); });
   }, []);
 
   // Série unificada para o LineChart: [{year, BRA, CHN, ...}]
@@ -53,15 +51,11 @@ export default function CarbonPricingSection({ onSourceClick, onEmbedClick }: Pr
         <div className="flex items-start justify-between mb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              {isLive ? (
-                <span className="inline-flex items-center gap-1.5 text-[9px] font-mono text-[#00FF88] border border-[#00FF88]/30 px-1.5 py-0.5">
-                  <Radio size={10} className="animate-pulse" />
-                  {locale === "pt" ? "DADOS AO VIVO" : "LIVE DATA"}
-                  {updatedAt && <span className="text-[#00FF88]/60">— {formatUpdatedAt(updatedAt, locale)}</span>}
-                </span>
-              ) : (
-                <EstBadge />
-              )}
+              <span className="inline-flex items-center gap-1.5 text-[9px] font-mono text-[#00FFFF] border border-[#00FFFF]/30 px-1.5 py-0.5">
+                <Landmark size={10} />
+                {t("carbon.badgeOfficial")}
+                {updatedAt && <span className="text-[#00FFFF]/60">· {t("carbon.badgeSnapshot")} {formatUpdatedAt(updatedAt, locale)}</span>}
+              </span>
             </div>
             <h2 className="text-xl font-bold text-[#e0e0e0] tracking-tight">{t("carbon.title")}</h2>
             <p className="text-[11px] font-mono text-[#555] mt-1 max-w-2xl leading-relaxed">{t("carbon.subtitle")}</p>
