@@ -45,10 +45,16 @@ export default function ClimateVectorChart({ onSourceClick, onEmbedClick }: Prop
     async function fetchClimate() {
       try {
         const results: ClimateData[] = [];
+        // Janela movel: ultimos 12 meses completos (archive API tem defasagem de ~5 dias)
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() - 5);
+        const startDate = new Date(endDate);
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        const fmtDate = (d: Date) => d.toISOString().slice(0, 10);
         for (const station of CLIMATE_STATIONS) {
           try {
             const res = await fetch(
-              `https://archive-api.open-meteo.com/v1/archive?latitude=${station.lat}&longitude=${station.lon}&start_date=2024-01-01&end_date=2024-12-31&daily=temperature_2m_mean,precipitation_sum&timezone=auto`,
+              `https://archive-api.open-meteo.com/v1/archive?latitude=${station.lat}&longitude=${station.lon}&start_date=${fmtDate(startDate)}&end_date=${fmtDate(endDate)}&daily=temperature_2m_mean,precipitation_sum&timezone=auto`,
               { signal: AbortSignal.timeout(5000) }
             );
             if (!res.ok) throw new Error();

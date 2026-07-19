@@ -13,6 +13,8 @@ import GoldReservesChart from "@/components/GoldReservesChart";
 import OilVectorChart from "@/components/OilVectorChart";
 import NewsTicker from "@/components/NewsTicker";
 import ClimateVectorChart from "@/components/ClimateVectorChart";
+import CarbonPricingSection from "@/components/CarbonPricingSection";
+import BlockchainSection from "@/components/BlockchainSection";
 import Footer from "@/components/Footer";
 import SourceOverlay from "@/components/SourceOverlay";
 import EmbedOverlay from "@/components/EmbedOverlay";
@@ -107,7 +109,13 @@ export default function App() {
       {/* ── 14. CLIMATE VECTOR: Temperature Anomalies + Risk Scores ── */}
       <RevealSection><ClimateVectorChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>
 
-      {/* ── 15. FOOTER ── */}
+      {/* ── 15. CARBON PRICING & CBAM: EU ETS, CBAM certificates, embedded CO2 ── */}
+      <RevealSection><CarbonPricingSection onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>
+
+      {/* ── 16. BLOCKCHAIN & DIGITAL ASSETS: Market + On-chain + RWA + Tokenized Carbon ── */}
+      <RevealSection><BlockchainSection onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>
+
+      {/* ── 17. FOOTER ── */}
       <Footer onSourceClick={handleSourceClick} />
 
       {/* ── OVERLAYS ── */}
