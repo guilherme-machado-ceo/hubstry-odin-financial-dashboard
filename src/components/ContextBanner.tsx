@@ -17,7 +17,7 @@ export default function ContextBanner() {
             <AlertTriangle size={10} />
             {locale === "pt" ? data.tagPt : data.tag}
           </span>
-          <span className="text-[8px] font-mono text-[#444]">— {locale === "pt" ? "Junho 2025" : data.date}</span>
+          <span className="text-[8px] font-mono text-[#444]">{locale === "pt" ? "— marco histórico: junho/2025" : "— milestone: June 2025"}</span>
         </div>
         <h2 className="text-lg md:text-xl font-bold text-[#e0e0e0] tracking-tight leading-snug mb-2">
           {locale === "pt" ? data.headlinePt : data.headline}
