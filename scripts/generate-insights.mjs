@@ -1,5 +1,5 @@
 // ============================================================
-// ODIN INSIGHTS v2 — gera análises editoriais por seção via MaaS (LiteLLM)
+// ODIN INSIGHTS v2.2 — gera análises editoriais por seção via MaaS (LiteLLM)
 // Roda LOCALMENTE (Actions bloqueado): a chave fica apenas no env da
 // sua máquina — nunca no código, nunca no navegador.
 //
@@ -8,8 +8,12 @@
 //   MAAS_MODEL="glm-5.1" MAAS_KEY="..." node scripts/generate-insights.mjs
 //
 // Saída: public/data/insights.json — por seção: { pt, en, dataAsOf,
-// freshness, confidence }. Faz MERGE com o arquivo existente: seções
-// que falharem são preservadas da rodada anterior, nunca apagadas.
+// freshness, confidence, promptVersion, generatedAt, generationStatus }.
+// O promptVersion GLOBAL indica a versão do GERADOR; o de cada seção
+// indica a versão que gerou aquele conteúdo (rastreabilidade real).
+// Faz MERGE com o arquivo existente: seções que falharem são preservadas
+// da rodada anterior e marcadas como "preserved_after_timeout" ou
+// "preserved_after_error", mantendo promptVersion/generatedAt originais.
 // Se MAAS_KEY não estiver definida, o script avisa e sai sem erro.
 // ============================================================
 import { readFile, writeFile, mkdir } from "node:fs/promises";
@@ -17,7 +21,7 @@ import path from "node:path";
 
 const ENDPOINT = process.env.MAAS_ENDPOINT || "https://ldgllm.digiti.net.br/v1/chat/completions";
 const MODEL = process.env.MAAS_MODEL || "deepseek-v4-flash";
-const PROMPT_VERSION = "2.1";
+const PROMPT_VERSION = "2.2";
 const KEY = process.env.MAAS_KEY;
 const OUT_DIR = path.resolve(process.cwd(), "public/data");
 
@@ -35,12 +39,14 @@ Regras editoriais obrigatórias:
 - Nunca use emissões per capita de um país como argumento de conformidade ou vantagem no CBAM — o mecanismo incide sobre emissões EMBUTIDAS no produto/instalação, não sobre a média nacional.
 - O limiar CBAM é ANUAL e AGREGADO por importador (50 t/ano de massa total de mercadorias cobertas); carregamentos pequenos se somam.
 - Relações de transmissão (clima→commodities→câmbio; stablecoins→desdolarização) são HIPÓTESES/interpretações — nunca conclusões dos dados. Marque-as linguisticamente como tal.
+- Efeitos econômicos são POSSIBILIDADES, não fatos consumados: escreva "pode elevar custos", "pode afetar a competitividade" — nunca "eleva", "pressiona", "afeta" como fato.
 - Valor de mercado de stablecoins NÃO é volume de pagamentos internacionais — quando o tema surgir, essa distinção deve aparecer.
 - Termine sempre com uma frase de limitação explícita: o que os dados NÃO permitem concluir.
 - Responda SOMENTE com JSON válido no formato:
   {"pt":"...","en":"...","confidence":{"data":"high|medium|low","interpretation":"high|medium|low"}}
   — sem markdown, sem comentários.
-- Atribua "high" à confiança dos dados apenas se TODOS os números citados vieram do contexto fornecido.`;
+- Atribua "high" à confiança dos dados apenas se TODOS os números citados vieram do contexto fornecido.
+- Calibragem de confiança: se a interpretação contém inferência econômica NÃO medida diretamente nos dados (competitividade, repasse de custos, efeito em safras ou energia), "interpretation" deve ser "medium" ou "low" — nunca "high". Use "high" em "interpretation" apenas quando a leitura for descrição direta dos números.`;
 
 async function chat(userPrompt) {
   const res = await fetch(ENDPOINT, {
@@ -100,9 +106,10 @@ async function ctxCarbon() {
   const context = `Dados da seção Precificação de Carbono e CBAM (regime definitivo desde 01/01/2026):
 - currentPeriod: "Q2 2026"; currentPrice: 75,28 €/tCO2e (publicação oficial da Comissão Europeia em 06/07/2026).
 - previousPeriod: "Q1 2026"; previousPrice: 75,36 €/tCO2e. Q3 2026 publica em 05/10/2026.
-- Escopo: 6 setores; limiar de minimis de 50 t/ano ANUAL E AGREGADO por importador (massa total de mercadorias cobertas, Reg. 2025/2083); quem responde às obrigações é o importador autorizado na UE, não o exportador; primeira declaração e entrega em 30/09/2027.
+- Escopo: 6 setores; limiar de minimis de 50 t/ano ANUAL E AGREGADO por importador (massa total de mercadorias cobertas, Reg. 2025/2083); primeira declaração e entrega em 30/09/2027.
+- Responsabilidade legal: no regime definitivo, quem declara as emissões embutidas é o importador autorizado na UE (o declarante CBAM), NÃO o exportador. Exportadores brasileiros são pressionados INDIRETAMENTE: importadores europeus passam a exigir deles dados verificáveis de emissões embutidas por instalação.
 - dataAsOf: ${dataAsOf}.
-Escreva a análise para um exportador brasileiro: efeitos indiretos (exigência de dados verificáveis de emissões embutidas, custos de comprovação, competitividade). Não use emissões per capita.`;
+Escreva a análise para um exportador brasileiro com o enquadramento legal correto (a obrigação é do importador na UE; o exportador responde indiretamente via cadeia). Formule efeitos econômicos como possibilidade ("pode elevar custos de comprovação", "pode afetar a competitividade"), nunca como fato. Não use emissões per capita.`;
   return { context, dataAsOf };
 }
 
@@ -139,7 +146,7 @@ async function ctxClimate() {
 - Janela móvel de 12 meses: ${startDate} a ${endDate} (a Archive API tem defasagem de ~5 dias). dataAsOf: ${dataAsOf}.
 - Brasília: temperatura média ${avg.toFixed(1)}°C (referência histórica fixa do dashboard: 21,4°C — aproximação, não climatologia oficial); precipitação acumulada ${Math.round(precip)} mm (referência fixa: 1550 mm).
 - O dashboard compara 8 capitais com score heurístico de risco 0-100 (fórmula própria, não classificação climatológica).
-Escreva a análise marcando QUALQUER transmissão para commodities, energia ou câmbio como hipótese, e declare a limitação: uma cidade não representa as regiões produtoras de um país.`;
+Escreva a análise marcando QUALQUER transmissão para commodities, energia ou câmbio como hipótese. NÃO afirme efeito econômico a partir de uma única cidade: em vez disso, recomende monitorar se o padrão se estende às regiões produtoras e às bacias hidrográficas relevantes para geração elétrica. Declare a limitação: uma cidade não representa as regiões produtoras de um país.`;
   return { context, dataAsOf };
 }
 
@@ -156,17 +163,38 @@ async function main() {
     process.exit(0);
   }
   console.log(`Modelo: ${MODEL} · Prompt: v${PROMPT_VERSION} · Endpoint: ${ENDPOINT}`);
-  const existing = (await readJsonSafe("insights.json"))?.data?.sections ?? {};
+  const prev = await readJsonSafe("insights.json");
+  const existing = prev?.data?.sections ?? {};
   const sections = { ...existing };
   for (const [id, ctxFn] of SECTIONS) {
     try {
       const { context, dataAsOf } = await ctxFn();
       const t0 = Date.now();
       const result = await chat(context);
-      sections[id] = { ...result, dataAsOf, freshness: freshnessOf(dataAsOf, id) };
+      sections[id] = {
+        ...result,
+        dataAsOf,
+        freshness: freshnessOf(dataAsOf, id),
+        promptVersion: PROMPT_VERSION,
+        generatedAt: new Date().toISOString(),
+        generationStatus: "generated",
+      };
       console.log(`OK  ${id} (${((Date.now() - t0) / 1000).toFixed(1)}s) [${sections[id].freshness}, dados:${result.confidence.data} interp:${result.confidence.interpretation}]`);
     } catch (err) {
-      console.warn(`SKIP ${id}: ${err.message}${existing[id] ? " — versão anterior preservada" : ""}`);
+      if (existing[id]) {
+        // Preserva o conteúdo anterior SEM reivindicar a versão atual do prompt:
+        // herda promptVersion/generatedAt originais (fallback: metadados do arquivo prévio)
+        const status = /abort|timeout/i.test(err.message) ? "preserved_after_timeout" : "preserved_after_error";
+        sections[id] = {
+          ...existing[id],
+          promptVersion: existing[id].promptVersion ?? prev?.promptVersion ?? "unknown",
+          generatedAt: existing[id].generatedAt ?? prev?.updatedAt,
+          generationStatus: status,
+        };
+        console.warn(`SKIP ${id}: ${err.message} — versão anterior preservada [${status}, prompt v${sections[id].promptVersion}]`);
+      } else {
+        console.warn(`SKIP ${id}: ${err.message}`);
+      }
     }
   }
   if (Object.keys(sections).length === 0) {
