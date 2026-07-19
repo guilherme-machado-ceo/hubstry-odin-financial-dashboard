@@ -151,6 +151,9 @@ const pt: T = {
     thesis: "ENQUADRAMENTO: enquanto o BRICS+ constrói trilhos de Moeda Local (CIPS, NDB, Panda Bonds), as stablecoins de dólar processam volumes recordes — a digitalização, paradoxalmente, reforça o USD. Ler esta seção junto com as seções 5-7 é ler a disputa monetária do século em dois trilhos simultâneos.",
     source: "Fonte",
   },
+  insight: {
+    badge: "análise gerada por IA sobre os dados desta seção",
+  },
   sourceOverlay: { title: "Fonte Primária", methodology: "Metodologia de Cálculo", lastUpdated: "Atualizado em", close: "Fechar" },
   embedOverlay: { title: "Widget de Incorporação (Embed)", description: "Copie o código abaixo para incorporar esta seção em seu site ou post:", copy: "Copiar", copied: "Copiado!", close: "Fechar" },
   footer: {
@@ -302,6 +305,9 @@ const en: T = {
     tokenText: "Toucan Protocol and KlimaDAO brought carbon credits on-chain in 2021-22; the sector shrank after the hype but remains as experimental infrastructure for a programmable carbon market — relevant if SBCE and CBAM evolve toward digital rails.",
     thesis: "FRAMING: while BRICS+ builds Local Currency rails (CIPS, NDB, Panda Bonds), dollar stablecoins process record volumes — digitalization, paradoxically, reinforces the USD. Reading this section together with sections 5-7 is reading the century's monetary dispute on two simultaneous rails.",
     source: "Source",
+  },
+  insight: {
+    badge: "AI-generated analysis of this section's data",
   },
   sourceOverlay: { title: "Primary Source", methodology: "Calculation Methodology", lastUpdated: "Last updated", close: "Close" },
   embedOverlay: { title: "Embed Widget", description: "Copy the code below to embed this section on your site or post:", copy: "Copy", copied: "Copied!", close: "Close" },
