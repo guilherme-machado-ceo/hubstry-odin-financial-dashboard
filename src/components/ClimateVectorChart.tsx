@@ -194,6 +194,7 @@ export default function ClimateVectorChart({ onSourceClick, onEmbedClick }: Prop
             {t("climate.source")}: Open-Meteo (API sem chave) →
           </button>
         </div>
+        <div className="mt-1 text-[8px] font-mono text-[#444]">{t("climate.scoreNote")}</div>
       </div>
     </section>
   );
