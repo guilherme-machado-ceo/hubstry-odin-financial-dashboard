@@ -45,6 +45,7 @@ const pt: T = {
     avgTempAnomaly: "Anomalia Média de Temp.", avgPrecipAnomaly: "Anomalia de Precipitação", highRiskCities: "Cidades em Alto Risco",
     riskScoreTitle: "Índice de Risco Climático (0-100)", tempAnomalyTitle: "Anomalia de Temperatura (°C vs. média histórica)",
     risk: "Risco", tempAnomaly: "Anomalia de Temp.", source: "Fonte: Open-Meteo (dados abertos) / NASA GISS",
+    scoreNote: "Score heurístico baseado em referências fixas aproximadas; não corresponde a uma classificação climatológica oficial.",
   },
   section1: {
     title: "BRASIL EM DESTAQUE: PANDA BOND E INFRAESTRUTURA DE MOEDA LOCAL (ML)",
@@ -152,7 +153,11 @@ const pt: T = {
     source: "Fonte",
   },
   insight: {
-    badge: "análise gerada por IA sobre os dados desta seção",
+    badge: "IA assistida · não revisado por analista",
+    dataOf: "Dados de", generatedAt: "Gerado em",
+    confidence: "Confiança", data: "dados", interpretation: "interpretação",
+    levelHigh: "alta", levelMedium: "média", levelLow: "baixa",
+    stale: "Dados potencialmente desatualizados; interpretação pode não refletir o snapshot mais recente.",
   },
   sourceOverlay: { title: "Fonte Primária", methodology: "Metodologia de Cálculo", lastUpdated: "Atualizado em", close: "Fechar" },
   embedOverlay: { title: "Widget de Incorporação (Embed)", description: "Copie o código abaixo para incorporar esta seção em seu site ou post:", copy: "Copiar", copied: "Copiado!", close: "Fechar" },
@@ -200,6 +205,7 @@ const en: T = {
     avgTempAnomaly: "Avg. Temp. Anomaly", avgPrecipAnomaly: "Precip. Anomaly", highRiskCities: "High Risk Cities",
     riskScoreTitle: "Climate Risk Index (0-100)", tempAnomalyTitle: "Temperature Anomaly (°C vs. historical avg.)",
     risk: "Risk", tempAnomaly: "Temp. Anomaly", source: "Source: Open-Meteo (open data) / NASA GISS",
+    scoreNote: "Heuristic score based on approximate fixed references; not an official climatological classification.",
   },
   section1: {
     title: "BRAZIL SPOTLIGHT: PANDA BOND & LOCAL CURRENCY (LC) INFRASTRUCTURE",
@@ -307,7 +313,11 @@ const en: T = {
     source: "Source",
   },
   insight: {
-    badge: "AI-generated analysis of this section's data",
+    badge: "AI-assisted · not analyst-reviewed",
+    dataOf: "Data as of", generatedAt: "Generated",
+    confidence: "Confidence", data: "data", interpretation: "interpretation",
+    levelHigh: "high", levelMedium: "medium", levelLow: "low",
+    stale: "Data may be stale; interpretation may not reflect the latest snapshot.",
   },
   sourceOverlay: { title: "Primary Source", methodology: "Calculation Methodology", lastUpdated: "Last updated", close: "Close" },
   embedOverlay: { title: "Embed Widget", description: "Copy the code below to embed this section on your site or post:", copy: "Copy", copied: "Copied!", close: "Close" },
