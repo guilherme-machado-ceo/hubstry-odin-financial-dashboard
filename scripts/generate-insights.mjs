@@ -22,7 +22,8 @@ const SYSTEM_PROMPT = `Você é o analista editorial do ODIN, um dashboard de in
 Regras editoriais obrigatórias:
 - Escreva 2 a 3 frases curtas por idioma, em tom jornalístico-econômico sóbrio.
 - Público não-especialista: expanda toda sigla entre parênteses na primeira ocorrência.
-- Use APENAS os números fornecidos no contexto. Não invente dados, datas ou projeções.
+- Use APENAS os números e fatos fornecidos no contexto — reproduza-os com fidelidade exata, sem reinterpretar escopos (ex.: "por importador" nunca vira "por produto").
+- Não invente dados, datas ou projeções.
 - Português do Brasil normativo no campo "pt"; inglês internacional no campo "en".
 - Responda SOMENTE com JSON válido no formato: {"pt":"...","en":"..."} — sem markdown, sem comentários.`;
 
@@ -68,9 +69,9 @@ async function ctxCarbon() {
   const lines = Object.entries(last).map(([c, [y, v]]) => `${c}: ${v} tCO2 per capita em ${y}`).join("; ");
   return `Dados da seção Precificação de Carbono e CBAM (regime definitivo desde 01/01/2026):
 - Preço oficial do certificado CBAM: Q1 2026 = 75,36 €/tCO2e; Q2 2026 = 75,28 €/tCO2e (publicação da Comissão Europeia em 06/07/2026). Q3 publica em 05/10/2026.
-- Escopo: 6 setores, isenção de minimis de 50 t/ano; primeira declaração e entrega em 30/09/2027.
+- Escopo: 6 setores; isenção de minimis de 50 t/ano POR IMPORTADOR (massa total de mercadorias cobertas no ano, Reg. 2025/2083); quem responde às obrigações é o importador autorizado na UE, não o exportador; primeira declaração e entrega em 30/09/2027.
 - CO2 por consumo per capita (snapshot OWID de ${owid.updatedAt.slice(0, 10)}): ${lines}.
-Escreva a análise destacando o que mais importa para um exportador brasileiro.`;
+Escreva a análise destacando o que mais importa para um exportador brasileiro (efeitos indiretos: exigência de dados verificáveis, custo e competitividade).`;
 }
 
 async function ctxBlockchain() {
