@@ -1,13 +1,16 @@
 // ============================================================
-// ODIN INSIGHT BOX v2 — análise editorial gerada por IA (MaaS)
+// ODIN INSIGHT BOX v2.2 — análise editorial gerada por IA (MaaS)
 // Renderiza SOMENTE se public/data/insights.json existir e tiver
 // conteúdo para a seção — caso contrário, não exibe nada.
 // v2: dataAsOf por seção, confiança estruturada (dados vs interpretação),
 // aviso de dados potencialmente desatualizados e selo "não revisado".
-// Compatível com o formato v1 (campos novos são opcionais).
+// v2.2: proveniência por seção — "Gerado em" usa o generatedAt DA SEÇÃO
+// (não o updatedAt global da execução) e textos preservados de rodadas
+// anteriores (falha na última geração) são sinalizados.
+// Compatível com v1/v2.0 (campos novos são opcionais).
 // ============================================================
 import { useEffect, useState } from "react";
-import { Sparkles, AlertTriangle } from "lucide-react";
+import { Sparkles, AlertTriangle, History } from "lucide-react";
 import { t, getLocale } from "@/i18n";
 import { fetchSnapshot, formatUpdatedAt } from "@/lib/api";
 
@@ -16,6 +19,7 @@ interface InsightEntry {
   pt: string; en: string;
   dataAsOf?: string; freshness?: string;
   confidence?: InsightConfidence;
+  promptVersion?: string; generatedAt?: string; generationStatus?: string;
 }
 interface InsightsData { sections: Record<string, InsightEntry>; }
 interface Props { section: string; }
@@ -55,6 +59,10 @@ export default function InsightBox({ section }: Props) {
 
   const levelKey = (v?: string) => (v === "high" ? "insight.levelHigh" : v === "low" ? "insight.levelLow" : "insight.levelMedium");
   const conf = entry.confidence;
+  // Proveniência: o carimbo exibido é o da GERAÇÃO DA SEÇÃO; o updatedAt
+  // global (instante da última execução do script) é apenas fallback.
+  const generatedAt = entry.generatedAt ?? updatedAt;
+  const preserved = entry.generationStatus?.startsWith("preserved") ?? false;
 
   return (
     <div className="mb-6 border border-[#00FFFF]/20 bg-[#00FFFF]/5 p-4">
@@ -68,8 +76,8 @@ export default function InsightBox({ section }: Props) {
         {entry.dataAsOf && (
           <span className="text-[8px] font-mono text-[#555]">{t("insight.dataOf")} {formatDataOf(entry.dataAsOf, locale)}</span>
         )}
-        {updatedAt && (
-          <span className="text-[8px] font-mono text-[#555]">{t("insight.generatedAt")} {formatUpdatedAt(updatedAt, locale)}</span>
+        {generatedAt && (
+          <span className="text-[8px] font-mono text-[#555]">{t("insight.generatedAt")} {formatUpdatedAt(generatedAt, locale)}</span>
         )}
         {conf && (conf.data || conf.interpretation) && (
           <span className="text-[8px] font-mono text-[#555]">
@@ -81,6 +89,12 @@ export default function InsightBox({ section }: Props) {
         <div className="mt-2 flex items-center gap-1.5 text-[8px] font-mono text-[#FF8C00]">
           <AlertTriangle size={10} />
           {t("insight.stale")}
+        </div>
+      )}
+      {preserved && (
+        <div className="mt-2 flex items-center gap-1.5 text-[8px] font-mono text-[#777]">
+          <History size={10} />
+          {t("insight.preserved")}
         </div>
       )}
     </div>
