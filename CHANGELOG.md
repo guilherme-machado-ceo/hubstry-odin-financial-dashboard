@@ -3,6 +3,18 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [auditoria-v1.2] — 2026-07-20
+
+### Adicionado
+- `npm run insights:validate` — primeiro teste automatizado do projeto:
+  valida schema e proveniência do `insights.json` (campos obrigatórios,
+  formatos ISO, `runId`, `generationStatus`) e regressão editorial
+  bloqueante (siglas CBAM/BRICS+/RWA expandidas na 1ª ocorrência);
+  heurística anti-total derivado (RN-006) como aviso. Referências:
+  RNF-010 e "testes de regressão" do dogma editorial (SPEC/SDD no Notion).
+- SPEC-001 (ODIN Insights) redigida no template SDD — documento de
+  gestão mantido no Notion, conforme a tabela de fontes de verdade.
+
 ## [auditoria-v1.1] — 2026-07-19
 
 Rodada de refinamento da estrutura de auditoria, incorporando 11 pontos
