@@ -127,6 +127,8 @@ const pt: T = {
   carbon: {
     title: "PRECIFICAÇÃO DE CARBONO E CBAM: O PREÇO DO CARBONO NA FRONTEIRA EUROPEIA",
     subtitle: "CBAM (Carbon Border Adjustment Mechanism — Mecanismo de Ajuste de Carbono na Fronteira) em regime definitivo desde 01/01/2026. O preço do certificado segue a média dos leilões do EU ETS (EU Emissions Trading System — Sistema de Comércio de Emissões da União Europeia): trimestral em 2026, semanal a partir de 2027.",
+    badgeOfficial: "DADO OFICIAL — Q2 2026 · última publicação da Comissão Europeia: 06/07/2026",
+    badgeSnapshot: "snapshot OWID",
     kpiCert: "Certificado CBAM (€/tCO₂e)", kpiThreshold: "Isenção de minimis", kpiSectors: "Setores cobertos", kpiSectorsNote: "expansão downstream em 2028", kpiSurrender: "1ª declaração + entrega", kpiSurrenderNote: "referente às importações de 2026",
     certChartTitle: "Preço oficial do certificado CBAM (€/tCO₂e, por trimestre)",
     certPendingNote: "Q3 2026 publica em 05/10/2026; Q4 2026 em 04/01/2027. Fonte: Comissão Europeia (TAXUD).",
@@ -135,7 +137,7 @@ const pt: T = {
     timelineTitle: "Linha do tempo regulatória (Reg. (UE) 2023/956 + 2025/2083)",
     sectorsTitle: "Setores no escopo do CBAM",
     brazilTitle: "RECORTE BRASIL",
-    brazilText: "Exportadores brasileiros de aço, alumínio, cimento e fertilizantes passam a responder pelo carbono embutido ao vender para a União Europeia. Preço de carbono pago na origem é dedutível: o SBCE (Sistema Brasileiro de Comércio de Emissões — Lei 15.042/2024), quando operacional, pode reduzir o custo do CBAM para a indústria nacional.",
+    brazilText: "Quem responde às obrigações do CBAM é o importador autorizado na União Europeia (o declarante CBAM). Exportadores brasileiros de produtos cobertos serão pressionados a fornecer dados verificáveis sobre as emissões embutidas, com efeitos contratuais, financeiros e competitivos. Um preço de carbono efetivamente pago no Brasil pode ser abatido da obrigação — desde que elegível, comprovado e reconhecido conforme a metodologia europeia. O SBCE (Sistema Brasileiro de Comércio de Emissões — Lei 15.042/2024), quando operacional, pode criar essa possibilidade, mas não assegura dedução automática.",
     source: "Fonte",
   },
   blockchain: {
@@ -152,7 +154,8 @@ const pt: T = {
   sourceOverlay: { title: "Fonte Primária", methodology: "Metodologia de Cálculo", lastUpdated: "Atualizado em", close: "Fechar" },
   embedOverlay: { title: "Widget de Incorporação (Embed)", description: "Copie o código abaixo para incorporar esta seção em seu site ou post:", copy: "Copiar", copied: "Copiado!", close: "Fechar" },
   footer: {
-    compiledBy: "Compilado por", hubstry: "Hubstry Deep Tech", overall: "Overall 720°", snapshot: "snapshot Q2 2026",
+    compiledBy: "Compilado por", hubstry: "Hubstry Deep Tech", overall: "Overall 720°",
+    snapshot: "edição 2026.07 · dados estáticos: Q2 2026 · snapshots diários via APIs abertas",
     sources: "Fontes Primárias", disclaimer: "Valores aproximados. Verificar contra fontes primárias antes de publicar ou tomar decisão de investimento. Este dashboard é para fins educativos e de análise geopolítica, não constitui recomendação financeira.",
   },
   brazilSticky: {
@@ -264,7 +267,7 @@ const en: T = {
     embedLabel: "Embed", exportPNG: "Export PNG", exportPDF: "Export PDF", exportJSON: "Export JSON",
     source: "Source: World Gold Council (WGC) / IMF COFER (Currency Composition of Official Foreign Exchange Reserves)", estBadge: "⚠️ est. (estimated)",
   },
-  goldShare: { title: "GOLD AS %% OF TOTAL RESERVES (2025)", subtitle: "How much of each country's vault is in gold vs. dollars, euros, etc. — Higher %% in gold = less dollar dependency.", country: "Country", goldPct: "Gold (%% of reserves)" },
+  goldShare: { title: "GOLD AS %% OF TOTAL RESERVES (2025)", subtitle: "How much of each country's vault is in gold vs. dollars, euros, etc. — Higher %% in gold = less dollar dependency.", country: "País", goldPct: "Gold (%% of reserves)" },
   oil: {
     title: "OIL VECTOR: PRICE & BRICS+ PRODUCTION",
     subtitle: "Brent (US$/barrel) and BRICS+ production (million barrels/day) — Oil is the world's most traded commodity. When price rises, exporter currencies (like BRL) tend to appreciate.",
@@ -276,6 +279,8 @@ const en: T = {
   carbon: {
     title: "CARBON PRICING & CBAM: THE PRICE OF CARBON AT THE EUROPEAN BORDER",
     subtitle: "CBAM (Carbon Border Adjustment Mechanism) in its definitive regime since 01/01/2026. The certificate price tracks the EU ETS (EU Emissions Trading System) auction average: quarterly in 2026, weekly from 2027.",
+    badgeOfficial: "OFFICIAL DATA — Q2 2026 · last European Commission publication: 2026-07-06",
+    badgeSnapshot: "OWID snapshot",
     kpiCert: "CBAM certificate (€/tCO₂e)", kpiThreshold: "De minimis exemption", kpiSectors: "Covered sectors", kpiSectorsNote: "downstream expansion in 2028", kpiSurrender: "1st declaration + surrender", kpiSurrenderNote: "covering 2026 imports",
     certChartTitle: "Official CBAM certificate price (€/tCO₂e, per quarter)",
     certPendingNote: "Q3 2026 publishes on 2026-10-05; Q4 2026 on 2027-01-04. Source: European Commission (TAXUD).",
@@ -284,7 +289,7 @@ const en: T = {
     timelineTitle: "Regulatory timeline (Reg. (EU) 2023/956 + 2025/2083)",
     sectorsTitle: "Sectors under CBAM scope",
     brazilTitle: "BRAZIL ANGLE",
-    brazilText: "Brazilian exporters of steel, aluminium, cement and fertilisers now answer for embedded carbon when selling to the European Union. Carbon prices paid at origin are deductible: the SBCE (Brazilian Emissions Trading System — Law 15,042/2024), once operational, may reduce the CBAM cost for national industry.",
+    brazilText: "CBAM obligations fall on the authorised importer in the European Union (the CBAM declarant). Brazilian exporters of covered goods will be pressed to provide verifiable embedded-emissions data, with contractual, financial and competitive effects. A carbon price effectively paid in Brazil may be deducted from the obligation — provided it is eligible, proven and recognised under the EU methodology. The SBCE (Brazilian Emissions Trading System — Law 15,042/2024), once operational, may create that possibility, but does not guarantee automatic deduction.",
     source: "Source",
   },
   blockchain: {
@@ -301,7 +306,8 @@ const en: T = {
   sourceOverlay: { title: "Primary Source", methodology: "Calculation Methodology", lastUpdated: "Last updated", close: "Close" },
   embedOverlay: { title: "Embed Widget", description: "Copy the code below to embed this section on your site or post:", copy: "Copy", copied: "Copied!", close: "Close" },
   footer: {
-    compiledBy: "Compiled by", hubstry: "Hubstry Deep Tech", overall: "Overall 720°", snapshot: "snapshot Q2 2026",
+    compiledBy: "Compiled by", hubstry: "Hubstry Deep Tech", overall: "Overall 720°",
+    snapshot: "edition 2026.07 · static data: Q2 2026 · daily snapshots via open APIs",
     sources: "Primary Sources", disclaimer: "Approximate values. Verify against primary sources before publishing or making investment decisions. This dashboard is for educational and geopolitical analysis purposes, not financial advice.",
   },
   brazilSticky: {
