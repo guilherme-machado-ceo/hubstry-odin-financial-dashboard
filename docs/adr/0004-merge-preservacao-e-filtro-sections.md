@@ -1,7 +1,9 @@
 # ADR 0004: Merge com preservação e filtro SECTIONS
 
 - Status: aceito
-- Data: 2026-07-19
+- Data da decisão: 2026-07-19
+- Data da documentação: 2026-07-19
+- Natureza: Retrospectivo
 
 ## Contexto
 

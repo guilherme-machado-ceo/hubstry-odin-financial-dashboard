@@ -1,7 +1,9 @@
 # ADR 0001: Execução local do gerador ODIN Insights via MaaS
 
 - Status: aceito
-- Data: 2026-07-19 (documentado retroativamente)
+- Data da decisão: 2026-07-19
+- Data da documentação: 2026-07-19
+- Natureza: Retrospectivo
 
 ## Contexto
 
@@ -33,7 +35,7 @@ normal de push → deploy Vercel.
 ## Consequências
 
 - Positivas: a chave nunca sai da máquina do operador; o JSON gerado é
-  versionado no git (trilha imutável); o dashboard continua 100% estático;
-  custo de tokens controlado run a run.
+  versionado no git; o dashboard continua 100% estático; custo de tokens
+  controlado run a run.
 - Negativas: regeneração é manual e depende da máquina do operador; sem
   agendamento automático enquanto o Actions estiver bloqueado.

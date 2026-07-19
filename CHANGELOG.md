@@ -3,6 +3,34 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [auditoria-v1.1] — 2026-07-19
+
+Rodada de refinamento da estrutura de auditoria, incorporando 11 pontos
+de revisão externa (IA):
+
+### Adicionado
+- `runId` por execução e por seção, vinculando run log ↔ insights.json
+  sem depender de correlação por horário (commit d4d1b4d).
+- Hashes SHA-256 de entrada/saída no run log (prova de qual snapshot
+  alimentou o modelo).
+- Registros de falha com `latencyMs`, `errorType` e `tokens: null`
+  (null = consumo indeterminado; zero só com confirmação da API).
+- Rotação mensal do run log (`logs/insights-runs-AAAA-MM.jsonl`).
+- `npm run insights:usage` — soma auditável do consumo de tokens
+  (commit 2d2b466).
+- ADRs 0001–0004 marcados como Retrospectivos, com datas de decisão e
+  documentação; template ganha política de edição.
+
+### Corrigido
+- Narrativa de "imutabilidade" substituída por "registros versionados,
+  identificáveis e protegidos contra alteração não controlada" (git não
+  é livro-razão imutável: force push e poderes de admin existem).
+- Run log reclassificado como "registro técnico de consumo reportado
+  pela API" — referência de cobrança é o painel comercial.
+- Label de revisão renomeada para `external-ai-review` (o revisor é uma
+  IA, não um auditor humano); issues #2–#5 atualizadas.
+- Bump acidental de `react-dom` revertido (commit eccba6a).
+
 ## [insights-v2.3.1] — 2026-07-19
 
 ### Adicionado
@@ -11,8 +39,8 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
   afirmar concentração sem métrica (participação percentual, HHI).
   Origem: revisão externa (microcorreções editoriais não bloqueantes).
 - Estrutura de auditoria docs-as-code: `docs/adr/` (ADRs 0001–0004
-  retroativos + template), este CHANGELOG e `logs/insights-runs.jsonl`
-  com consumo de tokens por run.
+  retroativos + template), este CHANGELOG e run log com consumo de
+  tokens por execução.
 
 ## [insights-v2.3] — 2026-07-19
 

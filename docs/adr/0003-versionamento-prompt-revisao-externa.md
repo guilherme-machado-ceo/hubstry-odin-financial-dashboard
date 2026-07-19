@@ -1,7 +1,9 @@
 # ADR 0003: Versionamento de prompt e ciclo de revisão externa
 
 - Status: aceito
-- Data: 2026-07-19
+- Data da decisão: 2026-07-19
+- Data da documentação: 2026-07-19
+- Natureza: Retrospectivo
 
 ## Contexto
 
@@ -17,7 +19,9 @@ achado de revisão virasse melhoria permanente do gerador.
 - Todo achado de revisão (humana ou IA externa) é convertido em **regra
   literal** no system prompt — não em edição do texto gerado;
 - Cada rodada de geração passa por checklist de aceite antes do push;
-- O CHANGELOG registra versão, motivo e origem de cada regra.
+- O CHANGELOG registra versão, motivo e origem de cada regra;
+- Achados de IA externa são rastreados em issues com a label
+  `external-ai-review` (transparência sobre a natureza do revisor).
 
 ## Alternativas consideradas
 
@@ -29,7 +33,7 @@ achado de revisão virasse melhoria permanente do gerador.
 
 ## Consequências
 
-- Positivas: 4 rodadas de revisão externa incorporadas como 10+ regras
+- Positivas: 4 rodadas de revisão externa incorporadas como 15+ regras
   permanentes (v2.0 → v2.3.1); correções sistêmicas, não pontuais;
   histórico de qual versão gerou cada texto.
 - Negativas: prompt cresce a cada rodada (custo de tokens de sistema);
