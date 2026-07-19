@@ -1,5 +1,5 @@
 // ============================================================
-// ODIN INSIGHTS v2.3 — gera análises editoriais por seção via MaaS (LiteLLM)
+// ODIN INSIGHTS v2.3.1 — gera análises editoriais por seção via MaaS (LiteLLM)
 // Roda LOCALMENTE (Actions bloqueado): a chave fica apenas no env da
 // sua máquina — nunca no código, nunca no navegador.
 //
@@ -25,7 +25,7 @@ import path from "node:path";
 
 const ENDPOINT = process.env.MAAS_ENDPOINT || "https://ldgllm.digiti.net.br/v1/chat/completions";
 const MODEL = process.env.MAAS_MODEL || "deepseek-v4-flash";
-const PROMPT_VERSION = "2.3";
+const PROMPT_VERSION = "2.3.1";
 const KEY = process.env.MAAS_KEY;
 const OUT_DIR = path.resolve(process.cwd(), "public/data");
 // Filtro opcional: SECTIONS="carbon,blockchain" limita a regeneração
@@ -42,6 +42,8 @@ Regras editoriais obrigatórias:
 - O mesmo rigor vale para BRICS+ (Brasil, Rússia, Índia, China, África do Sul e parceiros), RWA (Real World Assets — ativos do mundo real tokenizados) e qualquer outra sigla.
 - Use APENAS os números e fatos do contexto, com fidelidade exata de escopo (ex.: "por importador" nunca vira "por produto").
 - NÃO some valores individuais de uma lista nem apresente somas parciais como total do setor; totais só podem ser citados quando o contexto fornecer explicitamente um campo de total validado.
+- Valor de mercado (capitalização) é um ESTOQUE de valor de mercado (preço × oferta em circulação) — nunca o chame de "capital alocado" ou "capital investido".
+- Não afirme concentração (nem dispersão) de mercado ou setor sem métrica de concentração no contexto (participação percentual, HHI, distribuição completa); cite apenas a liderança individual.
 - Se o contexto trouxer os campos "currentPeriod/currentPrice", LIDERE com o dado vigente; cite o anterior apenas como comparação.
 - Nunca use emissões per capita de um país como argumento de conformidade ou vantagem no CBAM — o mecanismo incide sobre emissões EMBUTIDAS no produto/instalação, não sobre a média nacional.
 - O limiar CBAM é ANUAL e AGREGADO por importador (50 t/ano de massa total de mercadorias cobertas); carregamentos pequenos se somam.
