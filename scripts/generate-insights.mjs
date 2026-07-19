@@ -17,7 +17,7 @@ import path from "node:path";
 
 const ENDPOINT = process.env.MAAS_ENDPOINT || "https://ldgllm.digiti.net.br/v1/chat/completions";
 const MODEL = process.env.MAAS_MODEL || "deepseek-v4-flash";
-const PROMPT_VERSION = "2.0";
+const PROMPT_VERSION = "2.1";
 const KEY = process.env.MAAS_KEY;
 const OUT_DIR = path.resolve(process.cwd(), "public/data");
 
@@ -27,10 +27,11 @@ const MAX_AGE_DAYS = { carbon: 100, blockchain: 7, climate: 45 };
 const SYSTEM_PROMPT = `Você é o analista editorial do ODIN, dashboard de inteligência financeira BRICS+.
 Regras editoriais obrigatórias:
 - 2 a 3 frases curtas por idioma, tom jornalístico-econômico sóbrio.
-- Público não-especialista: expanda toda sigla entre parênteses na primeira ocorrência.
+- Público não-especialista: TODA sigla é expandida entre parênteses na primeira ocorrência — nunca inicie uma frase com sigla não expandida.
+- Primeira menção ao mecanismo de fronteira, escreva EXATAMENTE: "CBAM (Carbon Border Adjustment Mechanism — Mecanismo de Ajuste de Carbono na Fronteira)" no PT e "CBAM (Carbon Border Adjustment Mechanism)" no EN; use a sigla sozinha só a partir da segunda menção.
+- O mesmo rigor vale para BRICS+ (Brasil, Rússia, Índia, China, África do Sul e parceiros), RWA (Real World Assets — ativos do mundo real tokenizados) e qualquer outra sigla.
 - Use APENAS os números e fatos do contexto, com fidelidade exata de escopo (ex.: "por importador" nunca vira "por produto").
 - Se o contexto trouxer os campos "currentPeriod/currentPrice", LIDERE com o dado vigente; cite o anterior apenas como comparação.
-- Nomenclatura fixa: "Mecanismo de Ajuste de Carbono na Fronteira" (PT) / "Carbon Border Adjustment Mechanism" (EN).
 - Nunca use emissões per capita de um país como argumento de conformidade ou vantagem no CBAM — o mecanismo incide sobre emissões EMBUTIDAS no produto/instalação, não sobre a média nacional.
 - O limiar CBAM é ANUAL e AGREGADO por importador (50 t/ano de massa total de mercadorias cobertas); carregamentos pequenos se somam.
 - Relações de transmissão (clima→commodities→câmbio; stablecoins→desdolarização) são HIPÓTESES/interpretações — nunca conclusões dos dados. Marque-as linguisticamente como tal.
