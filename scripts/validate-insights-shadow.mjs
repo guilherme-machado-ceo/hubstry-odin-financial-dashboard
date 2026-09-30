@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { validateInsightEntry, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION } from "./insights-schema.mjs";
 
@@ -20,5 +20,13 @@ const lawOk=Object.values(sections??{}).every(e=>e.economicLaw?.relevance!=="hig
 const gate=errors.length===0 && generated>0 && covered>=0.5 && lawOk;
 console.log(`Shadow gate: ${gate?"PASS":"BLOCK"} | sections=${generated} factEvidenceCoverage=${covered.toFixed(2)}`);
 if(!gate) errors.push("shadow generation gate bloqueou o artefato");
+const reportFile = path.resolve(process.cwd(),"public/data/generationReport.json");
+try {
+  const report = JSON.parse(await readFile(reportFile,"utf8"));
+  report.validation = { decision: gate ? "publish_candidate" : "blocked", validator: "semantic", errors, factEvidenceCoverage: covered, generatedSections: generated, economicLawHighHasNorms: lawOk, validatedAt: new Date().toISOString() };
+  await writeFile(reportFile, JSON.stringify(report,null,2)+"\n");
+} catch (reportError) {
+  errors.push(`generationReport.json não pôde ser atualizado: ${reportError.message}`);
+}
 if(errors.length){for(const e of errors) console.error("ERRO:",e);process.exit(1);}
 console.log("insights.v2.shadow.json APROVADO estruturalmente.");
