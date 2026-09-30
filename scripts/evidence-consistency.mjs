@@ -30,7 +30,7 @@ const iso = (y, m, d) => `${y}-${pad(m)}-${pad(d)}`;
 
 const DATE_PATTERNS = [
   // 2026-01-01
-  { re: /\b(\d{4})-(\d{2})-(\d{2})\b/g, to: (m) => iso(m[1], +m[2], +m[3]) },
+  { re: /\b(\d{4})-(\d{2})-(\d{2})(?=[^0-9]|$)/g, to: (m) => iso(m[1], +m[2], +m[3]) },
   // 25 de setembro de 2025 / 1º de janeiro de 2026
   { re: new RegExp(`\\b(\\d{1,2})º?\\s+de\\s+(${MONTH_RE})\\s+de\\s+(\\d{4})\\b`, "gi"), to: (m) => iso(m[3], MONTHS[m[2].toLowerCase()], +m[1]) },
   // September 25, 2025
