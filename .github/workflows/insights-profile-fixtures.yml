@@ -19,3 +19,5 @@ jobs:
           node-version: 22
       - name: Validate section profile fixtures
         run: node scripts/test-insights-profiles.mjs
+      - name: Validate claim/evidence consistency (regressão df75)
+        run: node scripts/test-evidence-consistency.mjs

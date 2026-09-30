@@ -2,6 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { validateInsightEntry, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, LEVELS } from "./insights-schema.mjs";
 import { validateSectionProfile } from "./insights-profile-validator.mjs";
+import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
 
 const input = path.resolve(process.argv[2] || "public/data/insights.v2.shadow.json");
 const output = path.resolve(process.argv[3] || "public/data/insights.v2.json");
@@ -43,6 +44,10 @@ const confidencePresent = Object.values(sections ?? {}).every(e =>
 const bannedClaims = Object.values(sections ?? {}).flatMap(e => e.claims ?? [])
   .filter(c => /\b(always|never|guaranteed|certainly)\b/i.test(c.textEn ?? "")).length;
 const sectionProfileValid = Object.values(sections ?? {}).every(e => validateSectionProfile(e, e.sectionId).length === 0);
+
+const evidenceBySection = new Map((report.sections ?? []).map(s => [s.sectionId, s.evidence]));
+for (const [id, entry] of Object.entries(sections ?? {}))
+  for (const e of checkEvidenceConsistency(entry, evidenceBySection.get(id))) errors.push(`sections.${id} ${formatConsistencyError(e)}`);
 
 if (generatedCount === 0) errors.push("nenhuma seção gerada");
 if (evidenceCoverage < 0.5) errors.push(`evidenceCoverage abaixo de 0.5: ${evidenceCoverage.toFixed(2)}`);

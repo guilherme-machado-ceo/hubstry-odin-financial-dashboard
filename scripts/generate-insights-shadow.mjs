@@ -5,6 +5,7 @@ import { createHash, randomBytes } from "node:crypto";
 import path from "node:path";
 import { chatJson, getProviderConfig } from "./ai-provider.mjs";
 import { PROMPT_VERSION, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION } from "./insights-schema.mjs";
+import { compareDirection } from "./evidence-consistency.mjs";
 
 const OUT_DIR = path.resolve(process.cwd(), "public/data");
 const OUT_FILE = path.join(OUT_DIR, "insights.v2.shadow.json");
@@ -26,6 +27,8 @@ Regras:
 - use somente o contexto fornecido;
 - capitalização de mercado não é capital investido nem volume de pagamentos;
 - relações causais não medidas devem ser hypothesis/interpretation;
+- datas-chave: use cada data SOMENTE para o evento a que o contexto a associa (ex.: início de vigência ≠ prazo de declaração);
+- comparações com referência: use a direção (acima/abaixo) calculada e declarada no contexto; nunca infira a direção;
 - efeitos econômicos são possibilidades, não fatos consumados;
 - Direito Econômico é lente analítica, não parecer jurídico;
 - se a relevância jurídica for alta, indique normas e instituições explicitamente presentes no contexto;
@@ -77,15 +80,35 @@ async function contexts() {
   const temps=weather.daily?.temperature_2m_mean??[];
   const precip=(weather.daily?.precipitation_sum??[]).reduce((a,b)=>a+b,0);
   const avg=temps.reduce((a,b)=>a+b,0)/(temps.length||1);
+  const avgR=Number(avg.toFixed(1)), precipR=Math.round(precip);
+  const TEMP_REF=21.4, PRECIP_REF=1550;
   const top=rwa.data.rwa.slice(0,3).map(x=>`${x.name}: ${fmt(x.tvlUsd)} TVL`).join("; ");
   return [
-    {
-      id:"carbon", validAsOf:"2026-07-06", nextReviewAt:"2026-10-05T00:00:00Z",
-      provenance:[
-        source("source-carbon-ec","https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en","2026-07-06","context:carbon","cbam-price-q2-2026","Q2 2026: 75.28 €/tCO2e; Q1: 75.36; six sectors; 50 t/year aggregated importer; first declaration 30/09/2027"),
-      ],
-      context:`Carbon pricing/CBAM. Q2 2026 price: 75.28 €/tCO2e; Q1: 75.36 €/tCO2e. Six sectors. De minimis: 50 t/year annual aggregate per importer for covered goods. First declaration/delivery: 2027-09-30. In definitive regime the authorized EU importer is legally responsible for declaring embedded emissions; Brazilian exporters may face indirect requests for verifiable installation-level data. Effects on costs/competitiveness are possibilities. Do not use national per-capita emissions. Source: source-carbon-ec.`
-    },
+    (() => {
+      const q2 = 75.28, q1 = 75.36;
+      const context = `Carbon pricing/CBAM (Regulation (EU) 2023/956, as amended by the 2025 CBAM simplification). Q2 2026 price: ${q2} €/tCO2e; Q1 2026: ${q1} €/tCO2e; the Q2 price is ${compareDirection(q2, q1) === "below" ? "below" : "above"} the Q1 price. Six sectors. De minimis: 50 t/year annual aggregate per importer for covered goods. Definitive period in force since 2026-01-01. First annual CBAM declaration (covering 2026 imports) due by 2027-09-30; this is a declaration deadline, not the start of the definitive regime. In the definitive regime the authorized EU importer is legally responsible for declaring embedded emissions; Brazilian exporters may face indirect requests for verifiable installation-level data. Effects on costs/competitiveness are possibilities. Do not use national per-capita emissions. Source: source-carbon-ec.`;
+      return {
+        id:"carbon", validAsOf:"2026-07-06", nextReviewAt:"2026-10-05T00:00:00Z",
+        provenance:[
+          source("source-carbon-ec","https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en","2026-07-06","context:carbon","cbam-price-q2-2026",context),
+        ],
+        context,
+        evidence:{
+          material: context,
+          keyDates:[
+            { id:"cbam-definitive-start", date:"2026-01-01",
+              subjectTerms:["regime definitivo","período definitivo","fase definitiva","definitive regime","definitive cbam regime","definitive cbam period","definitive period","definitive phase"],
+              eventTerms:["começa","começou","inicia","iniciou","início","em vigor","vigente","vigora","desde","starts","started","begins","began","start of","applies","applied","in force","since"] },
+            { id:"cbam-first-annual-declaration", date:"2027-09-30",
+              subjectTerms:["primeira declaração","declaração anual","first declaration","annual declaration","first annual"],
+              eventTerms:["até","prazo","devida","vence","due","deadline","by "] },
+          ],
+          comparisons:[
+            { id:"cbam-price-q2-vs-q1", observed:q2, reference:q1, unit:"€/tCO2e", direction:compareDirection(q2, q1) },
+          ],
+        },
+      };
+    })(),
     {
       id:"blockchain", validAsOf:stable.updatedAt, nextReviewAt:new Date(Date.now()+7*864e5).toISOString(),
       provenance:[
@@ -93,14 +116,19 @@ async function contexts() {
         source("source-defillama-rwa","https://defillama.com/protocols",rwa.updatedAt,"public/data/rwa-protocols.json","rwa-tvl-sample",JSON.stringify(rwa)),
         source("source-defillama-coins","https://defillama.com/","2026-09-30","public/data/crypto-market.json","asset-prices",JSON.stringify(crypto))
       ],
-      context:`Digital assets. Stablecoin market capitalization: ${fmt(stable.data.totalMcapUsd)}; Tether: ${fmt(stable.data.assets[0].mcapUsd)}. This is market capitalization, not international payment volume. RWA sample: ${top}; do not sum these protocols or call the sample the whole sector. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.`
+      context:`Digital assets. Stablecoin market capitalization: ${fmt(stable.data.totalMcapUsd)}; Tether: ${fmt(stable.data.assets[0].mcapUsd)}. This is market capitalization, not international payment volume. RWA sample: ${top}; do not sum these protocols or call the sample the whole sector. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.`,
+      get evidence(){ return { material:this.context, keyDates:[], comparisons:[] }; }
     },
     {
       id:"climate", validAsOf:climateEnd, nextReviewAt:new Date(Date.now()+7*864e5).toISOString(),
       provenance:[
         source("source-open-meteo-brasilia",weatherUrl,climateEnd,"external:open-meteo-archive","brasilia-12m-temp-precip",JSON.stringify(weather.daily))
       ],
-      context:`Climate vector for Brasília. Rolling 12-month window ${climateStart} to ${climateEnd}; mean temperature ${avg.toFixed(1)}°C; precipitation ${Math.round(precip)} mm. Dashboard reference benchmarks: 21.4°C and 1550 mm, not an official climatology. A single city cannot establish impacts on producing regions, commodities or energy. Any transmission to commodities, hydrology, energy or FX must be a hypothesis and should be monitored against producing regions and relevant river basins. Source: source-open-meteo-brasilia.`
+      context:`Climate vector for Brasília. Rolling 12-month window ${climateStart} to ${climateEnd}; mean temperature ${avgR}°C (${compareDirection(avgR, TEMP_REF) === "above" ? "above" : compareDirection(avgR, TEMP_REF) === "below" ? "below" : "equal to"} the ${TEMP_REF}°C reference); precipitation ${precipR} mm (${compareDirection(precipR, PRECIP_REF) === "above" ? "above" : compareDirection(precipR, PRECIP_REF) === "below" ? "below" : "equal to"} the ${PRECIP_REF} mm reference). The reference benchmarks (${TEMP_REF}°C and ${PRECIP_REF} mm) are dashboard references, not an official climatology. A single city cannot establish impacts on producing regions, commodities or energy. Any transmission to commodities, hydrology, energy or FX must be a hypothesis and should be monitored against producing regions and relevant river basins. Source: source-open-meteo-brasilia.`,
+      get evidence(){ return { material:this.context, keyDates:[], comparisons:[
+        { id:"climate-temp-vs-reference", observed:avgR, reference:TEMP_REF, unit:"°C", direction:compareDirection(avgR, TEMP_REF) },
+        { id:"climate-precip-vs-reference", observed:precipR, reference:PRECIP_REF, unit:"mm", direction:compareDirection(precipR, PRECIP_REF) },
+      ] }; }
     }
   ];
 }
@@ -142,7 +170,7 @@ for (const item of await contexts()) {
     runId, reviewStatus:"unreviewed",
     usage:{prompt:usage.prompt,completion:usage.completion,total:usage.total,latencyMs}
   });
-  reportSections.push({ sectionId: item.id, status: "shadow", latencyMs, totalTokens: usage.total });
+  reportSections.push({ sectionId: item.id, status: "shadow", latencyMs, totalTokens: usage.total, evidence: { ...item.evidence, materialSha256: sha256(item.evidence.material) } });
   console.log(`OK shadow ${item.id} · ${latencyMs}ms · ${usage.total ?? "?"} tokens`);
   } catch (error) {
     reportSections.push({ sectionId: item.id, status: "failed_controlled", decision: "preserve", errorType: error?.name || "Error", errorMessage: String(error?.message || error).slice(0, 500), providerEvents: sectionEvents });

@@ -3,6 +3,36 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [insights-v3.1.0] — 2026-09-30
+
+### Adicionado
+- `scripts/evidence-consistency.mjs` — consistência claim ↔ evidência
+  determinística, aplicada no gate shadow e, de novo, no promote:
+  1. números e datas de claims `fact` devem existir no material de fonte,
+     com normalização pt/en (`1.321`/`1321`, `22,4`/`22.4`, datas por
+     extenso → ISO);
+  2. datas-chave com papel semântico (`keyDates`): a data associada a um
+     evento deve ser a registrada para ele (início do regime definitivo do
+     CBAM ≠ prazo da primeira declaração anual);
+  3. comparações recalculadas em código (`comparisons`): acima/abaixo da
+     referência não é inferido pelo modelo.
+- O gerador shadow grava o material de fonte (e seu SHA-256), as datas-chave
+  e as comparações por seção no `generationReport.json`.
+- Fixtures de regressão com os erros reais do run
+  `odin-20260930-134927-df75` (devem ser bloqueadas) e com as versões
+  corrigidas (devem passar); rodam no CI de PR.
+
+### Alterado
+- Contexto de carbono: vigência do regime definitivo (2026-01-01) explícita
+  e distinta do prazo da primeira declaração anual (2027-09-30).
+- Contexto de clima: direção das comparações calculada e declarada.
+- SYSTEM prompt: regras de datas-chave e de comparações.
+- `PROMPT_VERSION` 3.0.1 → 3.1.0.
+
+### Limitações conhecidas
+- Inteiros de 0 a 10 e números colados a letras (CO2, Q2) não são checados.
+- Comparações são avaliadas por frase; uma frase com as duas direções passa.
+
 ## [insights-v3.0.1] — 2026-09-30
 
 ### Alterado

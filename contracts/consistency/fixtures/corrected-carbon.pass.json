@@ -1,0 +1,205 @@
+{
+  "description": "Regressão do MVP Readiness Gate: artefato real do run odin-20260930-134927-df75.",
+  "expect": "pass",
+  "expectRules": [],
+  "evidence": {
+    "material": "Carbon pricing/CBAM (Regulation (EU) 2023/956, as amended by the 2025 CBAM simplification). Q2 2026 price: 75.28 €/tCO2e; Q1 2026: 75.36 €/tCO2e; the Q2 price is below the Q1 price. Six sectors. De minimis: 50 t/year annual aggregate per importer for covered goods. Definitive period in force since 2026-01-01. First annual CBAM declaration (covering 2026 imports) due by 2027-09-30; this is a declaration deadline, not the start of the definitive regime. In the definitive regime the authorized EU importer is legally responsible for declaring embedded emissions; Brazilian exporters may face indirect requests for verifiable installation-level data. Effects on costs/competitiveness are possibilities. Do not use national per-capita emissions. Source: source-carbon-ec.",
+    "keyDates": [
+      {
+        "id": "cbam-definitive-start",
+        "date": "2026-01-01",
+        "subjectTerms": [
+          "regime definitivo",
+          "período definitivo",
+          "fase definitiva",
+          "definitive regime",
+          "definitive cbam regime",
+          "definitive cbam period",
+          "definitive period",
+          "definitive phase"
+        ],
+        "eventTerms": [
+          "começa",
+          "começou",
+          "inicia",
+          "iniciou",
+          "início",
+          "em vigor",
+          "vigente",
+          "vigora",
+          "desde",
+          "starts",
+          "started",
+          "begins",
+          "began",
+          "start of",
+          "applies",
+          "applied",
+          "in force",
+          "since"
+        ]
+      },
+      {
+        "id": "cbam-first-annual-declaration",
+        "date": "2027-09-30",
+        "subjectTerms": [
+          "primeira declaração",
+          "declaração anual",
+          "first declaration",
+          "annual declaration",
+          "first annual"
+        ],
+        "eventTerms": [
+          "até",
+          "prazo",
+          "devida",
+          "vence",
+          "due",
+          "deadline",
+          "by "
+        ]
+      }
+    ],
+    "comparisons": [
+      {
+        "id": "cbam-price-q2-vs-q1",
+        "observed": 75.28,
+        "reference": 75.36,
+        "unit": "€/tCO2e",
+        "direction": "below"
+      }
+    ]
+  },
+  "entry": {
+    "schemaVersion": "2.0",
+    "intelligenceContractVersion": "1.0",
+    "sectionId": "carbon",
+    "status": "generated",
+    "pt": "O preço do CBAM no Q2 de 2026 foi de 75,28 €/tCO2e, ligeiramente inferior ao Q1 de 75,36 €/tCO2e. O regime definitivo está em vigor desde 2026-01-01, com a primeira declaração anual devida até 2027-09-30; a responsabilidade legal de declaração recai sobre o importador autorizado da UE. Exportadores brasileiros podem receber pedidos indiretos por dados verificáveis de nível de instalação. Os efeitos sobre custos e competitividade permanecem possibilidades não medidas.",
+    "en": "The CBAM price in Q2 2026 was 75.28 €/tCO2e, slightly below Q1's 75.36 €/tCO2e. The definitive regime has applied since 2026-01-01, with the first annual declaration due by 2027-09-30; legal liability for declaration falls on the authorized EU importer. Brazilian exporters may face indirect requests for verifiable installation-level data. Effects on costs and competitiveness remain unmeasured possibilities.",
+    "thesis": {
+      "pt": "O CBAM transfere a responsabilidade de declaração de emissões embutidas para os importadores da UE, criando pressão indireta sobre exportadores não-UE para fornecer dados verificáveis.",
+      "en": "The CBAM shifts the responsibility for declaring embedded emissions to EU importers, creating indirect pressure on non-EU exporters to provide verifiable data."
+    },
+    "economicLaw": {
+      "relevance": "high",
+      "pt": "O CBAM estabelece obrigações legais de declaração e pagamento sob o regime aduaneiro da UE, afetando operações comerciais transfronteiriças.",
+      "en": "The CBAM establishes legal declaration and payment obligations under the EU customs regime, affecting cross-border trade operations.",
+      "norms": [
+        "Regulamento (UE) 2023/956 do Parlamento Europeu e do Conselho de 10 de maio de 2023 estabelecendo um mecanismo de ajuste de carbono nas fronteiras"
+      ],
+      "institutions": [
+        "Comissão Europeia - Direção-Geral da Fiscalização e União Aduaneira"
+      ],
+      "sourceRefs": [
+        "source-carbon-ec"
+      ]
+    },
+    "stakeholderImplications": [
+      {
+        "audience": "government",
+        "textPt": "Governos devem avaliar a necessidade de apoio técnico a exportadores para atender a pedidos de dados de emissões verificáveis.",
+        "textEn": "Governments should assess the need for technical assistance to exporters to meet requests for verifiable emissions data."
+      },
+      {
+        "audience": "corporate",
+        "textPt": "Importadores autorizados na UE devem estabelecer sistemas internos para a primeira declaração anual de emissões embutidas, devida até 2027-09-30.",
+        "textEn": "Authorized EU importers must establish internal systems for the first annual declaration of embedded emissions, due by 2027-09-30."
+      },
+      {
+        "audience": "investors",
+        "textPt": "Investidores devem monitorar a exposição de carteiras a setores cobertos pelo CBAM e a capacidade de fornecedores de atender a requisitos de dados.",
+        "textEn": "Investors should monitor portfolio exposure to CBAM-covered sectors and suppliers' capacity to meet data requirements."
+      },
+      {
+        "audience": "startups",
+        "textPt": "Startups em tecnologia de medição e verificação de emissões podem identificar oportunidades em atender a pedidos de dados de nível de instalação.",
+        "textEn": "Startups in emissions measurement and verification technology may identify opportunities in fulfilling installation-level data requests."
+      }
+    ],
+    "whatToWatch": [
+      {
+        "signal": "Publicação de orientações atualizadas pela Comissão Europeia sobre requisitos de dados de instalação para exportadores não-UE",
+        "source": "source-carbon-ec",
+        "expectedDate": null,
+        "whyItMatters": "Clarear o escopo e o formato dos dados que exportadores brasileiros podem ser solicitados a fornecer."
+      },
+      {
+        "signal": "Prazo da primeira declaração anual do CBAM no regime definitivo",
+        "source": "source-carbon-ec",
+        "expectedDate": "2027-09-30",
+        "whyItMatters": "Primeiro cumprimento efetivo da obrigação de declaração pelos importadores autorizados da UE, referente às importações de 2026."
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim-1",
+        "kind": "fact",
+        "textPt": "O preço do CBAM no Q2 de 2026 foi de 75,28 €/tCO2e.",
+        "textEn": "The CBAM price in Q2 2026 was 75.28 €/tCO2e.",
+        "evidenceRefs": [
+          "source-carbon-ec"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        }
+      },
+      {
+        "id": "claim-2",
+        "kind": "fact",
+        "textPt": "O regime definitivo do CBAM está em vigor desde 2026-01-01; a primeira declaração anual é devida até 2027-09-30.",
+        "textEn": "The definitive CBAM regime has applied since 2026-01-01; the first annual declaration is due by 2027-09-30.",
+        "evidenceRefs": [
+          "source-carbon-ec"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        }
+      },
+      {
+        "id": "claim-3",
+        "kind": "interpretation",
+        "textPt": "Exportadores brasileiros podem enfrentar pedidos indiretos por dados verificáveis de nível de instalação devido à estrutura de responsabilidade do CBAM.",
+        "textEn": "Brazilian exporters may face indirect requests for verifiable installation-level data due to the CBAM's responsibility structure.",
+        "evidenceRefs": [
+          "source-carbon-ec"
+        ],
+        "confidence": {
+          "data": "medium",
+          "interpretation": "medium"
+        }
+      }
+    ],
+    "provenance": [
+      {
+        "sourceId": "source-carbon-ec",
+        "sourceUrl": "https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en",
+        "asOf": "2026-07-06",
+        "dataPath": "context:carbon",
+        "metricId": "cbam-price-q2-2026",
+        "hash": "sha256:c1538158b417c5dd3b907d7ff9555e14d00e92262c9fd3b54b54078415f07473"
+      }
+    ],
+    "confidence": {
+      "data": "high",
+      "interpretation": "medium"
+    },
+    "limitations": "O contexto não fornece dados sobre o volume de pedidos de dados recebidos por exportadores brasileiros nem sobre custos específicos de compliance.",
+    "provider": "nvidia",
+    "model": "nvidia/nemotron-3-super-120b-a12b",
+    "promptVersion": "3.0.0",
+    "generatedAt": "2026-09-30T13:49:47.636Z",
+    "validAsOf": "2026-07-06",
+    "nextReviewAt": "2026-10-05T00:00:00Z",
+    "runId": "odin-20260930-134927-df75",
+    "reviewStatus": "approved",
+    "usage": {
+      "prompt": 941,
+      "completion": 1398,
+      "total": 2339,
+      "latencyMs": 19049
+    }
+  }
+}
