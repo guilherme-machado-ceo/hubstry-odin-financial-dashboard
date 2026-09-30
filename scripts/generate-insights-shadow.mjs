@@ -106,8 +106,10 @@ async function contexts() {
 }
 
 const results=[];
+const reportSections=[];
 for (const item of await contexts()) {
   const sectionEvents = [];
+  try {
   const {parsed,usage,latencyMs}=await chatJson({
     system:SYSTEM,
     user:`Section: ${item.id}\nValid as of: ${item.validAsOf}\nNext review: ${item.nextReviewAt}\nContext:\n${item.context}`,
@@ -140,7 +142,14 @@ for (const item of await contexts()) {
     runId, reviewStatus:"unreviewed",
     usage:{prompt:usage.prompt,completion:usage.completion,total:usage.total,latencyMs}
   });
+  reportSections.push({ sectionId: item.id, status: "shadow", latencyMs, totalTokens: usage.total });
   console.log(`OK shadow ${item.id} · ${latencyMs}ms · ${usage.total ?? "?"} tokens`);
+  } catch (error) {
+    reportSections.push({ sectionId: item.id, status: "failed_controlled", decision: "preserve", errorType: error?.name || "Error", errorMessage: String(error?.message || error).slice(0, 500), providerEvents: sectionEvents });
+    await mkdir(OUT_DIR,{recursive:true});
+    await writeFile(path.join(OUT_DIR, "generationReport.json"), JSON.stringify({ runId, provider: provider.name, model: provider.model, schemaVersion: SCHEMA_VERSION, intelligenceContractVersion: INTELLIGENCE_CONTRACT_VERSION, promptVersion: PROMPT_VERSION, decision: "failed_controlled", sections: reportSections, providerEvents: telemetry, generatedAt: new Date().toISOString() }, null, 2)+"\n");
+    throw error;
+  }
 }
 await mkdir(OUT_DIR,{recursive:true});
 const payload={
@@ -161,7 +170,7 @@ const report = {
   intelligenceContractVersion: INTELLIGENCE_CONTRACT_VERSION,
   promptVersion: PROMPT_VERSION,
   decision: "shadow_generated",
-  sections: results.map(s => ({ sectionId: s.sectionId, status: s.status, latencyMs: s.usage.latencyMs, totalTokens: s.usage.total })),
+  sections: reportSections,
   providerEvents: telemetry,
   generatedAt: new Date().toISOString()
 };
