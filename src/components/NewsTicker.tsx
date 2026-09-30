@@ -1,78 +1,58 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { t, getLocale } from "@/i18n";
-import { Newspaper, ExternalLink, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import { Newspaper, ExternalLink, ChevronLeft, ChevronRight, AlertCircle, Clock } from "lucide-react";
 
 interface NewsItem {
   title: string;
-  link: string;
-  pubDate: string;
+  url: string;
   source: string;
+  publishedAt: string | null;
+  feed: string;
 }
 
-const RSS_FEEDS = [
-  "https://news.google.com/rss/search?q=BRICS+Panda+Bond+local+currency+finance",
-  "https://news.google.com/rss/search?q=gold+reserves+central+bank+dollar",
-  "https://news.google.com/rss/search?q=oil+price+Brent+petroyuan+China",
-  "https://news.google.com/rss/search?q=Brazil+China+yuan+trade+agreement",
-];
+interface NewsSnapshot {
+  updatedAt: string;
+  source: string;
+  sourceUrl: string;
+  status: "fresh" | "stale" | "error";
+  data: { items: NewsItem[] };
+}
 
-const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+// Snapshot diário (cron 06:17 UTC): acima de 36h sem atualização, marca como desatualizado
+const STALE_AFTER_HOURS = 36;
 
 export default function NewsTicker() {
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const [snapshot, setSnapshot] = useState<NewsSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [page, setPage] = useState(0);
   const locale = getLocale();
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    async function fetchNews() {
-      try {
-        const allItems: NewsItem[] = [];
-        for (const feed of RSS_FEEDS) {
-          try {
-            const res = await fetch(`${CORS_PROXY}${encodeURIComponent(feed)}`, { signal: AbortSignal.timeout(8000) });
-            if (!res.ok) continue;
-            const xml = await res.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(xml, "text/xml");
-            const items = doc.querySelectorAll("item");
-            items.forEach((item) => {
-              const title = item.querySelector("title")?.textContent || "";
-              const link = item.querySelector("link")?.textContent || "";
-              const pubDate = item.querySelector("pubDate")?.textContent || "";
-              if (title && link) {
-                allItems.push({
-                  title: title.split(" - ")[0],
-                  link,
-                  pubDate: new Date(pubDate).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US"),
-                  source: title.split(" - ").pop() || "",
-                });
-              }
-            });
-          } catch { /* Skip failed feed */ }
-        }
-        const seen = new Set<string>();
-        const unique = allItems.filter((item) => {
-          if (seen.has(item.title)) return false;
-          seen.add(item.title);
-          return true;
-        }).slice(0, 12);
-        setNews(unique.length > 0 ? unique : getFallbackNews(locale));
+    fetch("/data/news.json")
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((json: NewsSnapshot) => {
+        setSnapshot(json);
         setLoading(false);
-      } catch {
+      })
+      .catch(() => {
         setError(true);
-        setNews(getFallbackNews(locale));
         setLoading(false);
-      }
-    }
-    fetchNews();
-  }, [locale]);
+      });
+  }, []);
 
+  const items = snapshot?.data.items ?? [];
   const itemsPerPage = 3;
-  const totalPages = Math.ceil(news.length / itemsPerPage);
-  const currentItems = news.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
+  const currentItems = items.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
+
+  const dateLocale = locale === "pt" ? "pt-BR" : "en-US";
+  const updatedAt = snapshot ? new Date(snapshot.updatedAt) : null;
+  const isStale = updatedAt ? Date.now() - updatedAt.getTime() > STALE_AFTER_HOURS * 3600_000 : false;
+  const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(dateLocale) : "");
 
   return (
     <section id="news" className="border-b border-[#1a1a1a] bg-gradient-to-b from-[#050505] to-[#0a0a0a]">
@@ -85,10 +65,19 @@ export default function NewsTicker() {
               <p className="text-[10px] font-mono text-[#555]">{t("news.subtitle")}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0} className="p-1 text-[#555] hover:text-[#00FFFF] disabled:opacity-30 transition-colors"><ChevronLeft size={14} /></button>
-            <span className="text-[9px] font-mono text-[#555]">{page + 1}/{totalPages}</span>
-            <button onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1} className="p-1 text-[#555] hover:text-[#00FFFF] disabled:opacity-30 transition-colors"><ChevronRight size={14} /></button>
+          <div className="flex items-center gap-3">
+            {updatedAt && (
+              <span className={`hidden sm:flex items-center gap-1 text-[9px] font-mono ${isStale ? "text-[#FF8C00]" : "text-[#555]"}`}>
+                <Clock size={10} />
+                {t("news.updated")} {updatedAt.toLocaleDateString(dateLocale)}
+                {isStale ? ` · ${t("news.stale")}` : ""}
+              </span>
+            )}
+            <div className="flex items-center gap-2">
+              <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0} className="p-1 text-[#555] hover:text-[#00FFFF] disabled:opacity-30 transition-colors"><ChevronLeft size={14} /></button>
+              <span className="text-[9px] font-mono text-[#555]">{page + 1}/{totalPages}</span>
+              <button onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1} className="p-1 text-[#555] hover:text-[#00FFFF] disabled:opacity-30 transition-colors"><ChevronRight size={14} /></button>
+            </div>
           </div>
         </div>
         {loading ? (
@@ -100,40 +89,24 @@ export default function NewsTicker() {
               </div>
             ))}
           </div>
-        ) : error ? (
-          <div className="flex items-center gap-2 text-[#FF8C00] text-[11px] font-mono"><AlertCircle size={12} />{t("news.error")}</div>
+        ) : error || items.length === 0 ? (
+          <div className="flex items-center gap-2 text-[#FF8C00] text-[11px] font-mono">
+            <AlertCircle size={12} />
+            {t("news.unavailable")}
+          </div>
         ) : (
-          <div ref={scrollRef} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {currentItems.map((item, i) => (
-              <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className="group border border-[#1a1a1a] bg-[#0a0a0a] p-4 hover:border-[#00FFFF]/30 transition-all">
-                <div className="text-[10px] font-mono text-[#555] mb-2 flex items-center justify-between"><span>{item.source}</span><span>{item.pubDate}</span></div>
+              <a key={i} href={item.url} target="_blank" rel="noopener noreferrer" className="group border border-[#1a1a1a] bg-[#0a0a0a] p-4 hover:border-[#00FFFF]/30 transition-all">
+                <div className="text-[10px] font-mono text-[#555] mb-2 flex items-center justify-between"><span>{item.source}</span><span>{fmtDate(item.publishedAt)}</span></div>
                 <p className="text-[12px] text-[#aaa] leading-relaxed group-hover:text-[#e0e0e0] transition-colors line-clamp-3">{item.title}</p>
                 <div className="mt-3 flex items-center gap-1 text-[9px] font-mono text-[#00FFFF] opacity-0 group-hover:opacity-100 transition-opacity"><ExternalLink size={8} />{t("news.readMore")}</div>
               </a>
             ))}
           </div>
         )}
-        <div className="mt-4 text-[8px] font-mono text-[#444]">{t("news.source")}: Google News RSS</div>
+        <div className="mt-4 text-[8px] font-mono text-[#444]">{t("news.source")}: Google News RSS · {t("news.snapshotNote")}</div>
       </div>
     </section>
   );
-}
-
-function getFallbackNews(locale: string): NewsItem[] {
-  if (locale === "pt") return [
-    { title: "Brasil emite Panda Bond soberano em CNY 6 bilhões — marco na saída do financiamento em USD", link: "#", pubDate: "28/06/2025", source: "Reuters" },
-    { title: "China e Índia aumentam reservas de ouro em 25% para reduzir dependência do dólar", link: "#", pubDate: "25/06/2025", source: "Financial Times" },
-    { title: "CIPS (sistema de pagamentos chinês) processa ¥200 trilhões em 2025 — novo recorde", link: "#", pubDate: "24/06/2025", source: "Bloomberg" },
-    { title: "Petróleo Brent ultrapassa US$ 85/barril após tensões no Golfo Pérsico", link: "#", pubDate: "23/06/2025", source: "Reuters" },
-    { title: "NDB (Novo Banco de Desenvolvimento) atinge meta de 30% em Moeda Local (ML) adiantada", link: "#", pubDate: "22/06/2025", source: "NDB Press" },
-    { title: "BRL/USD Ptax fecha em 5,1689 — BCB monitora fluxos de Panda Bond", link: "#", pubDate: "21/06/2025", source: "Valor Econômico" },
-  ];
-  return [
-    { title: "Brazil issues sovereign Panda Bond in CNY 6 billion — landmark shift from USD financing", link: "#", pubDate: "06/28/2025", source: "Reuters" },
-    { title: "China and India boost gold reserves by 25% to reduce dollar dependency", link: "#", pubDate: "06/25/2025", source: "Financial Times" },
-    { title: "CIPS (Chinese payment system) processes ¥200 trillion in 2025 — new record", link: "#", pubDate: "06/24/2025", source: "Bloomberg" },
-    { title: "Brent crude oil surpasses $85/barrel amid Persian Gulf tensions", link: "#", pubDate: "06/23/2025", source: "Reuters" },
-    { title: "NDB reaches 30% Local Currency (LC) target ahead of schedule", link: "#", pubDate: "06/22/2025", source: "NDB Press" },
-    { title: "BRL/USD Ptax closes at 5.1689 — BCB monitors Panda Bond flows", link: "#", pubDate: "06/21/2025", source: "Valor Economico" },
-  ];
 }
