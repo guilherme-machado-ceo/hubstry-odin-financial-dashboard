@@ -75,5 +75,5 @@ const production = {
   data: { sections: productionSections }
 };
 
-await writeFile(output, JSON.stringify(production, null, 2) + "\\n");
+await writeFile(output, JSON.stringify(production, null, 2) + "\n");
 console.log(`PROMOTED ${shadow.runId} -> ${output} | sections=${generatedCount} evidenceCoverage=${evidenceCoverage.toFixed(2)}`);
