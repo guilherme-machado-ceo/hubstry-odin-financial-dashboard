@@ -1,0 +1,73 @@
+name: ODIN Insights Controlled Promotion
+
+on:
+  workflow_dispatch:
+    inputs:
+      shadow_run_id:
+        description: "GitHub Actions run ID containing the approved ODIN shadow artifact"
+        required: true
+        type: string
+      approve:
+        description: "Explicit human approval to promote this shadow artifact to production"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  promote:
+    if: ${{ inputs.approve == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download selected shadow artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/odin-shadow
+          mkdir -p /tmp/odin-shadow
+          gh run download "${{ inputs.shadow_run_id }}" \
+            --repo "${{ github.repository }}" \
+            --name odin-insights-v2-shadow \
+            --dir /tmp/odin-shadow
+
+      - name: Promote through ODIN gate
+        env:
+          ODIN_PROMOTE_APPROVED: "true"
+        run: |
+          node scripts/promote-insights.mjs \
+            /tmp/odin-shadow/public/data/insights.v2.shadow.json \
+            public/data/insights.v2.json \
+            /tmp/odin-shadow/public/data/generationReport.json
+
+      - name: Verify promotion scope
+        run: |
+          set -euo pipefail
+          changed="$(git status --porcelain | sed 's/^.. //')"
+          if [ "${changed}" != "public/data/insights.v2.json" ]; then
+            echo "Unexpected files changed:"
+            git status --short
+            exit 1
+          fi
+
+      - name: Commit production insight artifact
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/insights.v2.json
+          git commit -m "chore(odin): promote validated insights v2"
+          git push origin HEAD:main
