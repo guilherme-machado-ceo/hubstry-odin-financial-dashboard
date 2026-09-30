@@ -30,7 +30,7 @@ Regras:
 - Direito Econômico é lente analítica, não parecer jurídico;
 - se a relevância jurídica for alta, indique normas e instituições explicitamente presentes no contexto;
 - stakeholder implications devem ser neutras e acionáveis como contexto, sem recomendar compra/venda ou escolha política; audience deve ser EXATAMENTE um destes valores ASCII: government, corporate, investors, startups; nunca traduza nem acrescente texto ao valor;
-- What to Watch deve apontar sinais observáveis, fonte e motivo;
+- What to Watch deve apontar sinais observáveis, fonte e motivo; o campo source deve ser EXATAMENTE um sourceId ou sourceUrl presente na lista de fontes permitidas fornecida no contexto;
 - escreva em português e inglês;
 - mantenha tom sóbrio, analítico, compatível com Chatham House;
 - não use linguagem promocional ou de chatbot.
@@ -112,7 +112,7 @@ for (const item of await contexts()) {
   try {
   const {parsed,usage,latencyMs}=await chatJson({
     system:SYSTEM,
-    user:`Section: ${item.id}\nValid as of: ${item.validAsOf}\nNext review: ${item.nextReviewAt}\nContext:\n${item.context}`,
+    user:`Section: ${item.id}\nValid as of: ${item.validAsOf}\nNext review: ${item.nextReviewAt}\nProvenance permitida para esta seção (use estes sourceId/sourceUrl literalmente em evidenceRefs e whatToWatch.source):\n${item.provenance.map(p => `${p.sourceId} | ${p.sourceUrl}`).join("\n")}\nContext:\n${item.context}`,
     temperature:0.2,maxTokens:3500,reasoning:false,
     onEvent: (event) => sectionEvents.push({ ...event, sectionId: item.id })
   });
