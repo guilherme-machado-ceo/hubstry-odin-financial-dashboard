@@ -1,6 +1,24 @@
-import { validateCarbonProfile } from "../contracts/sections/carbon/rules.mjs";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 
-const validators = new Map([["carbon", validateCarbonProfile]]);
+// ODIN — section profile validator dirigido por registry (ADR-0003).
+// Adicionar uma seção = adicionar contracts/sections/<id>/ + entrada no registry.json.
+// Cada rules.mjs exporta validateProfile(entry, basePath) — ou validate<PascalCase(id)>Profile (legado do piloto).
+
+const root = process.cwd();
+const registryPath = path.join(root, "contracts/sections/registry.json");
+const registry = JSON.parse(readFileSync(registryPath, "utf8"));
+
+const toPascal = (id) => id.split(/[-_]/).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join("");
+
+const validators = new Map();
+for (const profileId of registry.profiles ?? []) {
+  const moduleUrl = pathToFileURL(path.join(root, "contracts/sections", profileId, "rules.mjs")).href;
+  const mod = await import(moduleUrl);
+  const fn = mod.validateProfile ?? mod[`validate${toPascal(profileId)}Profile`];
+  if (typeof fn === "function") validators.set(profileId, fn);
+}
 
 export function validateSectionProfile(entry, sectionId = entry?.sectionId) {
   if (!entry?.sectionProfile) return [];
