@@ -1,0 +1,174 @@
+{
+  "description": "Regressão do MVP Readiness Gate: artefato real do run odin-20260930-134927-df75.",
+  "expect": "fail",
+  "expectRules": [
+    "comparison_direction"
+  ],
+  "evidence": {
+    "material": "Climate vector for Brasília. Rolling 12-month window 2025-09-25 to 2026-09-25; mean temperature 22.4°C (above the 21.4°C reference); precipitation 1321 mm (below the 1550 mm reference). The reference benchmarks (21.4°C and 1550 mm) are dashboard references, not an official climatology. A single city cannot establish impacts on producing regions, commodities or energy. Any transmission to commodities, hydrology, energy or FX must be a hypothesis and should be monitored against producing regions and relevant river basins. Source: source-open-meteo-brasilia.",
+    "keyDates": [],
+    "comparisons": [
+      {
+        "id": "climate-temp-vs-reference",
+        "observed": 22.4,
+        "reference": 21.4,
+        "unit": "°C",
+        "direction": "above"
+      },
+      {
+        "id": "climate-precip-vs-reference",
+        "observed": 1321,
+        "reference": 1550,
+        "unit": "mm",
+        "direction": "below"
+      }
+    ]
+  },
+  "entry": {
+    "schemaVersion": "2.0",
+    "intelligenceContractVersion": "1.0",
+    "sectionId": "climate",
+    "status": "generated",
+    "pt": "A temperatura média em Brasília foi 22,4°C e a precipitação total foi 1321 mm no período de 25 de setembro de 2025 a 25 de setembro de 2026, conforme dados do Open-Meteo. Esses valores estão acima das referências de benchmark de 21,4°C e 1550 mm, mas não representam uma climatologia oficial nem podem ser usados para inferir impactos diretos em commodities, energia ou câmbio sem análise de regiões produtoras e bacias hidrográficas relevantes.",
+    "en": "Mean temperature in Brasília was 22.4°C and total precipitation was 1321 mm from September 25, 2025 to September 25, 2026, according to Open-Meteo data. These values exceed the benchmark references of 21.4°C and 1550 mm but do not constitute an official climatology and cannot be used to infer direct impacts on commodities, energy, or FX without analysis of producing regions and relevant river basins.",
+    "thesis": {
+      "pt": "Os dados climáticos de Brasília refletem condições locais que, por si só, não estabelecem ligações causais com variáveis macroeconômicas ou de mercado.",
+      "en": "Brasília's climate data reflect local conditions that, by themselves, do not establish causal links with macroeconomic or market variables."
+    },
+    "economicLaw": {
+      "relevance": "not_material",
+      "pt": "Não há normas ou instituições econômico-jurídicas diretamente aplicáveis aos dados climáticos de uma única cidade no contexto de análise de mercado ou política econômica.",
+      "en": "There are no economic-legal norms or institutions directly applicable to the climate data of a single city in the context of market or economic policy analysis.",
+      "norms": [],
+      "institutions": [],
+      "sourceRefs": [
+        "source-open-meteo-brasilia"
+      ]
+    },
+    "stakeholderImplications": [
+      {
+        "audience": "government",
+        "textPt": "Governos devem evitar usar dados de uma única cidade como base para políticas setoriais sem validação em regiões produtoras e bacias hidrográficas relevantes.",
+        "textEn": "Governments should avoid using data from a single city as the basis for sectoral policies without validation in producing regions and relevant river basins."
+      },
+      {
+        "audience": "corporate",
+        "textPt": "Empresas devem tratar esses dados como indicador local e não como sinal de risco ou oportunidade em cadeias de suprimentos ou geração de energia sem correlação com fontes primárias de produção.",
+        "textEn": "Corporations should treat this data as a local indicator and not as a signal of risk or opportunity in supply chains or energy generation without correlation with primary production sources."
+      },
+      {
+        "audience": "investors",
+        "textPt": "Investidores devem considerar esses dados como contexto ambiental de baixa relevância direta para decisões de alocação em commodities, energia ou câmbio sem evidência de transmissão medida.",
+        "textEn": "Investors should consider this data as low-relevance environmental context for allocation decisions in commodities, energy, or FX without evidence of measured transmission."
+      },
+      {
+        "audience": "startups",
+        "textPt": "Startups em clima ou agrotecnologia devem validar qualquer modelo preditivo com dados de múltiplas localidades e bacias antes de escalar soluções baseadas em observações urbanas isoladas.",
+        "textEn": "Startups in climate or agrotechnology should validate any predictive model with data from multiple locations and river basins before scaling solutions based on isolated urban observations."
+      }
+    ],
+    "whatToWatch": [
+      {
+        "signal": "Desvio persistente da média de temperatura e precipitação em regiões produtoras de soja, milho e café no Brasil",
+        "source": "source-open-meteo-brasilia",
+        "expectedDate": null,
+        "whyItMatters": "Para avaliar se o padrão observado em Brasília reflete tendências regionais que possam afetar safras, hidrologia ou geração hidrelétrica."
+      },
+      {
+        "signal": "Variação na precipitação nas bacias do Paraná e São Francisco em relação às médias históricas",
+        "source": "source-open-meteo-brasilia",
+        "expectedDate": null,
+        "whyItMatters": "Essas bacias são críticas para geração de energia e irrigação; mudanças nelas têm impacto mensurável em commodities e FX."
+      },
+      {
+        "signal": "Publicação de dados oficiais do INMET ou do CPTEC para o mesmo período e localidades",
+        "source": "source-open-meteo-brasilia",
+        "expectedDate": null,
+        "whyItMatters": "Para comparar a qualidade e representatividade dos dados do Open-Meteo com fontes climatológicas oficiais brasileiras."
+      }
+    ],
+    "claims": [
+      {
+        "id": "clim-bsb-001",
+        "kind": "fact",
+        "textPt": "A temperatura média em Brasília foi 22,4°C entre 25 de setembro de 2025 e 25 de setembro de 2026.",
+        "textEn": "The mean temperature in Brasília was 22.4°C from September 25, 2025 to September 25, 2026.",
+        "evidenceRefs": [
+          "source-open-meteo-brasilia"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        }
+      },
+      {
+        "id": "clim-bsb-002",
+        "kind": "fact",
+        "textPt": "A precipitação total em Brasília foi 1321 mm entre 25 de setembro de 2025 e 25 de setembro de 2026.",
+        "textEn": "Total precipitation in Brasília was 1321 mm from September 25, 2025 to September 25, 2026.",
+        "evidenceRefs": [
+          "source-open-meteo-brasilia"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        }
+      },
+      {
+        "id": "clim-bsb-003",
+        "kind": "interpretation",
+        "textPt": "Os valores observados em Brasília excedem os benchmarks de referência de 21,4°C e 1550 mm, mas esses benchmarks não são climatologia oficial.",
+        "textEn": "The observed values in Brasília exceed the reference benchmarks of 21.4°C and 1550 mm, but these benchmarks are not an official climatology.",
+        "evidenceRefs": [
+          "source-open-meteo-brasilia"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "medium"
+        }
+      },
+      {
+        "id": "clim-bsb-004",
+        "kind": "hypothesis",
+        "textPt": "O padrão climático observado em Brasília pode estar correlacionado com variações na produção agrícola ou geração de energia em regiões produtoras, mas essa relação não foi estabelecida pelos dados fornecidos.",
+        "textEn": "The climate pattern observed in Brasília may be correlated with variations in agricultural production or energy generation in producing regions, but this relationship has not been established by the provided data.",
+        "evidenceRefs": [
+          "source-open-meteo-brasilia"
+        ],
+        "confidence": {
+          "data": "medium",
+          "interpretation": "low"
+        }
+      }
+    ],
+    "provenance": [
+      {
+        "sourceId": "source-open-meteo-brasilia",
+        "sourceUrl": "https://archive-api.open-meteo.com/v1/archive?latitude=-15.8&longitude=-47.9&start_date=2025-09-25&end_date=2026-09-25&daily=temperature_2m_mean,precipitation_sum&timezone=auto",
+        "asOf": "2026-09-25",
+        "dataPath": "external:open-meteo-archive",
+        "metricId": "brasilia-12m-temp-precip",
+        "hash": "sha256:cfea30f54700133447eff93d17f8234f51845dc31c8c3621e88d7c8feb08905c"
+      }
+    ],
+    "confidence": {
+      "data": "high",
+      "interpretation": "medium"
+    },
+    "limitations": "Os dados são limitados a uma única localidade urbana (Brasília) e não representam condições regionais ou setoriais. Não há evidência de transmissão climática para commodities, hidrologia, energia ou câmbio no contexto fornecido. Qualquer inferência além da descrição dos dados observados é hipotética e requer validação em escalas espaciais e temporais adequadas.",
+    "provider": "nvidia",
+    "model": "nvidia/nemotron-3-super-120b-a12b",
+    "promptVersion": "3.0.0",
+    "generatedAt": "2026-09-30T13:50:19.551Z",
+    "validAsOf": "2026-09-25",
+    "nextReviewAt": "2026-10-07T13:49:28.585Z",
+    "runId": "odin-20260930-134927-df75",
+    "reviewStatus": "approved",
+    "usage": {
+      "prompt": 990,
+      "completion": 1825,
+      "total": 2815,
+      "latencyMs": 20531
+    }
+  }
+}
