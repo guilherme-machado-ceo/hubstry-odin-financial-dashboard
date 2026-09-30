@@ -1,0 +1,151 @@
+// ODIN Insights v3 shadow generator.
+// Produces public/data/insights.v2.shadow.json only; never replaces production insights.json.
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { createHash, randomBytes } from "node:crypto";
+import path from "node:path";
+import { chatJson, getProviderConfig } from "./ai-provider.mjs";
+import { PROMPT_VERSION, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION } from "./insights-schema.mjs";
+
+const OUT_DIR = path.resolve(process.cwd(), "public/data");
+const OUT_FILE = path.join(OUT_DIR, "insights.v2.shadow.json");
+const runId = (() => {
+  const s = new Date().toISOString().slice(0,19).replace(/[-:T]/g,"");
+  return `odin-${s.slice(0,8)}-${s.slice(8)}-${randomBytes(2).toString("hex")}`;
+})();
+const sha256 = (s) => "sha256:" + createHash("sha256").update(String(s)).digest("hex");
+const provider = getProviderConfig();
+
+const SYSTEM = `Você é o analista editorial do ODIN — Open Financial & Geoeconomic Intelligence Platform.
+Epistemic contract: SOURCE → DATA → EVENT → CLAIM → CONTEXT → INTERPRETATION → THESIS → STAKEHOLDER.
+Produza inteligência verificável, não aconselhamento financeiro, jurídico ou político.
+
+Regras:
+- fatos devem ser sustentados por evidenceRefs; interpretações e hipóteses nunca podem ser apresentadas como fatos;
+- não invente números, fontes, normas, instituições ou datas;
+- use somente o contexto fornecido;
+- capitalização de mercado não é capital investido nem volume de pagamentos;
+- relações causais não medidas devem ser hypothesis/interpretation;
+- efeitos econômicos são possibilidades, não fatos consumados;
+- Direito Econômico é lente analítica, não parecer jurídico;
+- se a relevância jurídica for alta, indique normas e instituições explicitamente presentes no contexto;
+- stakeholder implications devem ser neutras e acionáveis como contexto, sem recomendar compra/venda ou escolha política;
+- What to Watch deve apontar sinais observáveis, fonte e motivo;
+- escreva em português e inglês;
+- mantenha tom sóbrio, analítico, compatível com Chatham House;
+- não use linguagem promocional ou de chatbot.
+
+Retorne SOMENTE JSON válido, exatamente neste formato:
+{
+ "pt":"2-4 frases executivas",
+ "en":"2-4 executive sentences",
+ "thesis":{"pt":"...","en":"..."},
+ "economicLaw":{"relevance":"high|medium|low|not_material","pt":"...","en":"...","norms":["..."],"institutions":["..."],"sourceRefs":["..."]},
+ "stakeholderImplications":[
+   {"audience":"government|corporate|investors|startups","textPt":"...","textEn":"..."}
+ ],
+ "whatToWatch":[
+   {"signal":"...","source":"...","expectedDate":"YYYY-MM-DD or null","whyItMatters":"...","ownerLens":"...","relatedSection":"..."}
+ ],
+ "claims":[
+   {"id":"...","kind":"fact|interpretation|hypothesis","textPt":"...","textEn":"...","evidenceRefs":["source-id"],"confidence":{"data":"high|medium|low","interpretation":"high|medium|low"}}
+ ],
+ "confidence":{"data":"high|medium|low","interpretation":"high|medium|low"},
+ "limitations":"..."
+}`;
+
+function source(sourceId, sourceUrl, asOf, dataPath, metricId, material) {
+  return { sourceId, sourceUrl, asOf, dataPath, metricId, hash: sha256(material) };
+}
+function fmt(v) {
+  if (v >= 1e12) return `US$ ${(v/1e12).toFixed(2)} trilhões`;
+  if (v >= 1e9) return `US$ ${(v/1e9).toFixed(1)} bilhões`;
+  if (v >= 1e6) return `US$ ${(v/1e6).toFixed(1)} milhões`;
+  return `US$ ${Math.round(v).toLocaleString("en-US")}`;
+}
+async function json(name) { return JSON.parse(await readFile(path.join(OUT_DIR,name),"utf8")); }
+
+async function contexts() {
+  const stable = await json("stablecoins.json");
+  const crypto = await json("crypto-market.json");
+  const rwa = await json("rwa-protocols.json");
+  const now = new Date().toISOString().slice(0,10);
+  const climateEnd = new Date(Date.now()-5*864e5).toISOString().slice(0,10);
+  const climateStart = new Date(Date.now()-370*864e5).toISOString().slice(0,10);
+  const weatherUrl = `https://archive-api.open-meteo.com/v1/archive?latitude=-15.8&longitude=-47.9&start_date=${climateStart}&end_date=${climateEnd}&daily=temperature_2m_mean,precipitation_sum&timezone=auto`;
+  const weather = await (await fetch(weatherUrl,{signal:AbortSignal.timeout(30000)})).json();
+  const temps=weather.daily?.temperature_2m_mean??[];
+  const precip=(weather.daily?.precipitation_sum??[]).reduce((a,b)=>a+b,0);
+  const avg=temps.reduce((a,b)=>a+b,0)/(temps.length||1);
+  const top=rwa.data.rwa.slice(0,3).map(x=>`${x.name}: ${fmt(x.tvlUsd)} TVL`).join("; ");
+  return [
+    {
+      id:"carbon", validAsOf:"2026-07-06", nextReviewAt:"2026-10-05",
+      provenance:[
+        source("source-carbon-ec","https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en","2026-07-06","context:carbon","cbam-price-q2-2026","Q2 2026: 75.28 €/tCO2e; Q1: 75.36; six sectors; 50 t/year aggregated importer; first declaration 30/09/2027"),
+      ],
+      context:`Carbon pricing/CBAM. Q2 2026 price: 75.28 €/tCO2e; Q1: 75.36 €/tCO2e. Six sectors. De minimis: 50 t/year annual aggregate per importer for covered goods. First declaration/delivery: 2027-09-30. In definitive regime the authorized EU importer is legally responsible for declaring embedded emissions; Brazilian exporters may face indirect requests for verifiable installation-level data. Effects on costs/competitiveness are possibilities. Do not use national per-capita emissions. Source: source-carbon-ec.`
+    },
+    {
+      id:"blockchain", validAsOf:stable.updatedAt, nextReviewAt:new Date(Date.now()+7*864e5).toISOString(),
+      provenance:[
+        source("source-defillama-stablecoins","https://defillama.com/stablecoins",stable.updatedAt,"public/data/stablecoins.json","stablecoin-total-mcap",JSON.stringify(stable)),
+        source("source-defillama-rwa","https://defillama.com/protocols",rwa.updatedAt,"public/data/rwa-protocols.json","rwa-tvl-sample",JSON.stringify(rwa)),
+        source("source-defillama-coins","https://defillama.com/","2026-09-30","public/data/crypto-market.json","asset-prices",JSON.stringify(crypto))
+      ],
+      context:`Digital assets. Stablecoin market capitalization: ${fmt(stable.data.totalMcapUsd)}; Tether: ${fmt(stable.data.assets[0].mcapUsd)}. This is market capitalization, not international payment volume. RWA sample: ${top}; do not sum these protocols or call the sample the whole sector. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.`
+    },
+    {
+      id:"climate", validAsOf:climateEnd, nextReviewAt:new Date(Date.now()+7*864e5).toISOString(),
+      provenance:[
+        source("source-open-meteo-brasilia",weatherUrl,climateEnd,"external:open-meteo-archive","brasilia-12m-temp-precip",JSON.stringify(weather.daily))
+      ],
+      context:`Climate vector for Brasília. Rolling 12-month window ${climateStart} to ${climateEnd}; mean temperature ${avg.toFixed(1)}°C; precipitation ${Math.round(precip)} mm. Dashboard reference benchmarks: 21.4°C and 1550 mm, not an official climatology. A single city cannot establish impacts on producing regions, commodities or energy. Any transmission to commodities, hydrology, energy or FX must be a hypothesis and should be monitored against producing regions and relevant river basins. Source: source-open-meteo-brasilia.`
+    }
+  ];
+}
+
+const results=[];
+for (const item of await contexts()) {
+  const {parsed,usage,latencyMs}=await chatJson({
+    system:SYSTEM,
+    user:`Section: ${item.id}\nValid as of: ${item.validAsOf}\nNext review: ${item.nextReviewAt}\nContext:\n${item.context}`,
+    temperature:0.2,maxTokens:1800,reasoning:false
+  });
+  if (!parsed || typeof parsed.pt!=="string" || typeof parsed.en!=="string") throw new Error(`Invalid model output for ${item.id}`);
+  const provById=new Map(item.provenance.map(p=>[p.sourceId,p]));
+  for (const c of parsed.claims ?? []) for (const ref of c.evidenceRefs ?? [])
+    if (!provById.has(ref)) throw new Error(`${item.id}: claim ${c.id} references unknown provenance ${ref}`);
+  results.push({
+    schemaVersion:SCHEMA_VERSION,
+    intelligenceContractVersion:INTELLIGENCE_CONTRACT_VERSION,
+    sectionId:item.id,
+    status:"shadow",
+    pt:parsed.pt.trim(), en:parsed.en.trim(),
+    thesis:parsed.thesis,
+    economicLaw:parsed.economicLaw,
+    stakeholderImplications:parsed.stakeholderImplications,
+    whatToWatch:parsed.whatToWatch,
+    claims:parsed.claims,
+    provenance:item.provenance,
+    confidence:parsed.confidence,
+    limitations:parsed.limitations,
+    provider:provider.name, model:provider.model,
+    promptVersion:PROMPT_VERSION, generatedAt:new Date().toISOString(),
+    validAsOf:item.validAsOf, nextReviewAt:item.nextReviewAt,
+    runId, reviewStatus:"unreviewed",
+    usage:{prompt:usage.prompt,completion:usage.completion,total:usage.total,latencyMs}
+  });
+  console.log(`OK shadow ${item.id} · ${latencyMs}ms · ${usage.total ?? "?"} tokens`);
+}
+await mkdir(OUT_DIR,{recursive:true});
+const payload={
+  schemaVersion:SCHEMA_VERSION,
+  intelligenceContractVersion:INTELLIGENCE_CONTRACT_VERSION,
+  status:"shadow",
+  runId,
+  generatedAt:new Date().toISOString(),
+  provider:provider.name, model:provider.model, promptVersion:PROMPT_VERSION,
+  data:{sections:Object.fromEntries(results.map(x=>[x.sectionId,x]))}
+};
+await writeFile(OUT_FILE,JSON.stringify(payload,null,2)+"\n");
+console.log(`WROTE ${OUT_FILE}`);
