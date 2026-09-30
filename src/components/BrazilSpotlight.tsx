@@ -3,6 +3,7 @@ import { inflectionPoints, countryDebtData, kpis, latestYearIndex } from "@/data
 import { t, getLocale } from "@/i18n";
 import ExportButton from "./ExportButton";
 import EstBadge from "./EstBadge";
+import PandaBondTracker from "./PandaBondTracker";
 import { ArrowRight, ChevronRight, Share2 } from "lucide-react";
 
 interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; }
@@ -172,6 +173,8 @@ export default function BrazilSpotlight({ onSourceClick, onEmbedClick }: Props) 
             </div>
           </div>
         </div>
+
+        <PandaBondTracker />
 
         <div className="mt-4 flex items-center justify-between">
           <button onClick={() => onSourceClick("bcb")} className="text-[9px] font-mono text-[#444] hover:text-[#00FFFF] transition-colors">{t("section1.source")}: BCB / PBOC / NDB / CIPS →</button>
