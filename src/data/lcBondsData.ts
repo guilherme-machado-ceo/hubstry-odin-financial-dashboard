@@ -52,7 +52,7 @@ export const tcxHedgingData: TCXData[] = [
 
 export const volatilityData: VolatilityData[] = [
   { year: 2015, BRL: 34.2, MXN: 15.1, COP: 22.4, INR: 4.9, CNY: 3.5, ZAR: 20.1 }, { year: 2016, BRL: 22.1, MXN: 17.8, COP: 14.2, INR: 5.2, CNY: 4.1, ZAR: 22.6 },
-  { year: 2017, BRL: 12.8, MXN: 14.2, COP: 10.1, INR: 4.0, CNY: 3.2, ZAR: 11.2 }, { year: 2018, BRL: 18.5, MXN: 12.8, COP: 12.4, INR: 7.2, CNY: 4.5, ZAR: 16.8 },
+  { year: 2017, BRL: 12.8, MXN: 14.2, COP: 10.1, INR: 4.0, CNY: 3.2, ZAR: 11.2 }, { year: 2018, BRL: 18.5, MXN: 12.8, COP: 12.8, INR: 7.2, CNY: 4.5, ZAR: 16.8 },
   { year: 2019, BRL: 14.1, MXN: 9.6, COP: 12.8, INR: 4.5, CNY: 3.8, ZAR: 13.4 }, { year: 2020, BRL: 28.4, MXN: 22.1, COP: 20.2, INR: 6.1, CNY: 3.1, ZAR: 28.2 },
   { year: 2021, BRL: 18.2, MXN: 10.1, COP: 14.8, INR: 3.9, CNY: 2.8, ZAR: 14.1 }, { year: 2022, BRL: 16.4, MXN: 9.4, COP: 20.1, INR: 5.2, CNY: 4.2, ZAR: 16.4 },
   { year: 2023, BRL: 14.8, MXN: 9.8, COP: 14.4, INR: 3.6, CNY: 3.0, ZAR: 14.8 }, { year: 2024, BRL: 18.2, MXN: 12.4, COP: 15.8, INR: 3.8, CNY: 2.4, ZAR: 14.2 },
@@ -63,16 +63,16 @@ export const countryDebtData: CountryDebt[] = [
   { country: "Brazil", countryPt: "Brasil", region: "LATAM", flag: "BR", localCurrencyDebt: [65,68,72,74,75,96,98,94,88,87,88], foreignCurrencyDebt: [12,13,14,15,14,18,17,15,14,13,12], totalDebt: [77,81,86,89,89,114,115,109,102,100,100], debtToGDP: 80.4, debtToGDPLabel: "80.4%", debtToGDPSource: "BCB", debtToGDPSnapshot: "01/04/2026" },
   { country: "Mexico", countryPt: "Mexico", region: "LATAM", flag: "MX", localCurrencyDebt: [35,36,38,40,42,52,53,51,49,50,51], foreignCurrencyDebt: [11,12,11,11,11,12,11,11,10,10,10], totalDebt: [46,48,49,51,53,64,64,62,59,60,61], debtToGDP: 49.6, debtToGDPLabel: "49.6%", debtToGDPSource: "IMF", debtToGDPSnapshot: "2024" },
   { country: "Argentina", countryPt: "Argentina", region: "LATAM", flag: "AR", localCurrencyDebt: [38,42,50,66,74,89,78,67,62,58,55], foreignCurrencyDebt: [14,17,28,44,63,74,59,51,45,41,38], totalDebt: [52,59,78,110,137,163,137,118,107,99,93], debtToGDP: 93.0, debtToGDPLabel: "93%", debtToGDPSource: "2025e", debtToGDPSnapshot: "2025e" },
-  { country: "Colombia", countryPt: "Colombia", region: "LATAM", flag: "CO", localCurrencyDebt: [32,34,35,38,40,56,58,55,53,52,53], foreignCurrencyDebt: [12,13,14,15,15,17,16,15,14,13,13], totalDebt: [44,47,49,53,55,73,74,70,67,65,66], debtToGDP: 71.5, debtToGDPLabel: "71.5%", debtToGDPSource: "IMF", debtToGDPSnapshot: "2024" },
-  { country: "Chile", countryPt: "Chile", region: "LATAM", flag: "CL", localCurrencyDebt: [14,15,16,18,19,28,32,36,37,38,39], foreignCurrencyDebt: [7,7,8,8,8,10,10,9,9,8,8], totalDebt: [21,22,24,26,27,38,42,45,46,46,47], debtToGDP: 47.0, debtToGDPLabel: "47%", debtToGDPSource: "2025e", debtToGDPSnapshot: "2025e" },
+  { country: "Colombia", countryPt: "Colombia", region: "LATAM", flag: "CO", localCurrencyDebt: [32,34,35,38,40,56,58,55,53,52,53], foreignCurrencyDebt: [12,13,15,15,17,16,15,14,13,13].slice(0,11) as number[], totalDebt: [44,47,49,51,55,73,74,70,67,65,66], debtToGDP: 71.5, debtToGDPLabel: "71.5%", debtToGDPSource: "IMF", debtToGDPSnapshot: "2024" },
+  { country: "Chile", countryPt: "Chile", region: "LATAM", flag: "CL", localCurrencyDebt: [14,15,16,18,19,28,32,36,37,38,39], foreignCurrencyDebt: [7,8,8,8,8,10,10,9,8,8,8], totalDebt: [21,22,24,26,27,38,42,45,46,46,47], debtToGDP: 47.0, debtToGDPLabel: "47%", debtToGDPSource: "2025e", debtToGDPSnapshot: "2025e" },
   { country: "China", countryPt: "China", region: "BRICS", flag: "CN", localCurrencyDebt: [36,40,44,48,50,66,71,73,76,78,80], foreignCurrencyDebt: [2,2,2,2,2,2,2,2,2,2,2], totalDebt: [38,42,46,50,52,68,73,75,78,80,82], debtToGDP: 82.0, debtToGDPLabel: "82%", debtToGDPSource: "2025e", debtToGDPSnapshot: "2025e" },
-  { country: "India", countryPt: "India", region: "BRICS", flag: "IN", localCurrencyDebt: [62,64,67,68,70,85,84,82,80,82,83], foreignCurrencyDebt: [4,4,4,4,5,5,5,5,5,5,5], totalDebt: [66,68,71,72,75,90,89,87,85,87,88], debtToGDP: 46.5, debtToGDPLabel: "46.5%", debtToGDPSource: "IMF", debtToGDPSnapshot: "2018" },
-  { country: "Russia", countryPt: "Russia", region: "BRICS", flag: "RU", localCurrencyDebt: [11,11,12,12,13,18,18,19,19,17,16], foreignCurrencyDebt: [3,3,3,4,4,4,4,4,3,3,2], totalDebt: [14,14,15,16,17,22,22,23,22,20,18], debtToGDP: 18.0, debtToGDPLabel: "18%", debtToGDPSource: "IMF", debtToGDPSnapshot: "2024" },
+  { country: "India", countryPt: "India", region: "BRICS", flag: "IN", localCurrencyDebt: [62,64,67,68,70,85,84,82,80,82,83], foreignCurrencyDebt: [4,4,4,4,4,5,5,5,5,5,5], totalDebt: [66,68,71,72,75,90,89,87,85,87,88], debtToGDP: 46.5, debtToGDPLabel: "46.5%", debtToGDPSource: "IMF", debtToGDPSnapshot: "2018" },
+  { country: "Russia", countryPt: "Russia", region: "BRICS", flag: "RU", localCurrencyDebt: [11,11,12,12,13,18,18,19,19,17,16], foreignCurrencyDebt: [3,3,3,3,4,4,4,4,3,3,2], totalDebt: [14,14,15,16,17,22,22,23,22,20,18], debtToGDP: 18.0, debtToGDPLabel: "18%", debtToGDPSource: "IMF", debtToGDPSnapshot: "2024" },
   { country: "South Africa", countryPt: "Africa do Sul", region: "BRICS", flag: "ZA", localCurrencyDebt: [42,44,47,52,57,72,75,72,71,73,74], foreignCurrencyDebt: [5,5,5,5,5,6,6,5,5,5,5], totalDebt: [47,49,52,57,62,78,81,77,76,78,79], debtToGDP: 79.4, debtToGDPLabel: "79.4%", debtToGDPSource: "IMF", debtToGDPSnapshot: "2023" },
 ];
 
 export const inflectionPoints: InflectionPoint[] = [
-  { year: 2025, event: "Brazil Panda Bond (sovereign) up to CNY 5B", eventPt: "Panda Bond soberano do Brasil até CNY 5B", value: "Letter of Presentation to NAFMII", source: "Min. Fazenda / NAFMII", isEstimated: false },
+  { year: 2026, event: "Brazil Panda Bond (sovereign) up to CNY 5B — not yet issued", eventPt: "Panda Bond soberano do Brasil até CNY 5B — ainda não emitido", value: "Letter of Intent to NAFMII (Jun/2026)", source: "Reuters / Min. Fazenda", isEstimated: false },
   { year: 2024, event: "CIPS throughput", eventPt: "Throughput CIPS", value: "¥ 175 tri (2024)", source: "CIPS / PBOC", isEstimated: false },
   { year: 2026, event: "NDB LC target 30%", eventPt: "Meta LC do NDB 30%", value: "25% → 30% by 2026", source: "NDB Strategy 2022-2026", isEstimated: true },
   { year: 2025, event: "PBOC↔BCB swap line", eventPt: "Swap PBOC↔BCB", value: "R$ 157bi / ¥ 190bi", source: "BCB Press Release", isEstimated: false },
@@ -84,7 +84,7 @@ export const spreadsData: SpreadData[] = [
   { country: "China", countryPt: "China", flag: "CN", spread2025e: -15, trend: "estavel", trendEn: "stable", volatility2025e: 2.2, officialSpread: -20 },
   { country: "India", countryPt: "India", flag: "IN", spread2025e: 290, trend: "estavel", trendEn: "stable", volatility2025e: 3.5, officialSpread: 310 },
   { country: "Russia", countryPt: "Russia", flag: "RU", spread2025e: 1050, trend: "ampliando", trendEn: "widening", volatility2025e: 22.6, officialSpread: 1100 },
-  { country: "South Africa", countryPt: "Africa do Sul", flag: "ZA", spread2025e: 550, trend: "reduzindo", trendEn: "reducing", volatility2025e: 13.6, officialSpread: 580 },
+  { country: "South Africa", countryPt: "South Africa", flag: "ZA", spread2025e: 550, trend: "reduzindo", trendEn: "reducing", volatility2025e: 13.6, officialSpread: 580 },
   { country: "Mexico", countryPt: "Mexico", flag: "MX", spread2025e: 360, trend: "estavel", trendEn: "stable", volatility2025e: 11.8, officialSpread: 380 },
   { country: "Argentina", countryPt: "Argentina", flag: "AR", spread2025e: 5800, trend: "ampliando", trendEn: "widening", volatility2025e: 68.4, officialSpread: 6200 },
   { country: "Colombia", countryPt: "Colombia", flag: "CO", spread2025e: 460, trend: "reduzindo", trendEn: "reducing", volatility2025e: 14.2, officialSpread: 490 },
