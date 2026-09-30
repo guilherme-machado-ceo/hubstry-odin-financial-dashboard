@@ -131,7 +131,20 @@ async function contexts() {
 
   const climateContext = `Climate vector for Brasília. Rolling 12-month window ${climateStart} to ${climateEnd}; mean temperature ${avgR}°C (${dirWord(compareDirection(avgR, TEMP_REF))} the ${TEMP_REF}°C reference); precipitation ${precipR} mm (${dirWord(compareDirection(precipR, PRECIP_REF))} the ${PRECIP_REF} mm reference). The reference benchmarks (${TEMP_REF}°C and ${PRECIP_REF} mm) are dashboard references, not an official climatology. A single city cannot establish impacts on producing regions, commodities or energy. Any transmission to commodities, hydrology, energy or FX must be a hypothesis and should be monitored against producing regions and relevant river basins. Source: source-open-meteo-brasilia.`;
 
-  const blockchainContext = `Digital assets. Stablecoin market capitalization: ${fmt(stable.data.totalMcapUsd)}; Tether: ${fmt(stable.data.assets[0].mcapUsd)}. This is market capitalization, not international payment volume. RWA sample: ${top}; partial sample of individual protocols, not a sector total. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.`;
+    const makeEvidenceMaterial = (item, sources, context) => [
+    `Section: ${item.id}`,
+    `Valid as of: ${item.validAsOf}`,
+    `Next review: ${item.nextReviewAt}`,
+    `Forma temporal: ${item.evidence.temporalShape}`,
+    `Referências jurídicas disponíveis: ${(item.evidence.legalRefs ?? []).length ? item.evidence.legalRefs.map(r => `${r.labels[0]} (${r.kind})`).join("; ") : "nenhuma"}`,
+    "Provenance permitida para esta seção:",
+    sources.map(p => `${p.sourceId} | ${p.sourceUrl} | publica: ${SOURCE_REGISTRY[p.sourceId]?.publishes ?? "não registrado"}`).join("\\n"),
+    "Context:",
+    context,
+  ].join("\\n");
+
+const blockchainContext = `Digital assets. Stablecoin market capitalization: ${fmt(stable.data.totalMcapUsd)}; Tether: ${fmt(stable.data.assets[0].mcapUsd)}. This is market capitalization, not international payment volume. RWA sample: ${top}; partial sample of individual protocols, not a sector total. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.`;
+
 
   return [
     {
@@ -139,7 +152,7 @@ async function contexts() {
       provenance:[carbonSrc.provenance],
       context:carbonContext,
       evidence:{
-        material: carbonContext,
+        material: null,
         keyDates:[
           { id:"cbam-definitive-start", date:cbam.keyDates.definitiveStart,
             subjectTerms:["regime definitivo","período definitivo","fase definitiva","definitive regime","definitive cbam regime","definitive cbam period","definitive period","definitive phase"],
@@ -180,7 +193,12 @@ for (const item of await contexts()) {
   try {
   const {parsed,usage,latencyMs}=await chatJson({
     system:SYSTEM,
-    user:`Section: ${item.id}\nValid as of: ${item.validAsOf}\nNext review: ${item.nextReviewAt}\nForma temporal: ${item.evidence.temporalShape}\nReferências jurídicas disponíveis: ${(item.evidence.legalRefs ?? []).length ? item.evidence.legalRefs.map(r => `${r.labels[0]} (${r.kind})`).join("; ") : "nenhuma"}\nProvenance permitida para esta seção (use estes sourceId/sourceUrl literalmente em evidenceRefs e whatToWatch.source):\n${item.provenance.map(p => `${p.sourceId} | ${p.sourceUrl} | publica: ${SOURCE_REGISTRY[p.sourceId]?.publishes ?? "não registrado"}`).join("\n")}\nContext:\n${item.context}`,
+    user: (() => {
+      const sources = item.provenance;
+      const material = makeEvidenceMaterial(item, sources, item.context);
+      item.evidence.material = material;
+      return material;
+    })(),
     temperature:0.2,maxTokens:3500,reasoning:false,
     onEvent: (event) => sectionEvents.push({ ...event, sectionId: item.id })
   });
