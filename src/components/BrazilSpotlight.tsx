@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { inflectionPoints, countryDebtData, kpis, latestYearIndex } from "@/data/lcBondsData";
-import { t, getLocale } from "@/i18n";
+import { t, getLocale, subscribe } from "@/i18n";
 import ExportButton from "./ExportButton";
 import EstBadge from "./EstBadge";
 import PandaBondTracker from "./PandaBondTracker";
@@ -75,7 +75,13 @@ function FXInfrastructureSVG() {
 
 export default function BrazilSpotlight({ onSourceClick, onEmbedClick }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
+  const [, forceUpdate] = useState(0);
   const locale = getLocale();
+
+  useEffect(() => {
+    const unsub = subscribe(() => forceUpdate((v) => v + 1));
+    return () => { unsub(); };
+  }, []);
   const brazil = countryDebtData.find((c) => c.country === "Brazil")!;
   const latestLC = brazil.localCurrencyDebt[latestYearIndex];
   const latestFC = brazil.foreignCurrencyDebt[latestYearIndex];
