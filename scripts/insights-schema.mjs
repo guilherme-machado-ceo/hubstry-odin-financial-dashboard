@@ -46,22 +46,25 @@ export function validateProvenance(ref, path = "provenance") {
 
 function validateStakeholders(value, path) {
   const errors = [];
+  const prescriptive = /\b(devem|deve|should|must|recomenda-se|é recomendável|recommend|recommended)\b/i;
   if (!Array.isArray(value)) return [`${path} deve ser array`];
   for (const [i, item] of value.entries()) {
     if (!item || typeof item !== "object") { errors.push(`${path}[${i}] inválido`); continue; }
     if (!["government", "corporate", "investors", "startups"].includes(item.audience))
       errors.push(`${path}[${i}].audience inválido`);
     errors.push(...validateBilingual({pt:item.textPt,en:item.textEn}, `${path}[${i}].text`));
+    if (prescriptive.test(item.textPt ?? "") || prescriptive.test(item.textEn ?? "")) errors.push(`${path}[${i}].text linguagem prescritiva`);
   }
   return errors;
 }
 
-function validateWatch(value, path) {
+function validateWatch(value, path, knownSources = new Set()) {
   const errors = [];
   if (!Array.isArray(value)) return [`${path} deve ser array`];
   for (const [i, item] of value.entries()) {
     if (!item || typeof item !== "object") { errors.push(`${path}[${i}] inválido`); continue; }
     for (const f of ["signal", "source", "whyItMatters"]) if (typeof item[f] !== "string" || !item[f]) errors.push(`${path}[${i}].${f} ausente`);
+    if (typeof item.source === "string" && knownSources.size > 0 && ![...knownSources].some(s => item.source.includes(s))) errors.push(`${path}[${i}].source não corresponde às fontes conhecidas`);
     if (item.expectedDate !== undefined && item.expectedDate !== null && !isIsoDate(item.expectedDate)) errors.push(`${path}[${i}].expectedDate inválido`);
   }
   return errors;
@@ -92,7 +95,8 @@ export function validateInsightEntry(entry, sectionId = "unknown") {
     for (const ref of c.evidenceRefs ?? [])
       if (!refs.has(ref)) errors.push(`${p}.claims[${i}].evidenceRefs referencia sourceId inexistente: ${ref}`);
   errors.push(...validateStakeholders(entry.stakeholderImplications, `${p}.stakeholderImplications`));
-  errors.push(...validateWatch(entry.whatToWatch, `${p}.whatToWatch`));
+  const knownSources = new Set((entry.provenance ?? []).flatMap(r => [r.sourceId, r.sourceUrl]));
+  errors.push(...validateWatch(entry.whatToWatch, `${p}.whatToWatch`, knownSources));
   const law = entry.economicLaw;
   if (!law || !["high","medium","low","not_material"].includes(law.relevance)) errors.push(`${p}.economicLaw.relevance inválido`);
   if (law?.relevance === "high") {
