@@ -3,6 +3,7 @@ import path from "node:path";
 import { validateInsightEntry, checkFreshness, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION } from "./insights-schema.mjs";
 import { validateSectionProfile } from "./insights-profile-validator.mjs";
 import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
+import { verifyProvenance } from "./verify-provenance.mjs";
 
 const FILE = path.resolve(process.cwd(),"public/data/insights.v2.shadow.json");
 const json = JSON.parse(await readFile(FILE,"utf8"));
@@ -38,13 +39,16 @@ const consistencyErrors = [];
 for (const [id,entry] of Object.entries(sections??{})) consistencyErrors.push(...checkEvidenceConsistency(entry, evidenceBySection.get(id)).map(e => ({ sectionId:id, ...e })));
 const evidenceConsistent = consistencyErrors.length === 0;
 errors.push(...consistencyErrors.map(e => `sections.${e.sectionId} ${formatConsistencyError(e)}`));
-const gate=errors.length===0 && generated>0 && covered>=0.5 && lawOk && sectionProfileValid && evidenceConsistent && freshnessValid;
-console.log(`Shadow gate: ${gate?"PASS":"BLOCK"} | sections=${generated} factEvidenceCoverage=${covered.toFixed(2)} sectionProfileValid=${sectionProfileValid} evidenceConsistent=${evidenceConsistent} freshnessValid=${freshnessValid}`);
+const provenanceCheck = await verifyProvenance(json, { require: true });
+errors.push(...provenanceCheck.errors);
+const provenanceReproducible = provenanceCheck.errors.length === 0;
+const gate=errors.length===0 && generated>0 && covered>=0.5 && lawOk && sectionProfileValid && evidenceConsistent && freshnessValid && provenanceReproducible;
+console.log(`Shadow gate: ${gate?"PASS":"BLOCK"} | sections=${generated} factEvidenceCoverage=${covered.toFixed(2)} sectionProfileValid=${sectionProfileValid} evidenceConsistent=${evidenceConsistent} freshnessValid=${freshnessValid} provenanceReproducible=${provenanceReproducible}`);
 if(!gate) errors.push("shadow generation gate bloqueou o artefato");
 const reportFile = path.resolve(process.cwd(),"public/data/generationReport.json");
 try {
   const report = JSON.parse(await readFile(reportFile,"utf8"));
-  report.validation = { decision: gate ? "publish_candidate" : "blocked", validator: "semantic", errors, factEvidenceCoverage: covered, generatedSections: generated, economicLawHighHasNorms: lawOk, sectionProfileValid, evidenceConsistent, consistencyErrors, freshnessValid, validatedAt: new Date().toISOString() };
+  report.validation = { decision: gate ? "publish_candidate" : "blocked", validator: "semantic", errors, factEvidenceCoverage: covered, generatedSections: generated, economicLawHighHasNorms: lawOk, sectionProfileValid, evidenceConsistent, consistencyErrors, freshnessValid, provenanceReproducible, validatedAt: new Date().toISOString() };
   await writeFile(reportFile, JSON.stringify(report,null,2)+"\n");
 } catch (reportError) {
   errors.push(`generationReport.json não pôde ser atualizado: ${reportError.message}`);
