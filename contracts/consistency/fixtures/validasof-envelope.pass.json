@@ -1,0 +1,47 @@
+{
+  "description": "Regressão: a data validAsOf do envelope recebido pelo modelo é evidência válida para fact claims.",
+  "expect": "pass",
+  "expectRules": [],
+  "evidence": {
+    "material": "Section: blockchain\nValid as of: 2026-09-30T12:29:52.372Z\nNext review: 2026-10-07T15:50:07.171Z\nForma temporal: snapshot\nReferências jurídicas disponíveis: nenhuma\nProvenance permitida para esta seção (use estes sourceId/sourceUrl literalmente em evidenceRefs e whatToWatch.source):\nsource-defillama-stablecoins | https://defillama.com/stablecoins | publica: stablecoin market capitalization\nContext:\nDigital assets. Stablecoin market capitalization: US$ 284.9 bilhões. This is market capitalization, not international payment volume. Source: source-defillama-stablecoins.",
+    "keyDates": [],
+    "comparisons": [],
+    "legalRefs": [],
+    "temporalShape": "snapshot"
+  },
+  "entry": {
+    "sectionId": "blockchain",
+    "status": "shadow",
+    "pt": "A capitalização registrada no snapshot é de US$ 284,9 bilhões em 30/09/2026.",
+    "en": "The capitalization recorded in the snapshot is US$ 284.9 billion on 2026-09-30.",
+    "thesis": {
+      "pt": "O valor é um snapshot, não uma série temporal.",
+      "en": "The value is a snapshot, not a time series."
+    },
+    "economicLaw": {
+      "relevance": "not_material",
+      "pt": "Sem lente jurídica.",
+      "en": "No legal lens.",
+      "norms": [],
+      "institutions": [],
+      "sourceRefs": []
+    },
+    "stakeholderImplications": [],
+    "whatToWatch": [],
+    "claims": [
+      {
+        "id": "claim-1",
+        "kind": "fact",
+        "textPt": "Em 30/09/2026, a capitalização era de US$ 284,9 bilhões.",
+        "textEn": "On 2026-09-30, capitalization was US$ 284.9 billion.",
+        "evidenceRefs": [
+          "source-defillama-stablecoins"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        }
+      }
+    ]
+  }
+}

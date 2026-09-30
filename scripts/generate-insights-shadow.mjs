@@ -95,6 +95,18 @@ function fmt(v) {
 }
 const dirWord = (d) => d === "above" ? "above" : d === "below" ? "below" : "equal to";
 
+const buildEvidenceMaterial = (item) => [
+  `Section: ${item.id}`,
+  `Valid as of: ${item.validAsOf}`,
+  `Next review: ${item.nextReviewAt}`,
+  `Forma temporal: ${item.evidence.temporalShape}`,
+  `Referências jurídicas disponíveis: ${(item.evidence.legalRefs ?? []).length ? item.evidence.legalRefs.map(r => `${r.labels[0]} (${r.kind})`).join("; ") : "nenhuma"}`,
+  `Provenance permitida para esta seção (use estes sourceId/sourceUrl literalmente em evidenceRefs e whatToWatch.source):`,
+  item.provenance.map(p => `${p.sourceId} | ${p.sourceUrl} | publica: ${SOURCE_REGISTRY[p.sourceId]?.publishes ?? "não registrado"}`).join("\n"),
+  "Context:",
+  item.context,
+].join("\n");
+
 async function contexts() {
   // ── Fontes: cada leitura grava sua cópia de evidência e calcula o hash dos bytes.
   const carbonSrc = await fileSource("source-carbon-ec", null, null, "public/data/sources/cbam-carbon.json", "cbam-price-latest");
@@ -131,7 +143,8 @@ async function contexts() {
 
   const climateContext = `Climate vector for Brasília. Rolling 12-month window ${climateStart} to ${climateEnd}; mean temperature ${avgR}°C (${dirWord(compareDirection(avgR, TEMP_REF))} the ${TEMP_REF}°C reference); precipitation ${precipR} mm (${dirWord(compareDirection(precipR, PRECIP_REF))} the ${PRECIP_REF} mm reference). The reference benchmarks (${TEMP_REF}°C and ${PRECIP_REF} mm) are dashboard references, not an official climatology. A single city cannot establish impacts on producing regions, commodities or energy. Any transmission to commodities, hydrology, energy or FX must be a hypothesis and should be monitored against producing regions and relevant river basins. Source: source-open-meteo-brasilia.`;
 
-  const blockchainContext = `Digital assets. Stablecoin market capitalization: ${fmt(stable.data.totalMcapUsd)}; Tether: ${fmt(stable.data.assets[0].mcapUsd)}. This is market capitalization, not international payment volume. RWA sample: ${top}; partial sample of individual protocols, not a sector total. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.`;
+const blockchainContext = `Digital assets. Stablecoin market capitalization: ${fmt(stable.data.totalMcapUsd)}; Tether: ${fmt(stable.data.assets[0].mcapUsd)}. This is market capitalization, not international payment volume. RWA sample: ${top}; partial sample of individual protocols, not a sector total. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.`;
+
 
   return [
     {
@@ -139,7 +152,7 @@ async function contexts() {
       provenance:[carbonSrc.provenance],
       context:carbonContext,
       evidence:{
-        material: carbonContext,
+        material: null,
         keyDates:[
           { id:"cbam-definitive-start", date:cbam.keyDates.definitiveStart,
             subjectTerms:["regime definitivo","período definitivo","fase definitiva","definitive regime","definitive cbam regime","definitive cbam period","definitive period","definitive phase"],
@@ -159,13 +172,13 @@ async function contexts() {
       id:"blockchain", validAsOf:stable.updatedAt, nextReviewAt:new Date(Date.now()+7*864e5).toISOString(),
       provenance:[stableSrc.provenance, rwaSrc.provenance, cryptoSrc.provenance],
       context:blockchainContext,
-      evidence:{ material:blockchainContext, keyDates:[], comparisons:[], legalRefs:[], temporalShape:"snapshot" },
+      evidence:{ material:null, keyDates:[], comparisons:[], legalRefs:[], temporalShape:"snapshot" },
     },
     {
       id:"climate", validAsOf:climateEnd, nextReviewAt:new Date(Date.now()+7*864e5).toISOString(),
       provenance:[{ sourceId:"source-open-meteo-brasilia", sourceUrl:weatherUrl, asOf:climateEnd, dataPath:weatherEvidence.dataPath, metricId:"brasilia-12m-temp-precip", hash:weatherEvidence.hash }],
       context:climateContext,
-      evidence:{ material:climateContext, keyDates:[], legalRefs:[], temporalShape:"window_aggregate", comparisons:[
+      evidence:{ material:null, keyDates:[], legalRefs:[], temporalShape:"window_aggregate", comparisons:[
         { id:"climate-temp-vs-reference", observed:avgR, reference:TEMP_REF, unit:"°C", direction:compareDirection(avgR, TEMP_REF) },
         { id:"climate-precip-vs-reference", observed:precipR, reference:PRECIP_REF, unit:"mm", direction:compareDirection(precipR, PRECIP_REF) },
       ] },
@@ -178,9 +191,11 @@ const reportSections=[];
 for (const item of await contexts()) {
   const sectionEvents = [];
   try {
+  const evidenceMaterial = buildEvidenceMaterial(item);
+  item.evidence.material = evidenceMaterial;
   const {parsed,usage,latencyMs}=await chatJson({
     system:SYSTEM,
-    user:`Section: ${item.id}\nValid as of: ${item.validAsOf}\nNext review: ${item.nextReviewAt}\nForma temporal: ${item.evidence.temporalShape}\nReferências jurídicas disponíveis: ${(item.evidence.legalRefs ?? []).length ? item.evidence.legalRefs.map(r => `${r.labels[0]} (${r.kind})`).join("; ") : "nenhuma"}\nProvenance permitida para esta seção (use estes sourceId/sourceUrl literalmente em evidenceRefs e whatToWatch.source):\n${item.provenance.map(p => `${p.sourceId} | ${p.sourceUrl} | publica: ${SOURCE_REGISTRY[p.sourceId]?.publishes ?? "não registrado"}`).join("\n")}\nContext:\n${item.context}`,
+    user: evidenceMaterial,
     temperature:0.2,maxTokens:3500,reasoning:false,
     onEvent: (event) => sectionEvents.push({ ...event, sectionId: item.id })
   });
