@@ -15,11 +15,11 @@
         "intelligenceContractVersion": "1.0",
         "sectionId": "carbon",
         "status": "generated",
-        "pt": "O preço do CBAM no Q2 2026 foi de 75,28 €/tCO2e, ligeiramente abaixo do Q1 2026 (75,36 €/tCO2e). O regime definitivo está em vigor desde 2026-01-01, com a primeira declaração anual devida até 2027-09-30. O limite de desminimis é de 50 t/year por importador para bens abrangidos, abrangendo seis setores.",
+        "pt": "O preço do CBAM no Q2 2026 foi de 75,28 €/tCO2e, ligeiramente abaixo do Q1 2026 (75,36 €/tCO2e). O regime definitivo está em vigor desde 2026-01-01, com a primeira declaração anual devida até 2027-09-30. O limite de minimis é de 50 t/ano por importador para bens abrangidos, abrangendo seis setores.",
         "en": "The CBAM price in Q2 2026 was 75.28 €/tCO2e, slightly below the Q1 2026 price of 75.36 €/tCO2e. The definitive regime has been in force since 2026-01-01, with the first annual declaration due by 2027-09-30. The de minimis threshold is 50 t/year per importer for covered goods, applying to six sectors.",
         "thesis": {
-          "pt": "O CBAM mantém estabilidade de preço no início de 2026, com ajustes marginais e regime definitivo em operação, enquanto os prazos de declaração permanecem futuros.",
-          "en": "CBAM maintains price stability in early 2026 with marginal adjustments and the definitive regime in operation, while declaration deadlines remain forthcoming."
+          "pt": "Interpretação: a variação entre os dois trimestres disponíveis é marginal (75,36 → 75,28 €/tCO2e), com o regime definitivo em vigor e a primeira declaração anual ainda por vir; dois pontos não sustentam leitura de tendência ou de estabilidade de preço.",
+          "en": "Interpretation: the change between the two available quarters is marginal (75.36 → 75.28 €/tCO2e), with the definitive regime in force and the first annual declaration still ahead; two data points do not support a reading of price trend or stability."
         },
         "economicLaw": {
           "relevance": "high",
@@ -39,18 +39,18 @@
         "stakeholderImplications": [
           {
             "audience": "government",
-            "textPt": "Monitorar a conformidade das declarações iniciais e a eficácia do mecanismo de desminimis para ajustar políticas de mitigação de vazamento de carbono.",
+            "textPt": "Monitorar a conformidade das declarações iniciais e a eficácia do mecanismo de de minimis para ajustar políticas de mitigação de vazamento de carbono.",
             "textEn": "Monitor initial declaration compliance and de minimis mechanism effectiveness to adjust carbon leakage mitigation policies."
           },
           {
             "audience": "corporate",
-            "textPt": "Avaliar a necessidade de coletar dados de instalação verificáveis para atender a pedidos indiretos de exportadores brasileiros sob o regime definitivo do CBAM.",
-            "textEn": "Assess the need to gather verifiable installation-level data to meet indirect requests from Brazilian exporters under the CBAM definitive regime."
+            "textPt": "Exportadores brasileiros de setores abrangidos podem receber de importadores autorizados na UE pedidos de dados verificáveis de emissões por instalação; avaliar a capacidade de fornecê-los no regime definitivo.",
+            "textEn": "Brazilian exporters in covered sectors may receive requests from authorized EU importers for verifiable installation-level emissions data; assess the capacity to provide it under the definitive regime."
           },
           {
             "audience": "investors",
-            "textPt": "Avaliar o impacto potencial do preço estável do CBAM nos custos de produção e competitividade de setores abrangidos em carteiras expostas a comércio internacional.",
-            "textEn": "Evaluate the potential impact of stable CBAM pricing on production costs and competitiveness of covered sectors in internationally exposed portfolios."
+            "textPt": "Avaliar a exposição de carteiras a setores abrangidos pelo CBAM considerando o preço vigente de 75,28 €/tCO2e e o prazo da primeira declaração anual.",
+            "textEn": "Assess portfolio exposure to CBAM-covered sectors considering the current price of 75.28 €/tCO2e and the first annual declaration deadline."
           },
           {
             "audience": "startups",
@@ -63,7 +63,7 @@
             "signal": "Preço do CBAM publicado pela Comissão Europeia",
             "source": "source-carbon-ec",
             "expectedDate": null,
-            "whyItMatters": "Indica tendências de custos para importadores e sinais de ajuste no mecanismo de precificação de carbono nas fronteiras."
+            "whyItMatters": "Atualiza o preço de referência para importadores e permite a próxima comparação trimestral."
           }
         ],
         "claims": [
@@ -109,7 +109,7 @@
           {
             "id": "claim-4",
             "kind": "fact",
-            "textPt": "O limite de desminimis para o CBAM é de 50 t/year de agregado anual por importador para bens abrangidos.",
+            "textPt": "O limite de minimis do CBAM é de 50 t/ano, em agregado anual, por importador para bens abrangidos.",
             "textEn": "The CBAM de minimis threshold is 50 t/year annual aggregate per importer for covered goods.",
             "evidenceRefs": [
               "source-carbon-ec"
@@ -234,6 +234,22 @@
         "reviewSource": {
           "shadowRunId": "36753798426",
           "generationRunId": "odin-20260930-174643-adef"
+        },
+        "editorialCorrection": {
+          "correctedAt": "2026-09-30",
+          "method": "manual",
+          "regenerated": false,
+          "reviewer": "M1 editorial review",
+          "reason": "Tese extrapolava estabilidade a partir de dois pontos; implicação corporate invertia a direção dos pedidos de dados; implicação investors repetia 'preço estável'; grafia de 'de minimis' e unidade em pt.",
+          "fields": [
+            "pt",
+            "thesis",
+            "stakeholderImplications[corporate]",
+            "stakeholderImplications[investors]",
+            "stakeholderImplications[government]",
+            "claims[claim-4].pt",
+            "whatToWatch[0].whyItMatters"
+          ]
         }
       },
       "blockchain": {
@@ -244,8 +260,8 @@
         "pt": "A capitalização de mercado de stablecoins totalizou US$ 284,9 bilhões em 30 de setembro de 2026, com Tether representando US$ 183,8 bilhões. O TVL de protocolos RWA mostrou valores parciais, como Invesco USTB (US$ 577,5 milhões) e Ethena USDtb (US$ 492,6 milhões).",
         "en": "Stablecoin market capitalization totaled US$284.9 billion on September 30, 2026, with Tether accounting for US$183.8 billion. RWA protocol TVL showed partial values, such as Invesco USTB (US$577.5 million) and Ethena USDtb (US$492.6 million).",
         "thesis": {
-          "pt": "O mercado de stablecoins permanece concentrado, com Tether dominando mais de 64% da capitalização total.",
-          "en": "The stablecoin market remains concentrated, with Tether dominating over 64% of total capitalization."
+          "pt": "Interpretação: no snapshot de 30 de setembro de 2026, o mercado de stablecoins está concentrado — Tether responde por US$ 183,8 bilhões de US$ 284,9 bilhões (≈64,5%, cálculo derivado) da capitalização.",
+          "en": "Interpretation: in the September 30, 2026 snapshot, the stablecoin market is concentrated — Tether accounts for US$183.8 billion of US$284.9 billion (≈64.5%, derived calculation) of capitalization."
         },
         "economicLaw": {
           "relevance": "not_material",
@@ -371,6 +387,16 @@
         "reviewSource": {
           "shadowRunId": "36753798426",
           "generationRunId": "odin-20260930-174643-adef"
+        },
+        "editorialCorrection": {
+          "correctedAt": "2026-09-30",
+          "method": "manual",
+          "regenerated": false,
+          "reviewer": "M1 editorial review",
+          "reason": "'Permanece concentrado' pressupunha série temporal (fonte é snapshot); participação de 64% era cálculo do modelo — explicitado como derivado.",
+          "fields": [
+            "thesis"
+          ]
         }
       },
       "climate": {
@@ -381,8 +407,8 @@
         "pt": "A temperatura média em Brasília foi de 22,4°C no período de 25 de setembro de 2025 a 25 de setembro de 2026, acima da referência de 21,4°C. A precipitação total foi de 1321 mm, abaixo da referência de 1550 mm. Esses valores são agregados de uma janela móvel de 12 meses e não estabelecem impactos diretos em commodities, hidrologia ou energia.",
         "en": "The mean temperature in Brasília was 22.4°C from September 25, 2025 to September 25, 2026, above the 21.4°C reference. Total precipitation was 1321 mm, below the 1550 mm reference. These values are 12-month rolling aggregates and do not establish direct impacts on commodities, hydrology, or energy.",
         "thesis": {
-          "pt": "O clima de Brasília mostra anomalia térmica positiva e déficit pluviométrico em janela de 12 meses, sem evidência de transmissão direta para setores econômicos.",
-          "en": "Brasília's climate shows a positive temperature anomaly and precipitation deficit over a 12-month window, with no evidence of direct transmission to economic sectors."
+          "pt": "Interpretação: na janela de 12 meses, Brasília ficou mais quente e mais seca que as referências internas do dashboard (que não são climatologia oficial), sem evidência de transmissão para setores econômicos.",
+          "en": "Interpretation: over the 12-month window, Brasília was warmer and drier than the dashboard's internal references (which are not an official climatology), with no evidence of transmission to economic sectors."
         },
         "economicLaw": {
           "relevance": "not_material",
@@ -395,7 +421,7 @@
         "stakeholderImplications": [
           {
             "audience": "government",
-            "textPt": "Monitorar dados climáticos locais como insumo para avaliações de riscosetoriais, sem atribuir causalidade direta a Brasília isoladamente.",
+            "textPt": "Monitorar dados climáticos locais como insumo para avaliações de risco setoriais, sem atribuir causalidade direta a Brasília isoladamente.",
             "textEn": "Monitor local climate data as input for sectoral risk assessments, without assigning direct causality to Brasília in isolation."
           },
           {
@@ -411,10 +437,10 @@
         ],
         "whatToWatch": [
           {
-            "signal": "temperatura média diária e precipitação diária",
+            "signal": "Temperatura média e precipitação acumulada em Brasília na próxima atualização diária do Open-Meteo",
             "source": "source-open-meteo-brasilia",
             "expectedDate": null,
-            "whyItMatters": "Atualizações mensais desses indicadores permitem acompanhar a evolução da janela agregada e detectar desvios persistentes em relação às referências do dashboard."
+            "whyItMatters": "Permite acompanhar se o desvio em relação às referências do dashboard persiste na janela móvel de 12 meses."
           }
         ],
         "claims": [
@@ -479,6 +505,18 @@
         "reviewSource": {
           "shadowRunId": "36753798426",
           "generationRunId": "odin-20260930-174643-adef"
+        },
+        "editorialCorrection": {
+          "correctedAt": "2026-09-30",
+          "method": "manual",
+          "regenerated": false,
+          "reviewer": "M1 editorial review",
+          "reason": "'Anomalia' e 'déficit' pressupunham climatologia oficial; What to Watch sem localização e com cadência 'mensal' (a fonte é diária); grafia.",
+          "fields": [
+            "thesis",
+            "stakeholderImplications[government]",
+            "whatToWatch[0]"
+          ]
         }
       }
     }
