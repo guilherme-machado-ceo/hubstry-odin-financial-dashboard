@@ -22,7 +22,7 @@ jobs:
           AI_PROVIDER: nvidia
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           NVIDIA_MODEL: nvidia/nemotron-3-super-120b-a12b
-          AI_TIMEOUT_MS: 120000
+          AI_TIMEOUT_MS: 45000
         run: node scripts/generate-insights-shadow.mjs
       - name: Validate shadow artifact
         run: node scripts/validate-insights-shadow.mjs
@@ -30,5 +30,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: odin-insights-v2-shadow
-          path: public/data/insights.v2.shadow.json
+          path: |
+            public/data/insights.v2.shadow.json
+            public/data/generationReport.json
           if-no-files-found: error
