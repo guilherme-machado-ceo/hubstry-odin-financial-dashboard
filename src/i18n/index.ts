@@ -67,6 +67,13 @@ const pt: T = {
     readAnalysis: "Leia a análise completa →", embedLabel: "Incorporar", exportPNG: "Exportar PNG", exportPDF: "Exportar PDF", exportJSON: "Exportar JSON",
     source: "Fonte Primária", estBadge: "⚠️ est. (valor estimado)", ndbProgress: "Progresso rumo a meta de 30%% em Moeda Local (ML) — NDB 2026",
   },
+  panda: {
+    title: "PANDA BONDS: TRACKER BRASIL ↔ CHINA (CIBM — mercado interbancário chinês)",
+    subtitle: "Conteúdo curado: cada item tem fonte primária com URL e data de verificação. Panda Bond = título em yuan (CNY) emitido dentro da China por governo ou empresa estrangeira.",
+    marketTitle: "CONTEXTO DE MERCADO",
+    statusIssued: "EMITIDO", statusPlanned: "PLANEJADO", statusWatch: "RADAR",
+    verified: "Verificado em", amountTbd: "valor público a definir",
+  },
   section2: {
     title: "TAMANHO DO MERCADO: BRICS + LATAM LC BONDS (TÍTULOS EM MOEDA LOCAL)",
     subtitle: "Evolução 2015-2025 em US$ bilhões — O que são LC Bonds? Títulos de dívida emitidos na moeda do próprio país, não em dólar. Isso protege contra variações cambiais.",
@@ -230,6 +237,13 @@ const en: T = {
     flowStep5: "Hedge via TCX (The Currency Exchange Fund) or NDB",
     readAnalysis: "Read full analysis →", embedLabel: "Embed", exportPNG: "Export PNG", exportPDF: "Export PDF", exportJSON: "Export JSON",
     source: "Primary Source", estBadge: "⚠️ est. (estimated)", ndbProgress: "Progress toward 30%% Local Currency (LC) Target — NDB 2026",
+  },
+  panda: {
+    title: "PANDA BONDS: BRAZIL ↔ CHINA TRACKER (China Interbank Bond Market)",
+    subtitle: "Curated content: every item has a primary source with URL and verification date. Panda Bond = yuan (CNY) debt issued inside China by a foreign government or company.",
+    marketTitle: "MARKET CONTEXT",
+    statusIssued: "ISSUED", statusPlanned: "PLANNED", statusWatch: "WATCH",
+    verified: "Verified", amountTbd: "public amount TBD",
   },
   section2: {
     title: "MARKET SIZE: BRICS + LATAM LC BONDS (LOCAL CURRENCY DENOMINATED DEBT)",
