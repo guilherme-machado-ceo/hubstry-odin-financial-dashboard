@@ -24,9 +24,12 @@ export function getProviderConfig() {
 }
 
 function extractJson(text) {
-  const match = String(text ?? "").match(/\{[\s\S]*\}/);
-  if (!match) throw new Error("resposta sem JSON");
-  return JSON.parse(match[0]);
+  const raw = String(text ?? "").trim();
+  try { return JSON.parse(raw); } catch {}
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start < 0 || end <= start) throw new Error("resposta sem JSON");
+  return JSON.parse(raw.slice(start, end + 1));
 }
 
 function normalizeUsage(usage) {
@@ -51,6 +54,10 @@ export async function chatJson({ system, user, temperature = 0.3, maxTokens = 70
     max_tokens: maxTokens,
   };
 
+  // OpenAI-compatible structured-output hint. Providers that do not support
+  // it can still return JSON text; parsing below remains the final guard.
+  body.response_format = { type: "json_object" };
+
   if (config.name === "nvidia") {
     body.chat_template_kwargs = { enable_thinking: reasoning };
   }
@@ -66,7 +73,33 @@ export async function chatJson({ system, user, temperature = 0.3, maxTokens = 70
   if (!res.ok) throw new Error(`${config.name} HTTP ${res.status}: ${raw.slice(0, 500)}`);
   const json = JSON.parse(raw);
   const content = json.choices?.[0]?.message?.content ?? "";
-  const parsed = extractJson(content);
+  let parsed;
+  try {
+    parsed = extractJson(content);
+  } catch (firstError) {
+    // One controlled retry for malformed structured output. This is not a
+    // semantic retry: same prompt, lower temperature, explicit JSON request.
+    const retryBody = {
+      ...body,
+      temperature: 0,
+      messages: [
+        ...body.messages,
+        { role: "user", content: "Return the same answer again as syntactically valid JSON only. No markdown, no prose outside the JSON object." }
+      ]
+    };
+    const retryRes = await fetch(config.endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.key}` },
+      body: JSON.stringify(retryBody),
+      signal: AbortSignal.timeout(Number(process.env.AI_TIMEOUT_MS || 60000)),
+    });
+    const retryRaw = await retryRes.text();
+    if (!retryRes.ok) throw new Error(`${config.name} retry HTTP ${retryRes.status}: ${retryRaw.slice(0, 500)}`);
+    const retryJson = JSON.parse(retryRaw);
+    const retryContent = retryJson.choices?.[0]?.message?.content ?? "";
+    try { parsed = extractJson(retryContent); }
+    catch { throw new Error(`resposta JSON inválida após retry: ${firstError.message}`); }
+  }
   return {
     parsed,
     usage: normalizeUsage(json.usage),
