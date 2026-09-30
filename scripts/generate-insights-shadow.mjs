@@ -34,7 +34,7 @@ Regras:
 - mantenha tom sóbrio, analítico, compatível com Chatham House;
 - não use linguagem promocional ou de chatbot.
 
-Retorne SOMENTE JSON válido, exatamente neste formato:
+Retorne SOMENTE JSON válido. Não use markdown. Limite cada texto a 2 frases; produza no máximo 4 claims, 4 stakeholderImplications e 3 whatToWatch. Exatamente neste formato:
 {
  "pt":"2-4 frases executivas",
  "en":"2-4 executive sentences",
@@ -44,7 +44,7 @@ Retorne SOMENTE JSON válido, exatamente neste formato:
    {"audience":"government|corporate|investors|startups","textPt":"...","textEn":"..."}
  ],
  "whatToWatch":[
-   {"signal":"...","source":"...","expectedDate":"YYYY-MM-DD or null","whyItMatters":"...","ownerLens":"...","relatedSection":"..."}
+   {"signal":"...","source":"...","expectedDate":"YYYY-MM-DD or null","whyItMatters":"..."}
  ],
  "claims":[
    {"id":"...","kind":"fact|interpretation|hypothesis","textPt":"...","textEn":"...","evidenceRefs":["source-id"],"confidence":{"data":"high|medium|low","interpretation":"high|medium|low"}}
@@ -109,7 +109,7 @@ for (const item of await contexts()) {
   const {parsed,usage,latencyMs}=await chatJson({
     system:SYSTEM,
     user:`Section: ${item.id}\nValid as of: ${item.validAsOf}\nNext review: ${item.nextReviewAt}\nContext:\n${item.context}`,
-    temperature:0.2,maxTokens:1800,reasoning:false
+    temperature:0.2,maxTokens:3500,reasoning:false
   });
   if (!parsed || typeof parsed.pt!=="string" || typeof parsed.en!=="string") throw new Error(`Invalid model output for ${item.id}`);
   const provById=new Map(item.provenance.map(p=>[p.sourceId,p]));
