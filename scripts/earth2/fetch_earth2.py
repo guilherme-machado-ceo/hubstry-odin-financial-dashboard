@@ -60,10 +60,10 @@ def log(msg: str) -> None:
 def load_variables() -> list[str]:
     """Lista ordenada de canais do FourCastNet SFNO (fonte: earth2studio)."""
     try:
-        from earth2studio.models.px.fcn3 import VARIABLES
+        from earth2studio.models.px.sfno import VARIABLES
         return list(VARIABLES)
     except ImportError:
-        from earth2studio.models.px.sfno import VARIABLES
+        from earth2studio.models.px.fcn3 import VARIABLES
         return list(VARIABLES)
 
 
@@ -182,6 +182,7 @@ def main() -> int:
         return 1
 
     variables = load_variables()
+    log(f"Canais do modelo: {len(variables)} (esperado: 73 para o SFNO)")
     init_time, da = fetch_initial_state(variables)
 
     tmp = Path(os.environ.get("TMPDIR", "/tmp")) / "fcn_inputs.npy"
