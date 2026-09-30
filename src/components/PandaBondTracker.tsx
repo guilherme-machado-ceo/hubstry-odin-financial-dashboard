@@ -1,5 +1,6 @@
 import { PANDA_BOND_EVENTS, PANDA_MARKET_STATS, type PandaStatus } from "@/data/pandaBondsData";
-import { t, getLocale } from "@/i18n";
+import { useEffect, useState } from "react";
+import { t, getLocale, subscribe } from "@/i18n";
 import { ExternalLink, CheckCircle2, CalendarClock, Radar, type LucideIcon } from "lucide-react";
 
 const STATUS_META: Record<PandaStatus, { color: string; labelKey: string; Icon: LucideIcon }> = {
@@ -21,7 +22,13 @@ function fmtDate(iso: string, locale: string): string {
 }
 
 export default function PandaBondTracker() {
+  const [, forceUpdate] = useState(0);
   const locale = getLocale();
+
+  useEffect(() => {
+    const unsub = subscribe(() => forceUpdate((v) => v + 1));
+    return () => { unsub(); };
+  }, []);
   const sorted = [...PANDA_BOND_EVENTS].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
