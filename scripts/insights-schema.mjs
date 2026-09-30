@@ -2,7 +2,7 @@
 
 export const SCHEMA_VERSION = "2.0";
 export const INTELLIGENCE_CONTRACT_VERSION = "1.0";
-export const PROMPT_VERSION = "3.2.0";
+export const PROMPT_VERSION = "3.3.0";
 
 export const LEVELS = new Set(["high", "medium", "low"]);
 
@@ -131,5 +131,59 @@ export function validateInsightEntry(entry, sectionId = "unknown") {
     for (const f of ["norms","institutions","sourceRefs"])
       if (!Array.isArray(law[f]) || law[f].length === 0) errors.push(`${p}.economicLaw high sem ${f}`);
   }
+  return errors;
+}
+
+
+// ── M1 · Emergency MVP Gate: 5 camadas mínimas por seção ─────────────────────
+// Contexto (pt/en), Tese, Direito Econômico, ≥2 Stakeholders, exatamente 1
+// What to Watch (temporário no M1; volta a até 3 no M2). `not_material`
+// declara ausência de incidência e exige listas vazias.
+export const M1_WATCH_ITEMS = 1;
+export const M1_MIN_STAKEHOLDERS = 2;
+export const NOT_MATERIAL_PT = "Não foi identificada incidência material de Direito Econômico no conjunto de evidências analisado.";
+export const NOT_MATERIAL_EN = "No material Economic Law incidence was identified in the analyzed evidence set.";
+
+const nonEmpty = (v) => typeof v === "string" && v.trim().length > 0;
+
+/** Completude das 5 camadas (usada no retry de contrato, no gate e no promote). */
+export function checkLayerCompleteness(entry, sectionId = entry?.sectionId ?? "?") {
+  const errors = [];
+  const p = `sections.${sectionId}`;
+  if (!nonEmpty(entry?.pt) || !nonEmpty(entry?.en)) errors.push(`${p} camada Contexto: pt/en ausente`);
+  if (!nonEmpty(entry?.thesis?.pt) || !nonEmpty(entry?.thesis?.en)) errors.push(`${p} camada Tese: thesis.pt/en ausente`);
+  const law = entry?.economicLaw;
+  if (!law || !["high", "medium", "low", "not_material"].includes(law.relevance)) errors.push(`${p} camada Direito Econômico: relevance ausente/inválida`);
+  else {
+    if (!nonEmpty(law.pt) || !nonEmpty(law.en)) errors.push(`${p} camada Direito Econômico: pt/en ausente`);
+    if (law.relevance === "not_material" && ((law.norms ?? []).length || (law.institutions ?? []).length)) errors.push(`${p} camada Direito Econômico: not_material exige norms e institutions vazios`);
+  }
+  const st = entry?.stakeholderImplications;
+  if (!Array.isArray(st) || st.length < M1_MIN_STAKEHOLDERS) errors.push(`${p} camada Stakeholders: mínimo ${M1_MIN_STAKEHOLDERS} (recebido ${Array.isArray(st) ? st.length : 0})`);
+  const w = entry?.whatToWatch;
+  if (!Array.isArray(w) || w.length !== M1_WATCH_ITEMS) errors.push(`${p} camada What to Watch: exatamente ${M1_WATCH_ITEMS} item (recebido ${Array.isArray(w) ? w.length : 0})`);
+  return errors;
+}
+
+/** Contrato da saída crua do modelo, para o retry de contrato (estrutura, não semântica). */
+export function validateModelOutput(parsed, sectionId, allowedSourceIds = []) {
+  if (!parsed || typeof parsed !== "object") return ["saída não é objeto JSON"];
+  const errors = [...checkLayerCompleteness(parsed, sectionId)];
+  const known = new Set(allowedSourceIds);
+  for (const [i, c] of (parsed.claims ?? []).entries()) {
+    errors.push(...validateClaim(c, `claims[${i}]`));
+    for (const ref of c?.evidenceRefs ?? []) if (known.size && !known.has(ref)) errors.push(`claims[${i}].evidenceRefs: ${ref} fora da provenance permitida`);
+  }
+  for (const [i, s] of (parsed.stakeholderImplications ?? []).entries()) {
+    if (!["government", "corporate", "investors", "startups"].includes(s?.audience)) errors.push(`stakeholderImplications[${i}].audience inválido`);
+    if (!nonEmpty(s?.textPt) || !nonEmpty(s?.textEn)) errors.push(`stakeholderImplications[${i}] textPt/textEn ausente`);
+  }
+  for (const [i, w] of (parsed.whatToWatch ?? []).entries()) {
+    for (const f of ["signal", "source", "whyItMatters"]) if (!nonEmpty(w?.[f])) errors.push(`whatToWatch[${i}].${f} ausente`);
+    if (known.size && nonEmpty(w?.source) && !known.has(w.source)) errors.push(`whatToWatch[${i}].source deve ser um sourceId permitido`);
+    if (w?.expectedDate != null && !isIsoDate(w.expectedDate)) errors.push(`whatToWatch[${i}].expectedDate deve ser YYYY-MM-DD ou null`);
+  }
+  if (!LEVELS.has(parsed.confidence?.data) || !LEVELS.has(parsed.confidence?.interpretation)) errors.push("confidence inválida");
+  if (!nonEmpty(parsed.limitations)) errors.push("limitations ausente");
   return errors;
 }

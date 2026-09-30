@@ -129,7 +129,7 @@ async function requestCompletion({ config, body, timeoutMs, phase, onEvent }) {
   throw new Error(`${config.name} ${phase} excedeu o limite de tentativas de transporte`);
 }
 
-export async function chatJson({ system, user, temperature = 0.3, maxTokens = 700, reasoning = false, onEvent }) {
+export async function chatJson({ system, user, temperature = 0.3, maxTokens = 700, reasoning = false, onEvent, validate }) {
   const config = getProviderConfig();
   if (!config.key) throw new Error(`${config.keyEnv} não definida para provider ${config.name}`);
 
@@ -187,6 +187,33 @@ export async function chatJson({ system, user, temperature = 0.3, maxTokens = 70
       usage = normalizeUsage(retry.json.usage);
     } catch {
       throw new Error(`resposta JSON inválida após retry corretivo: ${firstError.message}`);
+    }
+  }
+
+  // Retry de contrato de schema (M1): no máximo UMA vez, devolvendo ao modelo a
+  // lista de erros estruturais. Não corrige nem apaga nada localmente — se o
+  // retry ainda violar o contrato, a saída segue para o gate, que bloqueia.
+  const schemaErrors = typeof validate === "function" ? validate(parsed) : [];
+  if (schemaErrors.length) {
+    onEvent?.({ provider: config.name, phase: "schema_retry", decision: "retry", schemaErrors: schemaErrors.slice(0, 20) });
+    const retryBody = {
+      ...body,
+      temperature: 0,
+      messages: [
+        ...body.messages,
+        { role: "assistant", content: JSON.stringify(parsed) },
+        { role: "user", content: `Your JSON violates the output contract:\n- ${schemaErrors.join("\n- ")}\nReturn the COMPLETE corrected JSON object only, fixing exactly these issues. Do not add empty items; every array item must have all its fields filled.` },
+      ],
+    };
+    const retry = await requestCompletion({ config, body: retryBody, timeoutMs, phase: "schema_retry", onEvent });
+    try {
+      const retried = extractJson(retry.json.choices?.[0]?.message?.content ?? "");
+      const remaining = validate(retried);
+      onEvent?.({ provider: config.name, phase: "schema_retry", decision: remaining.length ? "still_invalid" : "fixed", remainingErrors: remaining.slice(0, 20) });
+      parsed = retried;
+      usage = { prompt: (usage.prompt ?? 0) + (normalizeUsage(retry.json.usage).prompt ?? 0), completion: (usage.completion ?? 0) + (normalizeUsage(retry.json.usage).completion ?? 0), total: (usage.total ?? 0) + (normalizeUsage(retry.json.usage).total ?? 0) };
+    } catch (e) {
+      onEvent?.({ provider: config.name, phase: "schema_retry", decision: "unparseable", error: String(e.message) });
     }
   }
 

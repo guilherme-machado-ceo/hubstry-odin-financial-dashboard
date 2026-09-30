@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { validateInsightEntry, checkFreshness, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION } from "./insights-schema.mjs";
+import { validateInsightEntry, checkFreshness, checkLayerCompleteness, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION } from "./insights-schema.mjs";
 import { validateSectionProfile } from "./insights-profile-validator.mjs";
 import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
 import { verifyProvenance } from "./verify-provenance.mjs";
@@ -17,13 +17,17 @@ const sections=json.data?.sections;
 if (!sections || typeof sections!=="object" || Object.keys(sections).length===0) errors.push("data.sections vazio");
 const profileErrors=[];
 const freshnessErrors=[];
+const layerErrors=[];
 for (const [id,entry] of Object.entries(sections??{})) {
   errors.push(...validateInsightEntry(entry,id));
   profileErrors.push(...validateSectionProfile(entry,id,{ strict:true }));
   freshnessErrors.push(...checkFreshness(entry,id));
+  layerErrors.push(...checkLayerCompleteness(entry,id));
 }
 errors.push(...profileErrors);
 errors.push(...freshnessErrors);
+errors.push(...layerErrors);
+const layersComplete = layerErrors.length === 0;
 const freshnessValid = freshnessErrors.length === 0;
 const sectionProfileValid = profileErrors.length === 0;
 const generated=Object.values(sections??{}).filter(e=>e.status==="shadow").length;
@@ -43,17 +47,17 @@ errors.push(...consistencyErrors.map(e => `sections.${e.sectionId} ${formatConsi
 const provenanceCheck = await verifyProvenance(json, { require: true });
 errors.push(...provenanceCheck.errors);
 const provenanceReproducible = provenanceCheck.errors.length === 0;
-const gate=errors.length===0 && generated>0 && covered>=0.5 && lawOk && sectionProfileValid && evidenceConsistent && freshnessValid && provenanceReproducible;
-console.log(`Shadow gate: ${gate?"PASS":"BLOCK"} | sections=${generated} factEvidenceCoverage=${covered.toFixed(2)} sectionProfileValid=${sectionProfileValid} evidenceConsistent=${evidenceConsistent} freshnessValid=${freshnessValid} provenanceReproducible=${provenanceReproducible}`);
+const gate=errors.length===0 && generated>0 && covered>=0.5 && lawOk && sectionProfileValid && evidenceConsistent && freshnessValid && provenanceReproducible && layersComplete;
+console.log(`Shadow gate: ${gate?"PASS":"BLOCK"} | sections=${generated} factEvidenceCoverage=${covered.toFixed(2)} sectionProfileValid=${sectionProfileValid} evidenceConsistent=${evidenceConsistent} freshnessValid=${freshnessValid} provenanceReproducible=${provenanceReproducible} layersComplete=${layersComplete}`);
 if(!gate) errors.push("shadow generation gate bloqueou o artefato");
 const reportFile = path.resolve(process.cwd(),"public/data/generationReport.json");
 try {
   const report = JSON.parse(await readFile(reportFile,"utf8"));
-  report.validation = { decision: gate ? "publish_candidate" : "blocked", validator: "semantic", errors, factEvidenceCoverage: covered, generatedSections: generated, economicLawHighHasNorms: lawOk, sectionProfileValid, evidenceConsistent, consistencyErrors, freshnessValid, provenanceReproducible, validatedAt: new Date().toISOString() };
+  report.validation = { decision: gate ? "publish_candidate" : "blocked", validator: "semantic", errors, factEvidenceCoverage: covered, generatedSections: generated, economicLawHighHasNorms: lawOk, sectionProfileValid, evidenceConsistent, consistencyErrors, freshnessValid, provenanceReproducible, layersComplete, validatedAt: new Date().toISOString() };
   await writeFile(reportFile, JSON.stringify(report,null,2)+"\n");
 } catch (reportError) {
   errors.push(`generationReport.json não pôde ser atualizado: ${reportError.message}`);
 }
-annotateNotice("ODIN shadow gate", `run ${json.runId} · ${gate?"PASS":"BLOCK"} · sections=${generated} · profile=${sectionProfileValid} · consistency=${evidenceConsistent} · freshness=${freshnessValid} · provenance=${provenanceReproducible}`);
+annotateNotice("ODIN shadow gate", `run ${json.runId} · ${gate?"PASS":"BLOCK"} · sections=${generated} · profile=${sectionProfileValid} · consistency=${evidenceConsistent} · freshness=${freshnessValid} · provenance=${provenanceReproducible} · layers=${layersComplete}`);
 if(errors.length){annotateErrors("ODIN gate BLOCK",errors);for(const e of errors) console.error("ERRO:",e);process.exit(1);}
 console.log("insights.v2.shadow.json APROVADO estruturalmente.");

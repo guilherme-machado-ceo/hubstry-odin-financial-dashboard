@@ -4,7 +4,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { createHash, randomBytes } from "node:crypto";
 import path from "node:path";
 import { chatJson, getProviderConfig } from "./ai-provider.mjs";
-import { PROMPT_VERSION, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION } from "./insights-schema.mjs";
+import { PROMPT_VERSION, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, validateModelOutput, NOT_MATERIAL_PT, NOT_MATERIAL_EN } from "./insights-schema.mjs";
 import { compareDirection } from "./evidence-consistency.mjs";
 import { buildSectionProfile } from "./section-profile-builder.mjs";
 import { SOURCE_REGISTRY } from "./editorial-contract.mjs";
@@ -33,6 +33,8 @@ Regras:
 - comparações com referência: use a direção (acima/abaixo) calculada e declarada no contexto; nunca infira a direção;
 - efeitos econômicos são possibilidades, não fatos consumados;
 - Direito Econômico é lente analítica, não parecer jurídico;
+- se não houver incidência material de Direito Econômico nas evidências, use relevance "not_material", norms [], institutions [], sourceRefs [] e escreva exatamente: pt "${NOT_MATERIAL_PT}" / en "${NOT_MATERIAL_EN}"; não fabrique aparato normativo para preencher a camada;
+- low: análise curta, sem obrigação de citar normas;
 - Direito Econômico: cite em norms e institutions SOMENTE itens da lista "Referências jurídicas disponíveis"; se a lista for "nenhuma", use relevance not_material ou low com norms e institutions vazios; nunca cite normas, instituições ou órgãos de memória; em pt e en mencione exatamente as mesmas referências;
 - se a relevância jurídica for alta, indique normas e instituições da lista de referências disponíveis;
 - stakeholder implications devem ser neutras e acionáveis como contexto, sem recomendar compra/venda ou escolha política; audience deve ser EXATAMENTE um destes valores ASCII: government, corporate, investors, startups; nunca traduza nem acrescente texto ao valor;
@@ -44,7 +46,7 @@ Regras:
 - mantenha tom sóbrio, analítico, compatível com Chatham House;
 - não use linguagem promocional ou de chatbot.
 
-Retorne SOMENTE JSON válido. Não use markdown. Limite cada texto a 2 frases; produza no máximo 4 claims, 4 stakeholderImplications e 3 whatToWatch. Campos temporais: nextReviewAt deve ser ISO datetime completo; whatToWatch.expectedDate deve ser YYYY-MM-DD ou null. Não invente datas. Os valores de audience devem permanecer exatamente em inglês conforme o enum. Exatamente neste formato:
+Retorne SOMENTE JSON válido. Não use markdown. Limite cada texto a 2 frases; produza no máximo 4 claims, de 2 a 4 stakeholderImplications e EXATAMENTE 1 whatToWatch (um único sinal, completo; nunca itens vazios). Campos temporais: nextReviewAt deve ser ISO datetime completo; whatToWatch.expectedDate deve ser YYYY-MM-DD ou null. Não invente datas. Os valores de audience devem permanecer exatamente em inglês conforme o enum. Exatamente neste formato:
 {
  "pt":"2-4 frases executivas",
  "en":"2-4 executive sentences",
@@ -143,7 +145,7 @@ async function contexts() {
 
   const climateContext = `Climate vector for Brasília. Rolling 12-month window ${climateStart} to ${climateEnd}; mean temperature ${avgR}°C (${dirWord(compareDirection(avgR, TEMP_REF))} the ${TEMP_REF}°C reference); precipitation ${precipR} mm (${dirWord(compareDirection(precipR, PRECIP_REF))} the ${PRECIP_REF} mm reference). The reference benchmarks (${TEMP_REF}°C and ${PRECIP_REF} mm) are dashboard references, not an official climatology. A single city cannot establish impacts on producing regions, commodities or energy. Any transmission to commodities, hydrology, energy or FX must be a hypothesis and should be monitored against producing regions and relevant river basins. Source: source-open-meteo-brasilia.`;
 
-const blockchainContext = `Digital assets. Stablecoin market capitalization: ${fmt(stable.data.totalMcapUsd)}; Tether: ${fmt(stable.data.assets[0].mcapUsd)}. This is market capitalization, not international payment volume. RWA sample: ${top}; partial sample of individual protocols, not a sector total. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.`;
+const blockchainContext = `Digital assets. Stablecoin market capitalization: ${fmt(stable.data.totalMcapUsd)}; Tether: ${fmt(stable.data.assets[0].mcapUsd)}. This is market capitalization, not international payment volume. RWA sample: ${top}; partial sample of individual protocols, not a sector total. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Temporal shape: single-day snapshot; no time series is available in this dataset, so variation over time cannot be established yet. Suggested What to Watch: the next DefiLlama update of stablecoin market capitalization, which will allow the first temporal comparison. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.`;
 
 
   return [
@@ -197,6 +199,7 @@ for (const item of await contexts()) {
     system:SYSTEM,
     user: evidenceMaterial,
     temperature:0.2,maxTokens:3500,reasoning:false,
+    validate:(out) => validateModelOutput(out, item.id, item.provenance.map(p => p.sourceId)),
     onEvent: (event) => sectionEvents.push({ ...event, sectionId: item.id })
   });
   telemetry.push(...sectionEvents.map(e => ({ ...e, runId, model: provider.model, schemaVersion: SCHEMA_VERSION, intelligenceContractVersion: INTELLIGENCE_CONTRACT_VERSION, promptVersion: PROMPT_VERSION })));

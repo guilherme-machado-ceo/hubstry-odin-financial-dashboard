@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { validateInsightEntry, checkFreshness, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, LEVELS } from "./insights-schema.mjs";
+import { validateInsightEntry, checkFreshness, checkLayerCompleteness, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, LEVELS } from "./insights-schema.mjs";
 import { validateSectionProfile } from "./insights-profile-validator.mjs";
 import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
 import { verifyProvenance } from "./verify-provenance.mjs";
@@ -34,6 +34,7 @@ for (const [id, entry] of Object.entries(sections ?? {})) {
   errors.push(...validateInsightEntry(entry, id));
   errors.push(...validateSectionProfile(entry, id, { strict: true }));
   errors.push(...checkFreshness(entry, id));
+  errors.push(...checkLayerCompleteness(entry, id));
   if (entry.status !== "shadow") errors.push(`sections.${id}.status não é shadow`);
 
 }
