@@ -45,3 +45,13 @@ jobs:
             public/data/generationReport.json
             public/data/evidence/
           if-no-files-found: error
+      - name: Upload blocked shadow artifact (diagnóstico — não promovível)
+        if: failure() && hashFiles('public/data/insights.v2.shadow.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: odin-insights-v2-shadow-blocked
+          path: |
+            public/data/insights.v2.shadow.json
+            public/data/generationReport.json
+            public/data/evidence/
+          if-no-files-found: warn

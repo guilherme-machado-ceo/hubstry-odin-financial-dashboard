@@ -4,6 +4,7 @@ import { validateInsightEntry, checkFreshness, SCHEMA_VERSION, INTELLIGENCE_CONT
 import { validateSectionProfile } from "./insights-profile-validator.mjs";
 import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
 import { verifyProvenance } from "./verify-provenance.mjs";
+import { annotateErrors, annotateNotice } from "./gh-annotations.mjs";
 
 const FILE = path.resolve(process.cwd(),"public/data/insights.v2.shadow.json");
 const json = JSON.parse(await readFile(FILE,"utf8"));
@@ -53,5 +54,6 @@ try {
 } catch (reportError) {
   errors.push(`generationReport.json não pôde ser atualizado: ${reportError.message}`);
 }
-if(errors.length){for(const e of errors) console.error("ERRO:",e);process.exit(1);}
+annotateNotice("ODIN shadow gate", `run ${json.runId} · ${gate?"PASS":"BLOCK"} · sections=${generated} · profile=${sectionProfileValid} · consistency=${evidenceConsistent} · freshness=${freshnessValid} · provenance=${provenanceReproducible}`);
+if(errors.length){annotateErrors("ODIN gate BLOCK",errors);for(const e of errors) console.error("ERRO:",e);process.exit(1);}
 console.log("insights.v2.shadow.json APROVADO estruturalmente.");
