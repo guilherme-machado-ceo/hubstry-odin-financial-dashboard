@@ -21,4 +21,9 @@ assert(validateSectionProfile(semantic,"carbon").length > 0,"fixture invalid-sem
 const regressionErrors = validateInsightEntry(regression,"carbon");
 assert(regressionErrors.length === 0,`regression-published.json quebrou o contrato-base: ${regressionErrors.join("; ")}`);
 
+// Máquina de estados do profile-validator (ADR-0003):
+// sem sectionProfile -> legado, compatível; profile desconhecido -> BLOCK.
+assert(validateSectionProfile({ sectionId: "carbon" }, "carbon").length === 0, "seção sem sectionProfile deve seguir contrato legado");
+assert(validateSectionProfile({ sectionId: "carbon", sectionProfile: "inexistente" }, "carbon").length > 0, "sectionProfile desconhecido deveria bloquear");
+
 console.log("ODIN section profiles: fixtures PASS");
