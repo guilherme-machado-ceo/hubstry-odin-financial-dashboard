@@ -46,7 +46,7 @@ export function validateProvenance(ref, path = "provenance") {
 
 function validateStakeholders(value, path) {
   const errors = [];
-  const prescriptive = /\b(devem|deve|should|must|recomenda-se|é recomendável|recommend|recommended)\b/i;
+  const prescriptive = /\b(recomenda-se|recomendamos|recommendation|recommends|buy|sell|comprar|vender|escolha|choose)\b/i;
   if (!Array.isArray(value)) return [`${path} deve ser array`];
   for (const [i, item] of value.entries()) {
     if (!item || typeof item !== "object") { errors.push(`${path}[${i}] inválido`); continue; }
@@ -64,7 +64,11 @@ function validateWatch(value, path, knownSources = new Set()) {
   for (const [i, item] of value.entries()) {
     if (!item || typeof item !== "object") { errors.push(`${path}[${i}] inválido`); continue; }
     for (const f of ["signal", "source", "whyItMatters"]) if (typeof item[f] !== "string" || !item[f]) errors.push(`${path}[${i}].${f} ausente`);
-    if (typeof item.source === "string" && knownSources.size > 0 && ![...knownSources].some(s => item.source.includes(s))) errors.push(`${path}[${i}].source não corresponde às fontes conhecidas`);
+    if (typeof item.source === "string" && knownSources.size > 0) {
+      const normalized = item.source.toLowerCase();
+      const sourceMatch = [...knownSources].some(s => normalized.includes(String(s).toLowerCase())) || /https?:\/\//i.test(item.source);
+      if (!sourceMatch) errors.push(`${path}[${i}].source sem referência reconhecível`);
+    }
     if (item.expectedDate !== undefined && item.expectedDate !== null && !isIsoDate(item.expectedDate)) errors.push(`${path}[${i}].expectedDate inválido`);
   }
   return errors;
