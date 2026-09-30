@@ -53,6 +53,14 @@ jobs:
           report_file="$(find /tmp/odin-shadow -name generationReport.json -type f -print -quit)"
           test -n "$shadow_file"
           test -n "$report_file"
+          # Proveniência reproduzível: copia as evidências do run para o repo
+          # antes da promoção; o promote verifica o hash de cada arquivo.
+          run_id="$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1])).runId)' "$shadow_file")"
+          evidence_src="$(find /tmp/odin-shadow -type d -path "*/evidence/${run_id}" -print -quit)"
+          test -n "$evidence_src"
+          mkdir -p "public/data/evidence/${run_id}"
+          cp -R "${evidence_src}/." "public/data/evidence/${run_id}/"
+          echo "ODIN_RUN_ID=${run_id}" >> "$GITHUB_ENV"
           node scripts/promote-insights.mjs \
             "$shadow_file" \
             public/data/insights.v2.json \
@@ -61,17 +69,21 @@ jobs:
       - name: Verify promotion scope
         run: |
           set -euo pipefail
-          changed="$(git status --porcelain | sed 's/^.. //')"
-          if [ "${changed}" != "public/data/insights.v2.json" ]; then
+          # Permitido: o artefato de produção e as evidências do próprio run.
+          unexpected="$(git status --porcelain --untracked-files=all | sed 's/^.. //' \
+            | grep -v -x "public/data/insights.v2.json" \
+            | grep -v "^public/data/evidence/${ODIN_RUN_ID}/" || true)"
+          if [ -n "${unexpected}" ]; then
             echo "Unexpected files changed:"
-            git status --short
+            echo "${unexpected}"
             exit 1
           fi
+          node scripts/verify-provenance.mjs public/data/insights.v2.json --require
 
       - name: Commit production insight artifact
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/data/insights.v2.json
+          git add public/data/insights.v2.json "public/data/evidence/${ODIN_RUN_ID}"
           git commit -m "chore(odin): promote validated insights v2"
           git push origin HEAD:main

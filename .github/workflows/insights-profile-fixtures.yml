@@ -21,3 +21,5 @@ jobs:
         run: node scripts/test-insights-profiles.mjs
       - name: Validate claim/evidence consistency (regressão df75)
         run: node scripts/test-evidence-consistency.mjs
+      - name: Verify published insights provenance
+        run: node scripts/verify-provenance.mjs public/data/insights.v2.json

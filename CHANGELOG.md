@@ -3,6 +3,33 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [gate-v1.2] — 2026-09-30
+
+### Adicionado
+- **Proveniência reproduzível**: o gerador shadow grava os bytes exatos de
+  cada fonte usada em `public/data/evidence/<runId>/` e calcula o SHA-256
+  sobre esses bytes; `provenance.dataPath` aponta para a cópia de evidência
+  (imutável por run), não para o snapshot diário sobrescrito.
+- `public/data/sources/cbam-carbon.json` — fonte curada do CBAM (preços
+  trimestrais, datas-chave, de minimis, `validAsOf`, `nextReviewAt`),
+  versionada; os valores saem do código do gerador.
+- `scripts/verify-provenance.mjs` — recalcula os hashes; `--require` no
+  gate shadow e no promote; verificação do `insights.v2.json` publicado no
+  CI de PR.
+- Workflow shadow publica as evidências no artefato; o promote as copia
+  para o repositório, verifica os hashes e as commita junto com o insight.
+
+### Alterado
+- Clima: a resposta do Open-Meteo é persistida como evidência antes do
+  cálculo (antes: buscada ao vivo e descartada, hash irreprodutível).
+- Blockchain: hash sobre os bytes do arquivo (antes: `JSON.stringify` do
+  objeto reparseado); `asOf` do snapshot de preços vem do arquivo (antes:
+  data fixa no código).
+
+### Manutenção
+- Atualização do preço do CBAM: editar `public/data/sources/cbam-carbon.json`
+  (novo trimestre em `prices`, `validAsOf`, `nextReviewAt`).
+
 ## [gate-v1.1] — 2026-09-30
 
 ### Adicionado

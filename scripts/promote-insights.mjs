@@ -3,6 +3,7 @@ import path from "node:path";
 import { validateInsightEntry, checkFreshness, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, LEVELS } from "./insights-schema.mjs";
 import { validateSectionProfile } from "./insights-profile-validator.mjs";
 import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
+import { verifyProvenance } from "./verify-provenance.mjs";
 
 const input = path.resolve(process.argv[2] || "public/data/insights.v2.shadow.json");
 const output = path.resolve(process.argv[3] || "public/data/insights.v2.json");
@@ -49,6 +50,10 @@ const sectionProfileValid = Object.values(sections ?? {}).every(e => validateSec
 const evidenceBySection = new Map((report.sections ?? []).map(s => [s.sectionId, s.evidence]));
 for (const [id, entry] of Object.entries(sections ?? {}))
   for (const e of checkEvidenceConsistency(entry, evidenceBySection.get(id))) errors.push(`sections.${id} ${formatConsistencyError(e)}`);
+
+// Proveniência reproduzível: as cópias de evidência do run devem estar no repo
+// (o workflow as copia do artefato shadow antes de chamar este script).
+errors.push(...(await verifyProvenance(shadow, { require: true })).errors);
 
 if (generatedCount === 0) errors.push("nenhuma seção gerada");
 if (evidenceCoverage < 0.5) errors.push(`evidenceCoverage abaixo de 0.5: ${evidenceCoverage.toFixed(2)}`);
