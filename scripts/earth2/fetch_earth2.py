@@ -87,8 +87,29 @@ def fetch_initial_state(variables: list[str]):
 
 
 def save_npy(da, path: Path) -> int:
-    """Serializa o estado inicial no formato do NIM: (batch, lead, var, lat, lon)."""
-    arr = da.to_numpy()[None].astype("float32")  # (1, 1, C, 721, 1440)
+    """Serializa o estado inicial no formato do NIM: (batch, lead, var, lat, lon).
+
+    Pre-flight validation conforme o schema oficial do NIM (input_array 5D:
+    batch x 1 x variaveis x 721 x 1440, float32) — falha localmente com erro
+    legivel em vez de um HTTP 400 opaco do servico."""
+    raw = da.to_numpy()
+    if raw.ndim == 3:
+        arr = raw[None, None].astype("float32")
+    elif raw.ndim == 4:
+        arr = raw[None].astype("float32")
+    elif raw.ndim == 5:
+        arr = raw.astype("float32")
+    else:
+        raise ValueError(
+            f"Formato inesperado do estado inicial: shape={raw.shape}; "
+            "esperado CxHxW, TxCxHxW ou BxTxCxHxW"
+        )
+    if arr.shape[0:2] != (1, 1):
+        raise ValueError(f"Batch/lead invalidos para o NIM: {arr.shape}")
+    if arr.shape[-2:] != (721, 1440):
+        raise ValueError(
+            f"Grade invalida para FourCastNet: {arr.shape[-2:]}; esperado (721, 1440)"
+        )
     np.save(path, arr)
     size_mb = path.stat().st_size / 1e6
     log(f"Estado inicial salvo: {path} ({size_mb:.0f} MB, shape {arr.shape})")
@@ -102,32 +123,25 @@ def grid_index(lat: float, lon: float) -> tuple[int, int]:
     return i, j
 
 
-def run_forecast(npy_path: Path, init_time: datetime, variables: list[str]) -> dict:
-    """POST multipart ao NIM hospedado; consome o .tar em streaming e extrai
-    somente os pontos das cidades (nunca materializa o campo global em disco)."""
-    ch_idx = {ch: variables.index(ch) for ch in WANTED_CHANNELS if ch in variables}
-    if "t2m" not in ch_idx:
-        raise RuntimeError(f"Canal t2m ausente nos canais do modelo: {variables[:8]}...")
-    log(f"Canais extraidos: {ch_idx}")
-
-    series = {c["city"]: [] for c in CITIES}
-    city_idx = [(c["city"], *grid_index(c["lat"], c["lon"])) for c in CITIES]
-
+def _post_forecast(npy_path: Path, init_time: datetime, sim_len: int,
+                   ch_idx: dict, city_idx: list) -> dict:
+    """Uma tentativa de inferencia no NIM hospedado com simulation_length=sim_len."""
+    series = {city: [] for city, _, _ in city_idx}
     headers = {"Authorization": f"Bearer {API_KEY}", "accept": "application/x-tar"}
-    payload = {
-        "input_time": init_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "simulation_length": str(SIMULATION_LENGTH),
-    }
-    log(f"POST {NIM_URL} (simulation_length={SIMULATION_LENGTH}) — upload do estado inicial...")
+    log(f"POST {NIM_URL} (simulation_length={sim_len}) — upload do estado inicial...")
 
     with open(npy_path, "rb") as fh:
-        files = {"input_array": ("fcn_inputs.npy", fh, "application/octet-stream")}
+        files = {
+            "input_array": ("fcn_inputs.npy", fh, "application/octet-stream"),
+            "input_time": (None, init_time.strftime("%Y-%m-%dT%H:%M:%SZ")),
+            "simulation_length": (None, str(sim_len)),
+        }
         with requests.post(
-            NIM_URL, headers=headers, data=payload, files=files,
+            NIM_URL, headers=headers, files=files,
             timeout=(60, 1800), stream=True,
         ) as resp:
             if resp.status_code != 200:
-                body = resp.content[:500].decode("utf-8", "replace")
+                body = resp.content[:2000].decode("utf-8", "replace")
                 raise RuntimeError(f"NIM HTTP {resp.status_code}: {body}")
             log("Inferencia iniciada — recebendo lead times em streaming...")
             with tarfile.open(fileobj=resp.raw, mode="r|") as tar:
@@ -154,6 +168,45 @@ def run_forecast(npy_path: Path, init_time: datetime, variables: list[str]) -> d
                     if lead_h % 24 == 0:
                         log(f"  lead +{lead_h}h processado")
     return series
+
+
+def run_forecast(npy_path: Path, init_time: datetime, variables: list[str]) -> tuple[dict, int]:
+    """POST multipart ao NIM hospedado; consome o .tar em streaming e extrai
+    somente os pontos das cidades (nunca materializa o campo global em disco).
+
+    Degradacao graciosa: se o servico rejeitar o corpo da request (HTTP 400),
+    reduz simulation_length pela metade e tenta de novo. O horizonte efetivo
+    e retornado junto para ser declarado com honestidade no payload."""
+    ch_idx = {ch: variables.index(ch) for ch in WANTED_CHANNELS if ch in variables}
+    if "t2m" not in ch_idx:
+        raise RuntimeError(f"Canal t2m ausente nos canais do modelo: {variables[:8]}...")
+    log(f"Canais extraidos: {ch_idx}")
+
+    city_idx = [(c["city"], *grid_index(c["lat"], c["lon"])) for c in CITIES]
+
+    attempts: list[int] = []
+    n = SIMULATION_LENGTH
+    while n >= 4 and n not in attempts:
+        attempts.append(n)
+        n //= 2
+    if not attempts:
+        attempts = [SIMULATION_LENGTH]
+
+    last_err: Exception | None = None
+    for sim_len in attempts:
+        try:
+            series = _post_forecast(npy_path, init_time, sim_len, ch_idx, city_idx)
+            if sim_len != SIMULATION_LENGTH:
+                log(f"NIM aceitou simulation_length={sim_len} "
+                    f"(solicitado: {SIMULATION_LENGTH}) — horizonte reduzido para {sim_len * 6}h")
+            return series, sim_len
+        except RuntimeError as err:
+            last_err = err
+            if "NIM HTTP 400" in str(err) and sim_len > 4:
+                log(f"NIM rejeitou simulation_length={sim_len} (400) — tentando horizonte menor...")
+                continue
+            raise
+    raise last_err  # type: ignore[misc]
 
 
 def risk_from_forecast(points: list[dict]) -> dict:
@@ -188,7 +241,7 @@ def main() -> int:
     tmp = Path(os.environ.get("TMPDIR", "/tmp")) / "fcn_inputs.npy"
     save_npy(da, tmp)
 
-    series = run_forecast(tmp, init_time, variables)
+    series, used_steps = run_forecast(tmp, init_time, variables)
     tmp.unlink(missing_ok=True)
 
     cities = []
@@ -209,12 +262,13 @@ def main() -> int:
         "model": "fourcastnet-sfno",
         "initTime": init_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "leadStepHours": 6,
-        "horizonHours": SIMULATION_LENGTH * 6,
+        "horizonHours": used_steps * 6,
+        "requestedHorizonHours": SIMULATION_LENGTH * 6,
         "data": {"cities": cities},
     }
     out = OUT_DIR / "earth2-forecast.json"
-    out.write_text(json.dumps(payload))
-    log(f"OK  {out} <- FourCastNet NIM ({len(cities)} cidades, {SIMULATION_LENGTH * 6}h de horizonte)")
+    out.write_text(json.dumps(payload) + "\n")
+    log(f"OK  {out} <- FourCastNet NIM ({len(cities)} cidades, {used_steps * 6}h de horizonte)")
     return 0
 
 
