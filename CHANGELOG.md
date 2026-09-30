@@ -3,6 +3,16 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [insights-v3.0.1] — 2026-09-30
+
+### Alterado
+- Nome canônico: **ODIN = Omnibus Digital Intelligence News** (decisão de
+  marca de Guilherme Gonçalves Machado). "Financial & Geoeconomic
+  Intelligence" permanece apenas como descritor do produto dashboard
+  ("ODIN Intelligence Dashboard"). Substitui "Open Financial & Geoeconomic
+  Intelligence Platform" no SYSTEM prompt do gerador shadow e no README.
+- `PROMPT_VERSION` 3.0.0 → 3.0.1 (mudança de prompt, convenção do ADR 0003).
+
 ## [insights-v3.0.0-hotfix.1] — 2026-09-30
 
 Correção editorial manual do artefato publicado (run

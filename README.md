@@ -1,10 +1,12 @@
-# ODIN — Financial Intelligence Dashboard
+# ODIN — Omnibus Digital Intelligence News
 
 <p align="center">
   <a href="https://hubstry.dev">
     <img src="public/brand/hubstry-logo-chip.png" alt="Hubstry Deep Tech" width="320" />
   </a>
 </p>
+
+**ODIN Intelligence Dashboard** — Financial & Geoeconomic Intelligence. Produto da linha ODIN (Omnibus Digital Intelligence News), a frente de inteligência da Hubstry Deep Tech.
 
 Dashboard de inteligência financeira **BRICS+**: mercado de títulos em moeda local (LC Bonds), ouro, petróleo, precificação de carbono (CBAM), ativos digitais e vetor climático — com análises editoriais assistidas por IA e trilha de auditoria versionada no próprio repositório.
 
