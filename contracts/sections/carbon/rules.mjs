@@ -22,7 +22,7 @@ export function validateCarbonProfile(entry, path = "entry") {
   for (const [i, source] of (layers.sources ?? []).entries()) {
     if (!nonEmptyString(source?.id)) errors.push(`${path}.layers.sources[${i}].id ausente`);
     else sourceIds.add(source.id);
-    if (!/^https?:\\/\\//i.test(source?.sourceUrl ?? "")) errors.push(`${path}.layers.sources[${i}].sourceUrl inválida`);
+    if (!/^https?:\/\//i.test(source?.sourceUrl ?? "")) errors.push(`${path}.layers.sources[${i}].sourceUrl inválida`);
   }
 
   for (const [i, event] of (layers.events ?? []).entries()) {
