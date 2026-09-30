@@ -3,7 +3,7 @@ name: ODIN Section Profile Fixtures
 on:
   pull_request:
     types: [opened, synchronize]
-  workflow_dispatch
+  workflow_dispatch:
 
 permissions:
   contents: read
