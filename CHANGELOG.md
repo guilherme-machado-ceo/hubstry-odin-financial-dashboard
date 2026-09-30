@@ -3,6 +3,30 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [gate-v1.1] — 2026-09-30
+
+### Adicionado
+- **Freshness no gate v2** (`checkFreshness`, validate-shadow e promote):
+  `validAsOf` dentro do `maxAge` da seção (carbon 100 d, blockchain 7 d,
+  climate 45 d), sem data futura, e `nextReviewAt` não vencido.
+- **Carbon Section Profile em produção**: o gerador shadow emite
+  `sectionProfile`, `profileVersion` e `layers` para seções com profile
+  registrado, via `scripts/section-profile-builder.mjs` — camadas
+  determinísticas (fontes, datas-chave, indicadores, claims), não pedidas
+  ao LLM.
+- Testes: gate estrito, builder e freshness em `test-insights-profiles.mjs`.
+
+### Alterado
+- `validateSectionProfile(entry, id, { strict: true })` no gate: seção com
+  profile registrado **sem** profile agora bloqueia (antes passava como
+  "legado"). O modo padrão, compatível com o contrato legado, fica para o
+  `insights.v2.json` publicado até a próxima promoção.
+
+### Atenção operacional
+- Com os valores atuais do contexto de carbono (`validAsOf` 2026-07-06,
+  `nextReviewAt` 2026-10-05), a seção carbon passa a ser bloqueada no gate
+  a partir de 2026-10-05, até o dado de preço do CBAM ser atualizado.
+
 ## [insights-v3.1.0] — 2026-09-30
 
 ### Adicionado

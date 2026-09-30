@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { validateInsightEntry, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, LEVELS } from "./insights-schema.mjs";
+import { validateInsightEntry, checkFreshness, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, LEVELS } from "./insights-schema.mjs";
 import { validateSectionProfile } from "./insights-profile-validator.mjs";
 import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
 
@@ -26,7 +26,8 @@ if (!sections || typeof sections !== "object" || Object.keys(sections).length ==
 
 for (const [id, entry] of Object.entries(sections ?? {})) {
   errors.push(...validateInsightEntry(entry, id));
-  errors.push(...validateSectionProfile(entry, id));
+  errors.push(...validateSectionProfile(entry, id, { strict: true }));
+  errors.push(...checkFreshness(entry, id));
   if (entry.status !== "shadow") errors.push(`sections.${id}.status não é shadow`);
 
 }
@@ -43,7 +44,7 @@ const confidencePresent = Object.values(sections ?? {}).every(e =>
 );
 const bannedClaims = Object.values(sections ?? {}).flatMap(e => e.claims ?? [])
   .filter(c => /\b(always|never|guaranteed|certainly)\b/i.test(c.textEn ?? "")).length;
-const sectionProfileValid = Object.values(sections ?? {}).every(e => validateSectionProfile(e, e.sectionId).length === 0);
+const sectionProfileValid = Object.values(sections ?? {}).every(e => validateSectionProfile(e, e.sectionId, { strict: true }).length === 0);
 
 const evidenceBySection = new Map((report.sections ?? []).map(s => [s.sectionId, s.evidence]));
 for (const [id, entry] of Object.entries(sections ?? {}))

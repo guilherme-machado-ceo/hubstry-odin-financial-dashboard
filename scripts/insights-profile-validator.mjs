@@ -20,8 +20,21 @@ for (const profileId of registry.profiles ?? []) {
   if (typeof fn === "function") validators.set(profileId, fn);
 }
 
-export function validateSectionProfile(entry, sectionId = entry?.sectionId) {
-  if (!entry?.sectionProfile) return [];
+/** IDs de seção com profile registrado (registry.json). */
+export const REGISTERED_PROFILES = new Set(registry.profiles ?? []);
+
+/**
+ * Máquina de estados (ADR-0003):
+ * - sem sectionProfile → contrato legado (compatível), EXCETO em modo estrito;
+ * - modo estrito (gate de geração/promoção, MVP Readiness Gate): seção com
+ *   profile registrado DEVE declará-lo — ausência bloqueia, não é "válida";
+ * - profile desconhecido → BLOCK.
+ */
+export function validateSectionProfile(entry, sectionId = entry?.sectionId, { strict = false } = {}) {
+  if (!entry?.sectionProfile) {
+    if (strict && REGISTERED_PROFILES.has(sectionId)) return [`sections.${sectionId}: profile registrado "${sectionId}" ausente (gate estrito)`];
+    return [];
+  }
   const validator = validators.get(entry.sectionProfile);
   if (!validator) return [`section profile não suportado: ${entry.sectionProfile}`];
   if (entry.sectionId !== sectionId) return [`section profile sectionId inconsistente: ${entry.sectionId}`];

@@ -6,6 +6,7 @@ import path from "node:path";
 import { chatJson, getProviderConfig } from "./ai-provider.mjs";
 import { PROMPT_VERSION, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION } from "./insights-schema.mjs";
 import { compareDirection } from "./evidence-consistency.mjs";
+import { buildSectionProfile } from "./section-profile-builder.mjs";
 
 const OUT_DIR = path.resolve(process.cwd(), "public/data");
 const OUT_FILE = path.join(OUT_DIR, "insights.v2.shadow.json");
@@ -150,7 +151,7 @@ for (const item of await contexts()) {
   const provById=new Map(item.provenance.map(p=>[p.sourceId,p]));
   for (const c of parsed.claims ?? []) for (const ref of c.evidenceRefs ?? [])
     if (!provById.has(ref)) throw new Error(`${item.id}: claim ${c.id} references unknown provenance ${ref}`);
-  results.push({
+  const entry = {
     schemaVersion:SCHEMA_VERSION,
     intelligenceContractVersion:INTELLIGENCE_CONTRACT_VERSION,
     sectionId:item.id,
@@ -169,7 +170,9 @@ for (const item of await contexts()) {
     validAsOf:item.validAsOf, nextReviewAt:item.nextReviewAt,
     runId, reviewStatus:"unreviewed",
     usage:{prompt:usage.prompt,completion:usage.completion,total:usage.total,latencyMs}
-  });
+  };
+  // Section Profile (ADR-0003): camadas determinísticas para seções registradas.
+  results.push({ ...entry, ...buildSectionProfile(item.id, entry, item.evidence) });
   reportSections.push({ sectionId: item.id, status: "shadow", latencyMs, totalTokens: usage.total, evidence: { ...item.evidence, materialSha256: sha256(item.evidence.material) } });
   console.log(`OK shadow ${item.id} · ${latencyMs}ms · ${usage.total ?? "?"} tokens`);
   } catch (error) {

@@ -5,6 +5,30 @@ export const INTELLIGENCE_CONTRACT_VERSION = "1.0";
 export const PROMPT_VERSION = "3.1.0";
 
 export const LEVELS = new Set(["high", "medium", "low"]);
+
+// Idade máxima do dado por seção (dias), herdada do gerador v2.x (freshness).
+export const MAX_AGE_DAYS = { carbon: 100, blockchain: 7, climate: 45 };
+export const DEFAULT_MAX_AGE_DAYS = 30;
+
+/**
+ * Freshness como condição de publicação (MVP Readiness Gate):
+ * - validAsOf deve estar dentro do maxAge da seção;
+ * - validAsOf no futuro é inválido;
+ * - nextReviewAt vencido bloqueia (o dado precisa ser revisto antes).
+ */
+export function checkFreshness(entry, sectionId, now = Date.now()) {
+  const errors = [];
+  const p = `sections.${sectionId}`;
+  const asOf = Date.parse(entry?.validAsOf ?? "");
+  if (!Number.isFinite(asOf)) return [`${p}.validAsOf ausente/inválido para freshness`];
+  const maxAgeDays = MAX_AGE_DAYS[sectionId] ?? DEFAULT_MAX_AGE_DAYS;
+  const ageDays = (now - asOf) / 864e5;
+  if (ageDays < -1) errors.push(`${p}.validAsOf no futuro: ${entry.validAsOf}`);
+  if (ageDays > maxAgeDays) errors.push(`${p} stale: dado de ${entry.validAsOf} tem ${Math.floor(ageDays)} dias (máx. ${maxAgeDays})`);
+  const review = Date.parse(entry?.nextReviewAt ?? "");
+  if (Number.isFinite(review) && review < now) errors.push(`${p}.nextReviewAt vencido: ${entry.nextReviewAt}`);
+  return errors;
+}
 export const CLAIM_KINDS = new Set(["fact", "interpretation", "hypothesis"]);
 export const GENERATION_STATUSES = new Set([
   "shadow", "generated", "preserved_after_error", "preserved_after_timeout", "failed_controlled"
