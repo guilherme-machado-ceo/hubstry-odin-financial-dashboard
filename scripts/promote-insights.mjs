@@ -4,9 +4,15 @@ import { validateInsightEntry, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, LE
 
 const input = path.resolve(process.argv[2] || "public/data/insights.v2.shadow.json");
 const output = path.resolve(process.argv[3] || "public/data/insights.v2.json");
+const reportFile = path.resolve(process.argv[4] || "public/data/generationReport.json");
+const manualApproval = process.env.ODIN_PROMOTE_APPROVED === "true";
 
 const shadow = JSON.parse(await readFile(input, "utf8"));
+const report = JSON.parse(await readFile(reportFile, "utf8"));
 const errors = [];
+if (!manualApproval) errors.push("promoção exige ODIN_PROMOTE_APPROVED=true");
+if (report.runId !== shadow.runId) errors.push("generationReport.runId não corresponde ao shadow");
+if (report.validation?.decision !== "publish_candidate") errors.push("generationReport não autoriza publish_candidate");
 
 if (shadow.schemaVersion !== SCHEMA_VERSION) errors.push("schemaVersion inválido");
 if (shadow.intelligenceContractVersion !== INTELLIGENCE_CONTRACT_VERSION) errors.push("intelligenceContractVersion inválido");
@@ -19,7 +25,7 @@ if (!sections || typeof sections !== "object" || Object.keys(sections).length ==
 for (const [id, entry] of Object.entries(sections ?? {})) {
   errors.push(...validateInsightEntry(entry, id));
   if (entry.status !== "shadow") errors.push(`sections.${id}.status não é shadow`);
-  if (entry.reviewStatus !== "approved") errors.push(`sections.${id}.reviewStatus deve ser approved para produção`);
+
 }
 
 const facts = Object.values(sections ?? {}).flatMap(e => e.claims ?? []).filter(c => c.kind === "fact");
