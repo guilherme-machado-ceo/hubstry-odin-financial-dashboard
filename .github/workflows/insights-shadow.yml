@@ -1,8 +1,8 @@
 name: ODIN Insights Shadow
 
+# MVP Readiness Gate: chamadas ao LLM (Nemotron) só por disparo manual.
+# Nenhuma geração shadow automática em PR antes dos gates determinísticos.
 on:
-  pull_request:
-    types: [opened, synchronize]
   workflow_dispatch:
 
 permissions:
