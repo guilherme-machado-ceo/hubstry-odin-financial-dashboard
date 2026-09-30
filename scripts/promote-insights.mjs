@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { validateInsightEntry, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, LEVELS } from "./insights-schema.mjs";
+import { validateSectionProfile } from "./insights-profile-validator.mjs";
 
 const input = path.resolve(process.argv[2] || "public/data/insights.v2.shadow.json");
 const output = path.resolve(process.argv[3] || "public/data/insights.v2.json");
@@ -24,6 +25,7 @@ if (!sections || typeof sections !== "object" || Object.keys(sections).length ==
 
 for (const [id, entry] of Object.entries(sections ?? {})) {
   errors.push(...validateInsightEntry(entry, id));
+  errors.push(...validateSectionProfile(entry, id));
   if (entry.status !== "shadow") errors.push(`sections.${id}.status não é shadow`);
 
 }
@@ -40,12 +42,14 @@ const confidencePresent = Object.values(sections ?? {}).every(e =>
 );
 const bannedClaims = Object.values(sections ?? {}).flatMap(e => e.claims ?? [])
   .filter(c => /\b(always|never|guaranteed|certainly)\b/i.test(c.textEn ?? "")).length;
+const sectionProfileValid = Object.values(sections ?? {}).every(e => validateSectionProfile(e, e.sectionId).length === 0);
 
 if (generatedCount === 0) errors.push("nenhuma seção gerada");
 if (evidenceCoverage < 0.5) errors.push(`evidenceCoverage abaixo de 0.5: ${evidenceCoverage.toFixed(2)}`);
 if (!legalOk) errors.push("economicLaw high sem norms/institutions/sourceRefs");
 if (!confidencePresent) errors.push("confidence ausente/inválida");
 if (bannedClaims > 0) errors.push(`claims banidos detectados: ${bannedClaims}`);
+if (!sectionProfileValid) errors.push("sectionProfileValid=false");
 
 if (errors.length) {
   for (const e of errors) console.error("ERRO:", e);
@@ -76,4 +80,4 @@ const production = {
 };
 
 await writeFile(output, JSON.stringify(production, null, 2) + "\n");
-console.log(`PROMOTED ${shadow.runId} -> ${output} | sections=${generatedCount} evidenceCoverage=${evidenceCoverage.toFixed(2)}`);
+console.log(`PROMOTED ${shadow.runId} -> ${output} | sections=${generatedCount} evidenceCoverage=${evidenceCoverage.toFixed(2)} sectionProfileValid=${sectionProfileValid}`);

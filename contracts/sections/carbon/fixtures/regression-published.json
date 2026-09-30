@@ -1,0 +1,22 @@
+{
+  "schemaVersion":"2.0",
+  "intelligenceContractVersion":"1.0",
+  "sectionId":"carbon",
+  "status":"generated",
+  "pt":"Published v2 regression fixture.",
+  "en":"Published v2 regression fixture.",
+  "limitations":"Representative fixture preserving the pre-profile production shape.",
+  "confidence":{"data":"high","interpretation":"medium"},
+  "claims":[],
+  "provenance":[],
+  "stakeholderImplications":[],
+  "whatToWatch":[],
+  "economicLaw":{"relevance":"not_material","norms":[],"institutions":[],"sourceRefs":[]},
+  "provider":"nvidia",
+  "model":"nvidia/nemotron-3-super-120b-a12b",
+  "promptVersion":"3.0.0",
+  "generatedAt":"2026-09-30T13:50:19.551Z",
+  "validAsOf":"2026-09-25",
+  "runId":"odin-20260930-134927-df75",
+  "reviewStatus":"approved"
+}

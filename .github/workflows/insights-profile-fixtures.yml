@@ -1,0 +1,21 @@
+name: ODIN Section Profile Fixtures
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch
+
+permissions:
+  contents: read
+
+jobs:
+  fixtures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate section profile fixtures
+        run: node scripts/test-insights-profiles.mjs

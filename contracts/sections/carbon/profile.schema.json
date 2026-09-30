@@ -1,0 +1,26 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://hubstry.dev/odin/contracts/sections/carbon/profile.schema.json",
+  "title":"ODIN Carbon Section Profile",
+  "allOf":[
+    {"$ref":"../../intelligence-base.schema.json"},
+    {
+      "type":"object",
+      "required":["sectionProfile","profileVersion","layers"],
+      "properties":{
+        "sectionProfile":{"const":"carbon"},
+        "profileVersion":{"const":"1.0.0"},
+        "layers":{
+          "type":"object",
+          "required":["sources","events","indicators","intelligence"],
+          "properties":{
+            "sources":{"type":"array","minItems":1},
+            "events":{"type":"array","minItems":1},
+            "indicators":{"type":"array","minItems":1},
+            "intelligence":{"type":"array","minItems":1}
+          }
+        }
+      }
+    }
+  ]
+}

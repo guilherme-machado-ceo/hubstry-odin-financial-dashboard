@@ -1,0 +1,20 @@
+{
+  "schemaVersion":"2.0",
+  "intelligenceContractVersion":"1.0",
+  "sectionId":"carbon",
+  "sectionProfile":"carbon",
+  "profileVersion":"1.0.0",
+  "status":"shadow",
+  "pt":"fixture",
+  "en":"fixture",
+  "limitations":"fixture",
+  "confidence":{"data":"high","interpretation":"medium"},
+  "claims":[],
+  "provenance":[],
+  "layers":{
+    "sources":[{"id":"source-carbon-ec","sourceUrl":"https://example.org/carbon"}],
+    "events":[{"id":"event-cbam-001","type":"regulatory_update","sourceRefs":["source-missing"]}],
+    "indicators":[{"id":"indicator-cbam-price","metricId":"cbam-price-q2-2026","sourceRefs":["source-carbon-ec"]}],
+    "intelligence":[{"id":"intel-cbam-001","kind":"interpretation","evidenceRefs":[]}]
+  }
+}
