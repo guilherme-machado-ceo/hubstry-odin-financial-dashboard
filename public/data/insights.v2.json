@@ -15,8 +15,8 @@
         "intelligenceContractVersion": "1.0",
         "sectionId": "carbon",
         "status": "generated",
-        "pt": "O preço do CBAM no Q2 de 2026 foi de 75,28 €/tCO2e, ligeiramente inferior ao Q1 de 75,36 €/tCO2e. O regime definitivo começa em 2027-09-30, com responsabilidade legal de declaração recaindo sobre o importador autorizado da UE. Exportadores brasileiros podem receber pedidos indiretos por dados verificáveis de nível de instalação. Os efeitos sobre custos e competitividade permanecem possibilidades não medidas.",
-        "en": "The CBAM price in Q2 2026 was 75.28 €/tCO2e, slightly below Q1's 75.36 €/tCO2e. The definitive regime starts on 2027-09-30, with legal liability for declaration falling on the authorized EU importer. Brazilian exporters may face indirect requests for verifiable installation-level data. Effects on costs and competitiveness remain unmeasured possibilities.",
+        "pt": "O preço do CBAM no Q2 de 2026 foi de 75,28 €/tCO2e, ligeiramente inferior ao Q1 de 75,36 €/tCO2e. O regime definitivo está em vigor desde 2026-01-01, com a primeira declaração anual devida até 2027-09-30; a responsabilidade legal de declaração recai sobre o importador autorizado da UE. Exportadores brasileiros podem receber pedidos indiretos por dados verificáveis de nível de instalação. Os efeitos sobre custos e competitividade permanecem possibilidades não medidas.",
+        "en": "The CBAM price in Q2 2026 was 75.28 €/tCO2e, slightly below Q1's 75.36 €/tCO2e. The definitive regime has applied since 2026-01-01, with the first annual declaration due by 2027-09-30; legal liability for declaration falls on the authorized EU importer. Brazilian exporters may face indirect requests for verifiable installation-level data. Effects on costs and competitiveness remain unmeasured possibilities.",
         "thesis": {
           "pt": "O CBAM transfere a responsabilidade de declaração de emissões embutidas para os importadores da UE, criando pressão indireta sobre exportadores não-UE para fornecer dados verificáveis.",
           "en": "The CBAM shifts the responsibility for declaring embedded emissions to EU importers, creating indirect pressure on non-EU exporters to provide verifiable data."
@@ -43,8 +43,8 @@
           },
           {
             "audience": "corporate",
-            "textPt": "Importadores autorizados na UE devem estabelecer sistemas internos para declaração de emissões embutidas a partir de 2027-09-30.",
-            "textEn": "Authorized EU importers must establish internal systems for declaring embedded emissions from 2027-09-30."
+            "textPt": "Importadores autorizados na UE devem estabelecer sistemas internos para a primeira declaração anual de emissões embutidas, devida até 2027-09-30.",
+            "textEn": "Authorized EU importers must establish internal systems for the first annual declaration of embedded emissions, due by 2027-09-30."
           },
           {
             "audience": "investors",
@@ -65,10 +65,10 @@
             "whyItMatters": "Clarear o escopo e o formato dos dados que exportadores brasileiros podem ser solicitados a fornecer."
           },
           {
-            "signal": "Início do regime definitivo do CBAM e primeira declaração obrigatória",
+            "signal": "Prazo da primeira declaração anual do CBAM no regime definitivo",
             "source": "source-carbon-ec",
             "expectedDate": "2027-09-30",
-            "whyItMatters": "Marca o ponto em que a responsabilidade legal de declaração passa a ser efetivamente exigida dos importadores autorizados da UE."
+            "whyItMatters": "Primeiro cumprimento efetivo da obrigação de declaração pelos importadores autorizados da UE, referente às importações de 2026."
           }
         ],
         "claims": [
@@ -88,8 +88,8 @@
           {
             "id": "claim-2",
             "kind": "fact",
-            "textPt": "O regime definitivo do CBAM começa em 2027-09-30.",
-            "textEn": "The definitive CBAM regime starts on 2027-09-30.",
+            "textPt": "O regime definitivo do CBAM está em vigor desde 2026-01-01; a primeira declaração anual é devida até 2027-09-30.",
+            "textEn": "The definitive CBAM regime has applied since 2026-01-01; the first annual declaration is due by 2027-09-30.",
             "evidenceRefs": [
               "source-carbon-ec"
             ],
@@ -140,6 +140,19 @@
           "completion": 1398,
           "total": 2339,
           "latencyMs": 19049
+        },
+        "editorialCorrection": {
+          "correctedAt": "2026-09-30",
+          "method": "manual",
+          "regenerated": false,
+          "reason": "Data do regime definitivo do CBAM: vigente desde 2026-01-01; 2027-09-30 é o prazo da primeira declaração anual.",
+          "fields": [
+            "pt",
+            "en",
+            "claims[claim-2]",
+            "whatToWatch[1]",
+            "stakeholderImplications[corporate]"
+          ]
         }
       },
       "blockchain": {
@@ -312,8 +325,8 @@
         "intelligenceContractVersion": "1.0",
         "sectionId": "climate",
         "status": "generated",
-        "pt": "A temperatura média em Brasília foi 22,4°C e a precipitação total foi 1321 mm no período de 25 de setembro de 2025 a 25 de setembro de 2026, conforme dados do Open-Meteo. Esses valores estão acima das referências de benchmark de 21,4°C e 1550 mm, mas não representam uma climatologia oficial nem podem ser usados para inferir impactos diretos em commodities, energia ou câmbio sem análise de regiões produtoras e bacias hidrográficas relevantes.",
-        "en": "Mean temperature in Brasília was 22.4°C and total precipitation was 1321 mm from September 25, 2025 to September 25, 2026, according to Open-Meteo data. These values exceed the benchmark references of 21.4°C and 1550 mm but do not constitute an official climatology and cannot be used to infer direct impacts on commodities, energy, or FX without analysis of producing regions and relevant river basins.",
+        "pt": "A temperatura média em Brasília foi 22,4°C e a precipitação total foi 1321 mm no período de 25 de setembro de 2025 a 25 de setembro de 2026, conforme dados do Open-Meteo. A temperatura ficou acima da referência de 21,4°C e a precipitação ficou abaixo da referência de 1550 mm; essas referências não constituem climatologia oficial, e os valores não permitem inferir impactos diretos em commodities, energia ou câmbio sem análise de regiões produtoras e bacias hidrográficas relevantes.",
+        "en": "Mean temperature in Brasília was 22.4°C and total precipitation was 1321 mm from September 25, 2025 to September 25, 2026, according to Open-Meteo data. Temperature was above the 21.4°C reference and precipitation was below the 1550 mm reference; these references are not an official climatology, and the values cannot be used to infer direct impacts on commodities, energy, or FX without analysis of producing regions and relevant river basins.",
         "thesis": {
           "pt": "Os dados climáticos de Brasília refletem condições locais que, por si só, não estabelecem ligações causais com variáveis macroeconômicas ou de mercado.",
           "en": "Brasília's climate data reflect local conditions that, by themselves, do not establish causal links with macroeconomic or market variables."
@@ -400,8 +413,8 @@
           {
             "id": "clim-bsb-003",
             "kind": "interpretation",
-            "textPt": "Os valores observados em Brasília excedem os benchmarks de referência de 21,4°C e 1550 mm, mas esses benchmarks não são climatologia oficial.",
-            "textEn": "The observed values in Brasília exceed the reference benchmarks of 21.4°C and 1550 mm, but these benchmarks are not an official climatology.",
+            "textPt": "A temperatura observada em Brasília (22,4°C) ficou acima da referência de 21,4°C e a precipitação (1321 mm) ficou abaixo da referência de 1550 mm; essas referências não são climatologia oficial.",
+            "textEn": "The observed temperature in Brasília (22.4°C) was above the 21.4°C reference and precipitation (1321 mm) was below the 1550 mm reference; these references are not an official climatology.",
             "evidenceRefs": [
               "source-open-meteo-brasilia"
             ],
@@ -452,6 +465,17 @@
           "completion": 1825,
           "total": 2815,
           "latencyMs": 20531
+        },
+        "editorialCorrection": {
+          "correctedAt": "2026-09-30",
+          "method": "manual",
+          "regenerated": false,
+          "reason": "Comparação invertida: 1321 mm está abaixo da referência de 1550 mm.",
+          "fields": [
+            "pt",
+            "en",
+            "claims[clim-bsb-003]"
+          ]
         }
       }
     }
