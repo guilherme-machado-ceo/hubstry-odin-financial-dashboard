@@ -48,6 +48,8 @@ jobs:
       - name: Promote through ODIN gate
         env:
           ODIN_PROMOTE_APPROVED: "true"
+          ODIN_REVIEWER: ${{ github.actor }}
+          ODIN_SHADOW_RUN_ID: ${{ inputs.shadow_run_id }}
         run: |
           shadow_file="$(find /tmp/odin-shadow -name insights.v2.shadow.json -type f -print -quit)"
           report_file="$(find /tmp/odin-shadow -name generationReport.json -type f -print -quit)"
@@ -79,6 +81,7 @@ jobs:
             exit 1
           fi
           node scripts/verify-provenance.mjs public/data/insights.v2.json --require
+          node scripts/review-summary.mjs public/data/insights.v2.json > /dev/null
 
       - name: Commit production insight artifact
         run: |
