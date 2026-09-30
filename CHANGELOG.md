@@ -3,6 +3,29 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [insights-v3.0.0-hotfix.1] — 2026-09-30
+
+Correção editorial manual do artefato publicado (run
+`odin-20260930-134927-df75`). **Sem nova geração**: o texto foi corrigido
+diretamente no `insights.v2.json`; cada seção corrigida registra
+`editorialCorrection` (data, método, motivo e campos alterados).
+
+### Corrigido
+- **carbon** — o regime definitivo do CBAM (Carbon Border Adjustment
+  Mechanism) vigora desde 2026-01-01; 2027-09-30 é o prazo da primeira
+  declaração anual. O artefato afirmava, como `fact` de confiança alta, que
+  o regime "começa em 2027-09-30". Corrigidos: texto pt/en, `claim-2`,
+  item do What to Watch e implicação `corporate`.
+- **climate** — comparação invertida: 1321 mm está **abaixo** da
+  referência de 1550 mm (a temperatura, 22,4 °C, está acima de 21,4 °C).
+  Corrigidos: texto pt/en e `clim-bsb-003`.
+
+### Origem
+MVP Readiness Gate — auditoria de 2026-09-30. Ambos os erros passaram pelo
+gate atual porque `evidenceRef` existente não verifica se a evidência
+sustenta o claim; a checagem determinística claim ↔ evidência entra em PR
+posterior.
+
 ## [auditoria-v1.2] — 2026-07-20
 
 ### Adicionado
