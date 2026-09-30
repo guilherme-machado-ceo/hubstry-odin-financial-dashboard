@@ -28,13 +28,13 @@ Regras:
 - efeitos econômicos são possibilidades, não fatos consumados;
 - Direito Econômico é lente analítica, não parecer jurídico;
 - se a relevância jurídica for alta, indique normas e instituições explicitamente presentes no contexto;
-- stakeholder implications devem ser neutras e acionáveis como contexto, sem recomendar compra/venda ou escolha política;
+- stakeholder implications devem ser neutras e acionáveis como contexto, sem recomendar compra/venda ou escolha política; audience deve ser EXATAMENTE um destes valores ASCII: government, corporate, investors, startups; nunca traduza nem acrescente texto ao valor;
 - What to Watch deve apontar sinais observáveis, fonte e motivo;
 - escreva em português e inglês;
 - mantenha tom sóbrio, analítico, compatível com Chatham House;
 - não use linguagem promocional ou de chatbot.
 
-Retorne SOMENTE JSON válido. Não use markdown. Limite cada texto a 2 frases; produza no máximo 4 claims, 4 stakeholderImplications e 3 whatToWatch. Exatamente neste formato:
+Retorne SOMENTE JSON válido. Não use markdown. Limite cada texto a 2 frases; produza no máximo 4 claims, 4 stakeholderImplications e 3 whatToWatch. Campos temporais: nextReviewAt deve ser ISO datetime completo; whatToWatch.expectedDate deve ser YYYY-MM-DD ou null. Não invente datas. Os valores de audience devem permanecer exatamente em inglês conforme o enum. Exatamente neste formato:
 {
  "pt":"2-4 frases executivas",
  "en":"2-4 executive sentences",
@@ -79,7 +79,7 @@ async function contexts() {
   const top=rwa.data.rwa.slice(0,3).map(x=>`${x.name}: ${fmt(x.tvlUsd)} TVL`).join("; ");
   return [
     {
-      id:"carbon", validAsOf:"2026-07-06", nextReviewAt:"2026-10-05",
+      id:"carbon", validAsOf:"2026-07-06", nextReviewAt:"2026-10-05T00:00:00Z",
       provenance:[
         source("source-carbon-ec","https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en","2026-07-06","context:carbon","cbam-price-q2-2026","Q2 2026: 75.28 €/tCO2e; Q1: 75.36; six sectors; 50 t/year aggregated importer; first declaration 30/09/2027"),
       ],
