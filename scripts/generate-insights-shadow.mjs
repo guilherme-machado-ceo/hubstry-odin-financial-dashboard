@@ -143,6 +143,8 @@ async function contexts() {
             subjectTerms:["primeira declaração","declaração anual","first declaration","annual declaration","first annual"],
             eventTerms:["até","prazo","devida","vence","due","deadline","by "] },
         ],
+        legalRefs: cbam.legalReferences ?? [],
+        temporalShape: cbam.temporalShape ?? "two_points",
         comparisons: previous ? [
           { id:"cbam-price-latest-vs-previous", observed:latest.eurPerTCO2e, reference:previous.eurPerTCO2e, unit:"€/tCO2e", direction:carbonDir },
         ] : [],
@@ -152,13 +154,13 @@ async function contexts() {
       id:"blockchain", validAsOf:stable.updatedAt, nextReviewAt:new Date(Date.now()+7*864e5).toISOString(),
       provenance:[stableSrc.provenance, rwaSrc.provenance, cryptoSrc.provenance],
       context:blockchainContext,
-      evidence:{ material:blockchainContext, keyDates:[], comparisons:[] },
+      evidence:{ material:blockchainContext, keyDates:[], comparisons:[], legalRefs:[], temporalShape:"snapshot" },
     },
     {
       id:"climate", validAsOf:climateEnd, nextReviewAt:new Date(Date.now()+7*864e5).toISOString(),
       provenance:[{ sourceId:"source-open-meteo-brasilia", sourceUrl:weatherUrl, asOf:climateEnd, dataPath:weatherEvidence.dataPath, metricId:"brasilia-12m-temp-precip", hash:weatherEvidence.hash }],
       context:climateContext,
-      evidence:{ material:climateContext, keyDates:[], comparisons:[
+      evidence:{ material:climateContext, keyDates:[], legalRefs:[], temporalShape:"window_aggregate", comparisons:[
         { id:"climate-temp-vs-reference", observed:avgR, reference:TEMP_REF, unit:"°C", direction:compareDirection(avgR, TEMP_REF) },
         { id:"climate-precip-vs-reference", observed:precipR, reference:PRECIP_REF, unit:"mm", direction:compareDirection(precipR, PRECIP_REF) },
       ] },

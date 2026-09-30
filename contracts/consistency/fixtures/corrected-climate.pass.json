@@ -1,5 +1,5 @@
 {
-  "description": "Regressão do MVP Readiness Gate: artefato real do run odin-20260930-134927-df75.",
+  "description": "Regressão do MVP Readiness Gate: artefato real do run odin-20260930-134927-df75. What to Watch reescrito no gate v1.4: os sinais originais (regiões produtoras, bacias, INMET/CPTEC) não são publicados pela fonte citada.",
   "expect": "pass",
   "expectRules": [],
   "evidence": {
@@ -20,7 +20,9 @@
         "unit": "mm",
         "direction": "below"
       }
-    ]
+    ],
+    "legalRefs": [],
+    "temporalShape": "window_aggregate"
   },
   "entry": {
     "schemaVersion": "2.0",
@@ -67,22 +69,10 @@
     ],
     "whatToWatch": [
       {
-        "signal": "Desvio persistente da média de temperatura e precipitação em regiões produtoras de soja, milho e café no Brasil",
+        "signal": "Temperatura média e precipitação acumulada em Brasília na próxima janela móvel de 12 meses",
         "source": "source-open-meteo-brasilia",
         "expectedDate": null,
-        "whyItMatters": "Para avaliar se o padrão observado em Brasília reflete tendências regionais que possam afetar safras, hidrologia ou geração hidrelétrica."
-      },
-      {
-        "signal": "Variação na precipitação nas bacias do Paraná e São Francisco em relação às médias históricas",
-        "source": "source-open-meteo-brasilia",
-        "expectedDate": null,
-        "whyItMatters": "Essas bacias são críticas para geração de energia e irrigação; mudanças nelas têm impacto mensurável em commodities e FX."
-      },
-      {
-        "signal": "Publicação de dados oficiais do INMET ou do CPTEC para o mesmo período e localidades",
-        "source": "source-open-meteo-brasilia",
-        "expectedDate": null,
-        "whyItMatters": "Para comparar a qualidade e representatividade dos dados do Open-Meteo com fontes climatológicas oficiais brasileiras."
+        "whyItMatters": "Confirma se o desvio em relação às referências do dashboard persiste."
       }
     ],
     "claims": [

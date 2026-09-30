@@ -70,7 +70,43 @@
         "unit": "€/tCO2e",
         "direction": "below"
       }
-    ]
+    ],
+    "legalRefs": [
+      {
+        "id": "eu-reg-2023-956",
+        "kind": "norm",
+        "labels": [
+          "Regulation (EU) 2023/956",
+          "Regulamento (UE) 2023/956",
+          "2023/956"
+        ]
+      },
+      {
+        "id": "cbam-2025-simplification",
+        "kind": "norm",
+        "labels": [
+          "2025 CBAM simplification amendment",
+          "CBAM simplification",
+          "simplification amendment",
+          "simplificação do CBAM",
+          "alteração de 2025",
+          "2025 amendment",
+          "emenda de 2025"
+        ]
+      },
+      {
+        "id": "european-commission",
+        "kind": "institution",
+        "labels": [
+          "European Commission",
+          "Comissão Europeia",
+          "DG TAXUD",
+          "Directorate-General for Taxation and Customs Union",
+          "Direção-Geral da Fiscalidade e da União Aduaneira"
+        ]
+      }
+    ],
+    "temporalShape": "two_points"
   },
   "entry": {
     "schemaVersion": "2.0",

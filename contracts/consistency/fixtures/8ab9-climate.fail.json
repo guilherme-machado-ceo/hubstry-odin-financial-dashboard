@@ -1,0 +1,177 @@
+{
+  "description": "Regressão do gate v1.4: artefato real do run odin-20260930-155006-8ab9 (passou nos gates v1.3; reprovado na revisão editorial humana).",
+  "expect": "fail",
+  "expectRules": [
+    "watch_signal_out_of_scope"
+  ],
+  "evidence": {
+    "material": "Climate vector for Brasília. Rolling 12-month window 2025-09-25 to 2026-09-25; mean temperature 22.4°C (above the 21.4°C reference); precipitation 1321 mm (below the 1550 mm reference). The reference benchmarks (21.4°C and 1550 mm) are dashboard references, not an official climatology. A single city cannot establish impacts on producing regions, commodities or energy. Any transmission to commodities, hydrology, energy or FX must be a hypothesis and should be monitored against producing regions and relevant river basins. Source: source-open-meteo-brasilia.",
+    "keyDates": [],
+    "comparisons": [
+      {
+        "id": "climate-temp-vs-reference",
+        "observed": 22.4,
+        "reference": 21.4,
+        "unit": "°C",
+        "direction": "above"
+      },
+      {
+        "id": "climate-precip-vs-reference",
+        "observed": 1321,
+        "reference": 1550,
+        "unit": "mm",
+        "direction": "below"
+      }
+    ],
+    "materialSha256": "sha256:d966efbd650323499ae2958df4c44c606d850adb56182a3bbf1d98f5330f500f",
+    "legalRefs": [],
+    "temporalShape": "window_aggregate"
+  },
+  "entry": {
+    "schemaVersion": "2.0",
+    "intelligenceContractVersion": "1.0",
+    "sectionId": "climate",
+    "status": "shadow",
+    "pt": "A temperatura média em Brasília foi de 22,4°C no período de 25 de setembro de 2025 a 25 de setembro de 2026, acima da referência de 21,4°C. A precipitação total foi de 1321 mm, abaixo da referência de 1550 mm. Esses valores são baseados em dados de uma única cidade e não estabelecem impactos diretos em commodities, hidrologia ou energia. Qualquer ligação a esses setores deve ser tratada como hipótese e monitorada em regiões produtoras e bacias hidrográficas relevantes.",
+    "en": "Brasília's mean temperature averaged 22.4°C from September 25, 2025 to September 25, 2026, above the 21.4°C reference. Precipitation totaled 1321 mm, below the 1550 mm reference. These values are based on a single city and do not establish direct impacts on commodities, hydrology, or energy. Any linkage to these sectors must be treated as a hypothesis and monitored in producing regions and relevant river basins.",
+    "thesis": {
+      "pt": "O clima de Brasília mostra aquecimento relativo e seca relativa em relação às referências do dashboard, mas não permite inferências diretas sobre impactos econômicos ou geoeconômicos sem dados de regiões produtoras.",
+      "en": "Brasília's climate shows relative warming and drying relative to dashboard references, but does not allow direct inferences about economic or geoeconomic impacts without data from producing regions."
+    },
+    "economicLaw": {
+      "relevance": "not_material",
+      "pt": "Não há normas ou instituições econômicas aplicáveis diretamente aos dados climáticos de uma única cidade para fins de análise de impacto em mercados ou setores produtivos.",
+      "en": "No economic norms or institutions are directly applicable to single-city climate data for the purpose of analyzing impacts on markets or productive sectors.",
+      "norms": [],
+      "institutions": [],
+      "sourceRefs": [
+        "source-open-meteo-brasilia"
+      ]
+    },
+    "stakeholderImplications": [
+      {
+        "audience": "government",
+        "textPt": "Monitorar dados climáticos de regiões produtoras-chave para avaliar riscos à produção agrícola e energética.",
+        "textEn": "Monitor climate data from key producing regions to assess risks to agricultural and energy production."
+      },
+      {
+        "audience": "corporate",
+        "textPt": "Revisar modelos de risco climático com foco em bacias hidrográficas e zonas de produção, não em pontos urbanos isolados.",
+        "textEn": "Review climate risk models with focus on river basins and production zones, not isolated urban points."
+      },
+      {
+        "audience": "investors",
+        "textPt": "Aguardar dados agregados de regiões produtoras antes de ajustar exposições a commodities sensíveis ao clima.",
+        "textEn": "Wait for aggregated data from producing regions before adjusting exposures to climate-sensitive commodities."
+      },
+      {
+        "audience": "startups",
+        "textPt": "Desenvolver soluções de monitoramento climático hiperlocal apenas se vinculadas a dados de cadeias de suprimento verificáveis.",
+        "textEn": "Develop hyperlocal climate monitoring solutions only if linked to verifiable supply chain data."
+      }
+    ],
+    "whatToWatch": [
+      {
+        "signal": "Anomalia de temperatura e precipitação na bacia do São Francisco",
+        "source": "source-open-meteo-brasilia",
+        "expectedDate": null,
+        "whyItMatters": "A bacia do São Francisco é relevante para geração hidrelétrica e irrigação; desvios climáticos nela podem afetar energia e commodities."
+      },
+      {
+        "signal": "Padrões de precipitação no Mato Grosso e Goiás",
+        "source": "source-open-meteo-brasilia",
+        "expectedDate": null,
+        "whyItMatters": "Esses estados são produtores-chave de soja, milho e gado; seu clima afeta diretamente a oferta de commodities."
+      },
+      {
+        "signal": "Temperatura média na região do Pantanal",
+        "source": "source-open-meteo-brasilia",
+        "expectedDate": null,
+        "whyItMatters": "O Pantanal influencia regimes de umidade e biodiversidade; mudanças climáticas ali podem ter efeitos em cadeia na agricultura e pecuária."
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim-1",
+        "kind": "fact",
+        "textPt": "A temperatura média em Brasília foi de 22,4°C no período de 25 de setembro de 2025 a 25 de setembro de 2026.",
+        "textEn": "Brasília's mean temperature was 22.4°C from September 25, 2025 to September 25, 2026.",
+        "evidenceRefs": [
+          "source-open-meteo-brasilia"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        }
+      },
+      {
+        "id": "claim-2",
+        "kind": "fact",
+        "textPt": "A precipitação total em Brasília foi de 1321 mm no período de 25 de setembro de 2025 a 25 de setembro de 2026.",
+        "textEn": "Brasília's total precipitation was 1321 mm from September 25, 2025 to September 25, 2026.",
+        "evidenceRefs": [
+          "source-open-meteo-brasilia"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        }
+      },
+      {
+        "id": "claim-3",
+        "kind": "interpretation",
+        "textPt": "A temperatura em Brasília esteve acima da referência de 21,4°C e a precipitação abaixo da referência de 1550 mm no mesmo período.",
+        "textEn": "Brasília's temperature was above the 21.4°C reference and precipitation below the 1550 mm reference in the same period.",
+        "evidenceRefs": [
+          "source-open-meteo-brasilia"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        }
+      },
+      {
+        "id": "claim-4",
+        "kind": "hypothesis",
+        "textPt": "Desvios climáticos em Brasília podem estar correlacionados com mudanças em regiões produtoras, mas isso requer validação com dados específicos dessas áreas.",
+        "textEn": "Climate deviations in Brasília may be correlated with changes in producing regions, but this requires validation with specific data from those areas.",
+        "evidenceRefs": [
+          "source-open-meteo-brasilia"
+        ],
+        "confidence": {
+          "data": "medium",
+          "interpretation": "low"
+        }
+      }
+    ],
+    "provenance": [
+      {
+        "sourceId": "source-open-meteo-brasilia",
+        "sourceUrl": "https://archive-api.open-meteo.com/v1/archive?latitude=-15.8&longitude=-47.9&start_date=2025-09-25&end_date=2026-09-25&daily=temperature_2m_mean,precipitation_sum&timezone=auto",
+        "asOf": "2026-09-25",
+        "dataPath": "public/data/evidence/odin-20260930-155006-8ab9/open-meteo-brasilia.json",
+        "metricId": "brasilia-12m-temp-precip",
+        "hash": "sha256:78c12d2ab01061b4344339975b715f1f017fefcc9207a9080b4d24d9920754dc"
+      }
+    ],
+    "confidence": {
+      "data": "high",
+      "interpretation": "medium"
+    },
+    "limitations": "Os dados são limitados a uma única cidade urbana (Brasília) e não representam condições climáticas em regiões produtoras, bacias hidrográficas ou zonas de influência econômica direta. As referências de 21,4°C e 1550 mm são internas do dashboard e não correspondem a climatologias oficiais. Qualquer inferência sobre impacto em commodities, energia ou câmbio deve ser tratada como hipótese e validada com dados de múltiplas fontes e escalas espaciais relevantes.",
+    "provider": "nvidia",
+    "model": "nvidia/nemotron-3-super-120b-a12b",
+    "promptVersion": "3.1.0",
+    "generatedAt": "2026-09-30T15:50:55.363Z",
+    "validAsOf": "2026-09-25",
+    "nextReviewAt": "2026-10-07T15:50:07.171Z",
+    "runId": "odin-20260930-155006-8ab9",
+    "reviewStatus": "unreviewed",
+    "usage": {
+      "prompt": 1096,
+      "completion": 1703,
+      "total": 2799,
+      "latencyMs": 19544
+    }
+  }
+}

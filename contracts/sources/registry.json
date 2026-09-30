@@ -1,0 +1,41 @@
+{
+  "registryVersion": "1.0",
+  "description": "Capacidades declaradas de cada fonte do ODIN: o que ela publica (supports), o que ela NÃO publica (outOfScope) e a cadência de cada métrica. Usado pelo gate para verificar se um sinal de What to Watch é sustentável pela fonte citada. Termos são comparados sem acento e em minúsculas; termo terminado em * casa por prefixo de palavra, os demais por palavra/expressão inteira.",
+  "sources": {
+    "source-carbon-ec": {
+      "publisher": "European Commission — DG TAXUD",
+      "publishes": "preço do CBAM, marcos regulatórios, orientações e atos de execução do CBAM",
+      "supports": ["cbam", "preco*", "price*", "declaracao*", "declaration*", "regime definitivo", "definitive", "orientac*", "guidance", "comissao europeia", "european commission", "setor*", "sector*", "de minimis", "importador*", "importer*", "certificad*", "certificate*", "regulament*", "regulation*", "ato* de execucao", "implementing act*", "delegated act*", "ato* delegado*"],
+      "outOfScope": [],
+      "metrics": [{ "terms": ["preco*", "price*"], "cadence": "quarterly" }]
+    },
+    "source-defillama-stablecoins": {
+      "publisher": "DefiLlama",
+      "publishes": "capitalização de mercado de stablecoins, por ativo e total",
+      "supports": ["stablecoin*", "capitaliza*", "market cap*", "tether", "usdt", "usdc", "dominancia", "dominance", "participacao", "share"],
+      "outOfScope": ["sec", "cftc", "diretriz*", "guideline*", "regula*", "lei", "law", "reserva*", "reserve*", "volume*", "transferencia*", "transfer*", "pagamento*", "payment*"],
+      "metrics": [{ "terms": ["capitaliza*", "market cap*"], "cadence": "daily" }]
+    },
+    "source-defillama-rwa": {
+      "publisher": "DefiLlama",
+      "publishes": "TVL de protocolos de ativos do mundo real (RWA)",
+      "supports": ["tvl", "rwa", "protocolo*", "protocol*", "ativos do mundo real", "real-world", "real world", "tokeniza*"],
+      "outOfScope": ["sec", "cftc", "diretriz*", "guideline*", "regula*", "lei", "law"],
+      "metrics": [{ "terms": ["tvl"], "cadence": "daily" }]
+    },
+    "source-defillama-coins": {
+      "publisher": "DefiLlama",
+      "publishes": "preços de BTC, ETH, SOL, BNB, USDT e USDC",
+      "supports": ["preco*", "price*", "btc", "eth", "sol", "bnb", "bitcoin", "ethereum", "solana", "cripto*", "crypto*"],
+      "outOfScope": ["sec", "cftc", "diretriz*", "guideline*", "regula*", "lei", "law"],
+      "metrics": [{ "terms": ["preco*", "price*"], "cadence": "daily" }]
+    },
+    "source-open-meteo-brasilia": {
+      "publisher": "Open-Meteo (arquivo histórico, ponto de Brasília)",
+      "publishes": "temperatura média diária e precipitação diária em Brasília",
+      "supports": ["temperatura*", "temperature*", "precipitac*", "precipitation*", "chuva*", "rain*"],
+      "outOfScope": ["bacia*", "basin*", "sao francisco", "parana", "mato grosso", "goias", "pantanal", "regioes produtoras", "regiao produtora", "producing region*", "inmet", "cptec", "nacional", "national", "hidreletric*", "hydro*"],
+      "metrics": [{ "terms": ["temperatura*", "temperature*", "precipitac*", "precipitation*"], "cadence": "daily" }]
+    }
+  }
+}

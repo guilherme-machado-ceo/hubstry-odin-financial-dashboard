@@ -1,0 +1,155 @@
+{
+  "description": "Versão editorialmente corrigida do run 8ab9 — deve passar no gate v1.4.",
+  "expect": "pass",
+  "expectRules": [],
+  "evidence": {
+    "material": "Digital assets. Stablecoin market capitalization: US$ 284.9 bilhões; Tether: US$ 183.8 bilhões. This is market capitalization, not international payment volume. RWA sample: Invesco USTB: US$ 577.5 milhões TVL; Ethena USDtb: US$ 492.6 milhões TVL; Re: US$ 391.9 milhões TVL; do not sum these protocols or call the sample the whole sector. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.",
+    "keyDates": [],
+    "comparisons": [],
+    "materialSha256": "sha256:4771a3ac3a51f7fb049e7bc79113b3b18ef9ca9cbc935b95c4fe9724842956c4",
+    "legalRefs": [],
+    "temporalShape": "snapshot"
+  },
+  "entry": {
+    "schemaVersion": "2.0",
+    "intelligenceContractVersion": "1.0",
+    "sectionId": "blockchain",
+    "status": "shadow",
+    "pt": "A capitalização de mercado do setor de stablecoins é de US$ 284,9 bilhões, com Tether representando US$ 183,8 bilhões desse total. A amostra de ativos do mundo real (RWA) inclui protocolos como Invesco USTB, Ethena USDtb e Re, com TVLs individuais de US$ 577,5 milhões, US$ 492,6 milhões e US$ 391,9 milhões, respectivamente; a amostra não representa o setor inteiro.",
+    "en": "The stablecoin market capitalization is US$ 284.9 billion, with Tether accounting for US$ 183.8 billion of that total. The RWA sample includes protocols such as Invesco USTB, Ethena USDtb, and Re, with individual TVLs of US$ 577.5 million, US$ 492.6 million, and US$ 391.9 million, respectively; the sample does not represent the entire sector.",
+    "thesis": {
+      "pt": "A capitalização de stablecoins mede estoque de valor de mercado; sua relação com volumes de pagamento internacional não é medida por esta fonte.",
+      "en": "Stablecoin capitalization measures a stock of market value; its relationship to international payment volumes is not measured by this source."
+    },
+    "economicLaw": {
+      "relevance": "not_material",
+      "pt": "A fonte não contém referências jurídicas; a lente de Direito Econômico não é aplicada nesta edição.",
+      "en": "The source contains no legal references; the Economic Law lens is not applied in this edition.",
+      "norms": [],
+      "institutions": [],
+      "sourceRefs": []
+    },
+    "stakeholderImplications": [
+      {
+        "audience": "government",
+        "textPt": "Monitorar a emissão e reserva de stablecoins para avaliar riscos sistêmicos e conformidade com normas de combate ao lavagem de dinheiro.",
+        "textEn": "Monitor stablecoin issuance and reserves to assess systemic risks and compliance with anti-money laundering standards."
+      },
+      {
+        "audience": "corporate",
+        "textPt": "Avaliar o uso de stablecoins em liquidações transfronteiriças como alternativa a moedas fiat, considerando volatilidade cambial e infraestrutura de liquidez.",
+        "textEn": "Assess the use of stablecoins in cross-border settlements as an alternative to fiat currencies, considering foreign exchange volatility and liquidity infrastructure."
+      },
+      {
+        "audience": "investors",
+        "textPt": "Diferenciar entre exposição a stablecoins (baixo risco de preço) e protocolos de RWA (risco de crédito e smart contract) ao alocar em ativos digitais.",
+        "textEn": "Differentiate between exposure to stablecoins (low price risk) and RWA protocols (credit and smart contract risk) when allocating to digital assets."
+      },
+      {
+        "audience": "startups",
+        "textPt": "Considerar a integração de stablecoins para pagamentos ou rendimento, observando requisitos de licenciamento e parcerias com instituições financeiras reguladas.",
+        "textEn": "Consider integrating stablecoins for payments or yield, observing licensing requirements and partnerships with regulated financial institutions."
+      }
+    ],
+    "whatToWatch": [
+      {
+        "signal": "Mudanças na dominância de Tether no mercado de stablecoins",
+        "source": "source-defillama-stablecoins",
+        "expectedDate": null,
+        "whyItMatters": "Pode indicar shifts na confiança do mercado ou preferência por alternativas com maior transparência de reservas."
+      },
+      {
+        "signal": "Crescimento do TVL em protocolos de RWA vinculados a títulos do Tesouro dos EUA",
+        "source": "source-defillama-rwa",
+        "expectedDate": null,
+        "whyItMatters": "Reflete demanda por rendimento em dólares on-chain e pode influenciar a estrutura de colateral de stablecoins."
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim-1",
+        "kind": "fact",
+        "textPt": "A capitalização de mercado do setor de stablecoins é de US$ 284,9 bilhões, segundo dados do DefiLlama.",
+        "textEn": "The stablecoin market capitalization is US$ 284.9 billion, according to DefiLlama data.",
+        "evidenceRefs": [
+          "source-defillama-stablecoins"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        }
+      },
+      {
+        "id": "claim-2",
+        "kind": "fact",
+        "textPt": "Tether possui uma capitalização de mercado de US$ 183,8 bilhões, conforme o DefiLlama.",
+        "textEn": "Tether has a market capitalization of US$ 183.8 billion, according to DefiLlama.",
+        "evidenceRefs": [
+          "source-defillama-stablecoins"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        }
+      },
+      {
+        "id": "claim-3",
+        "kind": "fact",
+        "textPt": "O protocolo Invesco USTB tem um TVL de US$ 577,5 milhões, Ethena USDtb de US$ 492,6 milhões e Re de US$ 391,9 milhões, segundo o DefiLlama.",
+        "textEn": "The Invesco USTB protocol has a TVL of US$ 577.5 million, Ethena USDtb of US$ 492.6 million, and Re of US$ 391.9 million, according to DefiLlama.",
+        "evidenceRefs": [
+          "source-defillama-rwa"
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        }
+      }
+    ],
+    "provenance": [
+      {
+        "sourceId": "source-defillama-stablecoins",
+        "sourceUrl": "https://defillama.com/stablecoins",
+        "asOf": "2026-09-30T12:29:52.372Z",
+        "dataPath": "public/data/evidence/odin-20260930-155006-8ab9/stablecoins.json",
+        "metricId": "stablecoin-total-mcap",
+        "hash": "sha256:23a56ebd726e51088d4cef657abd2143b0b639a3050a53ec9c1b267d172f9b32"
+      },
+      {
+        "sourceId": "source-defillama-rwa",
+        "sourceUrl": "https://defillama.com/protocols",
+        "asOf": "2026-09-30T12:29:52.718Z",
+        "dataPath": "public/data/evidence/odin-20260930-155006-8ab9/rwa-protocols.json",
+        "metricId": "rwa-tvl-sample",
+        "hash": "sha256:d438f844eab3bae83ae3fb7a0574aee9a841bcc43dafbbc6064a32b78d0900fd"
+      },
+      {
+        "sourceId": "source-defillama-coins",
+        "sourceUrl": "https://defillama.com/",
+        "asOf": "2026-09-30T12:29:52.214Z",
+        "dataPath": "public/data/evidence/odin-20260930-155006-8ab9/crypto-market.json",
+        "metricId": "asset-prices",
+        "hash": "sha256:84aaacc3bf9bd899c7eaf4cad8cd48b727d56a5320b9567dd20196308f3a3a6d"
+      }
+    ],
+    "confidence": {
+      "data": "high",
+      "interpretation": "medium"
+    },
+    "limitations": "Os dados de TVL para protocolos de RWA são instantâneos e podem não refletir mudanças recentes. A amostra de RWA mencionada não é exaustiva e não deve ser usada para inferir o tamanho total do setor. Não há dados de volume de pagamento internacional disponíveis no contexto fornecido.",
+    "provider": "nvidia",
+    "model": "nvidia/nemotron-3-super-120b-a12b",
+    "promptVersion": "3.1.0",
+    "generatedAt": "2026-09-30T15:50:35.818Z",
+    "validAsOf": "2026-09-30T12:29:52.372Z",
+    "nextReviewAt": "2026-10-07T15:50:07.171Z",
+    "runId": "odin-20260930-155006-8ab9",
+    "reviewStatus": "unreviewed",
+    "usage": {
+      "prompt": 1096,
+      "completion": 1664,
+      "total": 2760,
+      "latencyMs": 11453
+    }
+  }
+}
