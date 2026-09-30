@@ -1,0 +1,15 @@
+{
+  "schemaVersion":"2.0",
+  "intelligenceContractVersion":"1.0",
+  "sectionId":"carbon",
+  "sectionProfile":"carbon",
+  "profileVersion":"1.0.0",
+  "status":"shadow",
+  "pt":"fixture",
+  "en":"fixture",
+  "limitations":"fixture",
+  "confidence":{"data":"high","interpretation":"medium"},
+  "claims":[],
+  "provenance":[],
+  "layers":{"sources":[],"events":[],"indicators":[]}
+}
