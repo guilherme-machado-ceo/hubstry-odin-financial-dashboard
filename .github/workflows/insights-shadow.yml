@@ -26,6 +26,16 @@ jobs:
         run: node scripts/generate-insights-shadow.mjs
       - name: Validate shadow artifact
         run: node scripts/validate-insights-shadow.mjs
+      - name: Review summary (conteúdo para revisão humana)
+        if: always()
+        env:
+          ODIN_SUMMARY_SHADOW: "true"
+        run: |
+          if [ -f public/data/insights.v2.shadow.json ]; then
+            node scripts/review-summary.mjs public/data/insights.v2.shadow.json public/data/generationReport.json > /dev/null
+          else
+            echo "Nenhum artefato shadow gerado — ver logs da geração." >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Upload shadow artifact
         uses: actions/upload-artifact@v4
         with:

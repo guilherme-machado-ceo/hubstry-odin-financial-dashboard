@@ -23,3 +23,5 @@ jobs:
         run: node scripts/test-evidence-consistency.mjs
       - name: Verify published insights provenance
         run: node scripts/verify-provenance.mjs public/data/insights.v2.json
+      - name: Review summary renders gate and claims
+        run: node scripts/test-review-summary.mjs

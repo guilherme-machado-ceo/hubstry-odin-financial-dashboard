@@ -3,6 +3,20 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [gate-v1.3] — 2026-09-30
+
+### Adicionado
+- **Revisão humana auditável**: `scripts/review-summary.mjs` publica no
+  resumo do job shadow (`$GITHUB_STEP_SUMMARY`) o que será aprovado —
+  decisão e flags do gate, bloqueios, claims (tipo, texto, evidência,
+  confiança), What to Watch, implicações e evidências com hash — e o
+  `shadow_run_id` a informar na promoção. Roda também quando o gate bloqueia.
+- O promote exige `ODIN_REVIEWER` (no workflow: `github.actor`) e grava por
+  seção `reviewedBy`, `reviewedAt` e `reviewSource`
+  (`shadowRunId`, `generationRunId`); o resumo do artefato promovido fica no
+  job de promoção.
+- `scripts/test-review-summary.mjs` no CI de PR.
+
 ## [gate-v1.2] — 2026-09-30
 
 ### Adicionado

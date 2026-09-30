@@ -9,11 +9,15 @@ const input = path.resolve(process.argv[2] || "public/data/insights.v2.shadow.js
 const output = path.resolve(process.argv[3] || "public/data/insights.v2.json");
 const reportFile = path.resolve(process.argv[4] || "public/data/generationReport.json");
 const manualApproval = process.env.ODIN_PROMOTE_APPROVED === "true";
+// Revisão humana auditável: quem aprovou e a partir de qual run shadow.
+const reviewer = (process.env.ODIN_REVIEWER ?? "").trim();
+const shadowRunId = (process.env.ODIN_SHADOW_RUN_ID ?? "").trim() || null;
 
 const shadow = JSON.parse(await readFile(input, "utf8"));
 const report = JSON.parse(await readFile(reportFile, "utf8"));
 const errors = [];
 if (!manualApproval) errors.push("promoção exige ODIN_PROMOTE_APPROVED=true");
+if (!reviewer) errors.push("promoção exige ODIN_REVIEWER (identidade de quem revisou e aprovou)");
 if (report.runId !== shadow.runId) errors.push("generationReport.runId não corresponde ao shadow");
 if (report.validation?.decision !== "publish_candidate") errors.push("generationReport não autoriza publish_candidate");
 
@@ -73,6 +77,9 @@ const productionSections = Object.fromEntries(
     ...entry,
     status: "generated",
     reviewStatus: "approved",
+    reviewedBy: reviewer,
+    reviewedAt: now,
+    reviewSource: { shadowRunId, generationRunId: shadow.runId },
     generatedAt: entry.generatedAt || now
   }])
 );
