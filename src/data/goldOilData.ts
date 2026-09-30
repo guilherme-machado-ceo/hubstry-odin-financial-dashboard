@@ -6,7 +6,7 @@
 export interface GoldReserve { year: number; China: number; Russia: number; India: number; Brazil: number; Turkey: number; Poland: number; }
 export interface GoldShare { flag: string; country: string; countryPt: string; pct2025: number; }
 export interface OilData { year: number; brent: number; wti: number; bricsProduction: number; petroyuanVolume: number; }
-export interface ContextBannerData { tag: string; tagPt: string; headline: string; headlinePt: string; summary: string; summaryPt: string; source: string; sourceUrl: string; date: string; }
+export interface ContextBannerData { tag: string; tagPt: string; headline: string; headlinePt: string; summary: string; summaryPt: string; source: string; sourceUrl: string; date: string; datePt?: string; }
 
 export const goldReserves: GoldReserve[] = [
   { year: 2015, China: 1743, Russia: 1275, India: 558, Brazil: 67, Turkey: 539, Poland: 103 },
@@ -51,11 +51,12 @@ export const oilData: OilData[] = [
 export const contextBanner: ContextBannerData = {
   tag: "GEOPOLITICAL ECONOMY",
   tagPt: "ECONOMIA GEOPOLITICA",
-  headline: "Brazil Files Letter of Presentation for Sovereign Panda Bond up to CNY 5 Billion — Pilot in China's Domestic Debt Market",
-  headlinePt: "Brasil entrega Carta de Apresentação da República para Panda Bond soberano de até CNY 5 bilhões — Piloto no mercado de dívida doméstico chinês",
-  summary: "Brazil filed a Letter of Presentation to the NAFMII (National Association of Financial Market Institutional Investors) to register up to CNY 5 billion in sovereign Panda Bonds in China's domestic interbank market. Bookrunners not yet designated in public phase. If executed, Brazil becomes the first Latin American sovereign — and the 5th globally in 12 months, following Kazakhstan and Pakistan — to access the CNY-denominated market, an institutional layer of the BRICS+ parallel financial infrastructure (CIPS, NDB, Bond Connect bilateral pilot).",
-  summaryPt: "O Brasil entregou Carta de Apresentação da República à NAFMII (National Association of Financial Market Institutional Investors) para registrar até CNY 5 bilhões em Panda Bonds soberanos no mercado interbancário doméstico chinês. Estruturadores ainda não designados em fase pública. Se executada, a operação torna o Brasil o primeiro soberano latino-americano — e o 5º global em 12 meses, após Cazaquistão e Paquistão — a acessar o mercado denominado em CNY, camada institucional da infraestrutura financeira paralela BRICS+ (CIPS, NDB, Bond Connect bilateral em piloto).",
-  source: "Ministério da Fazenda / NAFMII / Reuters",
-  sourceUrl: "https://www.gov.br/fazenda/pt-br/assuntos/noticias",
+  headline: "Brazil Files Letter of Intent for Sovereign Panda Bond up to CNY 5 Billion — Pilot in China's Domestic Debt Market",
+  headlinePt: "Brasil entrega Carta de Intenções para Panda Bond soberano de até CNY 5 bilhões — Piloto no mercado de dívida doméstico chinês",
+  summary: "Brazil filed a Letter of Intent to the NAFMII (National Association of Financial Market Institutional Investors) to register up to CNY 5 billion in sovereign Panda Bonds in China's domestic interbank market. Bookrunners not yet designated in public phase. If executed, Brazil becomes the first Latin American sovereign — and the 5th globally in 12 months, following Kazakhstan and Pakistan — to access the CNY-denominated market, an institutional layer of the BRICS+ parallel financial infrastructure (CIPS, NDB, Bond Connect bilateral pilot).",
+  summaryPt: "O Brasil entregou Carta de Intenções à NAFMII (National Association of Financial Market Institutional Investors) para registrar até CNY 5 bilhões em Panda Bonds soberanos no mercado interbancário doméstico chinês. Estruturadores ainda não designados em fase pública. Se executada, a operação torna o Brasil o primeiro soberano latino-americano — e o 5º global em 12 meses, após Cazaquistão e Paquistão — a acessar o mercado denominado em CNY, camada institucional da infraestrutura financeira paralela BRICS+ (CIPS, NDB, Bond Connect bilateral em piloto).",
+  source: "Reuters / Ministério da Fazenda / NAFMII",
+  sourceUrl: "https://www.reuters.com/world/americas/brazil-plans-up-5-billion-yuan-panda-bond-issuance-says-finance-minister-2026-06-25/",
   date: "June 2026",
+  datePt: "Junho 2026",
 };
