@@ -49,10 +49,14 @@ jobs:
         env:
           ODIN_PROMOTE_APPROVED: "true"
         run: |
+          shadow_file="$(find /tmp/odin-shadow -name insights.v2.shadow.json -type f -print -quit)"
+          report_file="$(find /tmp/odin-shadow -name generationReport.json -type f -print -quit)"
+          test -n "$shadow_file"
+          test -n "$report_file"
           node scripts/promote-insights.mjs \
-            /tmp/odin-shadow/public/data/insights.v2.shadow.json \
+            "$shadow_file" \
             public/data/insights.v2.json \
-            /tmp/odin-shadow/public/data/generationReport.json
+            "$report_file"
 
       - name: Verify promotion scope
         run: |
