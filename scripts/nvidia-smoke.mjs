@@ -44,8 +44,8 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
   await new Promise(r => setTimeout(r, delay));
 }
 if (!json) throw new Error(`NVIDIA smoke did not receive a successful response; last HTTP status ${lastStatus}`);
-const json = JSON.parse(raw);
-const content = json.choices?.[0]?.message?.content ?? "";
+const responseJson = json;
+const content = responseJson.choices?.[0]?.message?.content ?? "";
 if (!content) throw new Error("NVIDIA respondeu sem choices[0].message.content");
 
 console.log(JSON.stringify({
