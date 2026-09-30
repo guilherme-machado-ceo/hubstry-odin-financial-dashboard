@@ -170,7 +170,7 @@ export default function InsightBox({ section }: Props) {
 
     async function load() {
       const v2 = await fetchSnapshot<V2Data>("insights.v2.json", { sections: {} });
-      const v2Entry = v2.data.sections?.[section];
+      const v2Entry = v2.data?.sections?.[section];
 
       if (v2Entry && !cancelled && (v2Entry.pt || v2Entry.en)) {
         setEntry(v2Entry);
