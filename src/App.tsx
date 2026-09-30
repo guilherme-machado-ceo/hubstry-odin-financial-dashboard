@@ -13,6 +13,7 @@ import GoldReservesChart from "@/components/GoldReservesChart";
 import OilVectorChart from "@/components/OilVectorChart";
 import NewsTicker from "@/components/NewsTicker";
 import ClimateVectorChart from "@/components/ClimateVectorChart";
+import Earth2ForecastSection from "@/components/Earth2ForecastSection";
 import CarbonPricingSection from "@/components/CarbonPricingSection";
 import BlockchainSection from "@/components/BlockchainSection";
 import Footer from "@/components/Footer";
@@ -108,6 +109,8 @@ export default function App() {
 
       {/* ── 14. CLIMATE VECTOR: Temperature Anomalies + Risk Scores ── */}
       <RevealSection><ClimateVectorChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>
+      {/* ── 14b. EARTH-2 FORECAST: NVIDIA FourCastNet 10-day forecast ── */}
+      <RevealSection><Earth2ForecastSection onSourceClick={handleSourceClick} /></RevealSection>
 
       {/* ── 15. CARBON PRICING & CBAM: EU ETS, CBAM certificates, embedded CO2 ── */}
       <RevealSection><CarbonPricingSection onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>

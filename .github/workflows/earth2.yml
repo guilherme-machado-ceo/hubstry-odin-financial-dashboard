@@ -1,0 +1,49 @@
+name: ODIN Earth-2 Forecast
+
+# Previsao NVIDIA Earth-2 (FourCastNet NIM) -> public/data/earth2-forecast.json
+# Roda 2x/dia, apos a publicacao dos ciclos GFS 00Z e 12Z (~4h de defasagem).
+# Toda a preparacao de dados roda em CPU no runner; a inferencia roda na GPU
+# hospedada da NVIDIA (chave NVIDIA_API_KEY em Settings > Secrets > Actions).
+
+on:
+  schedule:
+    # 07:47 UTC e 19:47 UTC — apos os ciclos GFS 00Z/12Z ficarem disponiveis
+    - cron: "47 7 * * *"
+    - cron: "47 19 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  earth2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/earth2/requirements.txt
+      - name: Install eccodes (biblioteca C exigida pelo pygrib)
+        run: sudo apt-get update && sudo apt-get install -y libeccodes-dev
+
+      - name: Install Earth2Studio (CPU only — data prep, sem inferencia local)
+        run: pip install -r scripts/earth2/requirements.txt
+      - name: Run FourCastNet NIM forecast snapshot
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+        run: python3 scripts/earth2/fetch_earth2.py
+      - name: Commit snapshot
+        run: |
+          git config user.name "odin-data-bot"
+          git config user.email "odin-data-bot@users.noreply.github.com"
+          if git diff --quiet public/data/earth2-forecast.json 2>/dev/null && \
+             git ls-files --error-unmatch public/data/earth2-forecast.json >/dev/null 2>&1; then
+            echo "Sem alteracoes no snapshot Earth-2."
+            exit 0
+          fi
+          git add public/data/earth2-forecast.json
+          git commit -m "chore(data): snapshot earth-2 fourcastnet [skip ci]"
+          git push
