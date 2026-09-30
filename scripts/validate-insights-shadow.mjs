@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { validateInsightEntry, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION } from "./insights-schema.mjs";
+import { validateInsightEntry, checkFreshness, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION } from "./insights-schema.mjs";
 import { validateSectionProfile } from "./insights-profile-validator.mjs";
 import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
 
@@ -14,11 +14,15 @@ if (typeof json.runId!=="string") errors.push("global.runId ausente");
 const sections=json.data?.sections;
 if (!sections || typeof sections!=="object" || Object.keys(sections).length===0) errors.push("data.sections vazio");
 const profileErrors=[];
+const freshnessErrors=[];
 for (const [id,entry] of Object.entries(sections??{})) {
   errors.push(...validateInsightEntry(entry,id));
-  profileErrors.push(...validateSectionProfile(entry,id));
+  profileErrors.push(...validateSectionProfile(entry,id,{ strict:true }));
+  freshnessErrors.push(...checkFreshness(entry,id));
 }
 errors.push(...profileErrors);
+errors.push(...freshnessErrors);
+const freshnessValid = freshnessErrors.length === 0;
 const sectionProfileValid = profileErrors.length === 0;
 const generated=Object.values(sections??{}).filter(e=>e.status==="shadow").length;
 const facts=Object.values(sections??{}).flatMap(e=>e.claims??[]).filter(c=>c.kind==="fact");
@@ -34,13 +38,13 @@ const consistencyErrors = [];
 for (const [id,entry] of Object.entries(sections??{})) consistencyErrors.push(...checkEvidenceConsistency(entry, evidenceBySection.get(id)).map(e => ({ sectionId:id, ...e })));
 const evidenceConsistent = consistencyErrors.length === 0;
 errors.push(...consistencyErrors.map(e => `sections.${e.sectionId} ${formatConsistencyError(e)}`));
-const gate=errors.length===0 && generated>0 && covered>=0.5 && lawOk && sectionProfileValid && evidenceConsistent;
-console.log(`Shadow gate: ${gate?"PASS":"BLOCK"} | sections=${generated} factEvidenceCoverage=${covered.toFixed(2)} sectionProfileValid=${sectionProfileValid} evidenceConsistent=${evidenceConsistent}`);
+const gate=errors.length===0 && generated>0 && covered>=0.5 && lawOk && sectionProfileValid && evidenceConsistent && freshnessValid;
+console.log(`Shadow gate: ${gate?"PASS":"BLOCK"} | sections=${generated} factEvidenceCoverage=${covered.toFixed(2)} sectionProfileValid=${sectionProfileValid} evidenceConsistent=${evidenceConsistent} freshnessValid=${freshnessValid}`);
 if(!gate) errors.push("shadow generation gate bloqueou o artefato");
 const reportFile = path.resolve(process.cwd(),"public/data/generationReport.json");
 try {
   const report = JSON.parse(await readFile(reportFile,"utf8"));
-  report.validation = { decision: gate ? "publish_candidate" : "blocked", validator: "semantic", errors, factEvidenceCoverage: covered, generatedSections: generated, economicLawHighHasNorms: lawOk, sectionProfileValid, evidenceConsistent, consistencyErrors, validatedAt: new Date().toISOString() };
+  report.validation = { decision: gate ? "publish_candidate" : "blocked", validator: "semantic", errors, factEvidenceCoverage: covered, generatedSections: generated, economicLawHighHasNorms: lawOk, sectionProfileValid, evidenceConsistent, consistencyErrors, freshnessValid, validatedAt: new Date().toISOString() };
   await writeFile(reportFile, JSON.stringify(report,null,2)+"\n");
 } catch (reportError) {
   errors.push(`generationReport.json não pôde ser atualizado: ${reportError.message}`);
