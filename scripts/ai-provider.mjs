@@ -15,6 +15,12 @@ const PROVIDERS = {
   },
 };
 
+const TRANSIENT_HTTP = new Set([429, 500, 502, 503, 504]);
+const MAX_TRANSPORT_ATTEMPTS = Number(process.env.AI_MAX_TRANSPORT_ATTEMPTS || 5);
+const MAX_CONSECUTIVE_503 = Number(process.env.AI_MAX_CONSECUTIVE_503 || 3);
+const RETRY_BASE_MS = Number(process.env.AI_RETRY_BASE_MS || 1000);
+const RETRY_CAP_MS = Number(process.env.AI_RETRY_CAP_MS || 30000);
+
 export function getProviderConfig() {
   const name = process.env.AI_PROVIDER || "maas";
   const config = PROVIDERS[name];
@@ -40,6 +46,100 @@ function normalizeUsage(usage) {
   };
 }
 
+function retryDelayMs(attempt, retryAfter) {
+  if (Number.isFinite(retryAfter)) return Math.min(Math.max(retryAfter, 0), RETRY_CAP_MS);
+  const exponential = Math.min(RETRY_CAP_MS, RETRY_BASE_MS * (2 ** (attempt - 1)));
+  return Math.floor(Math.random() * (exponential + 1));
+}
+
+function parseRetryAfterMs(value) {
+  if (!value) return null;
+  const seconds = Number(value);
+  if (Number.isFinite(seconds)) return seconds * 1000;
+  const dateMs = Date.parse(value);
+  if (!Number.isNaN(dateMs)) return Math.max(0, dateMs - Date.now());
+  return null;
+}
+
+function isTransientNetworkError(error) {
+  return error?.name === "TimeoutError"
+    || error?.name === "AbortError"
+    || error?.name === "TypeError";
+}
+
+function classifyHttp(status) {
+  if (TRANSIENT_HTTP.has(status)) return "transient";
+  return "permanent";
+}
+
+async function requestCompletion({ config, body, timeoutMs, phase }) {
+  let consecutive503 = 0;
+
+  for (let attempt = 1; attempt <= MAX_TRANSPORT_ATTEMPTS; attempt += 1) {
+    const startedAt = Date.now();
+    let res;
+    let raw = "";
+
+    try {
+      res = await fetch(config.endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.key}` },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+      raw = await res.text();
+    } catch (error) {
+      if (!isTransientNetworkError(error) || attempt >= MAX_TRANSPORT_ATTEMPTS) {
+        throw new Error(`${config.name} ${phase} network failure after attempt ${attempt}: ${error.message}`);
+      }
+      const delayMs = retryDelayMs(attempt);
+      console.warn(JSON.stringify({
+        provider: config.name,
+        phase,
+        attempt,
+        errorType: error.name || "network",
+        latencyMs: Date.now() - startedAt,
+        decision: "retry",
+        delayMs,
+      }));
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+      continue;
+    }
+
+    if (res.ok) {
+      return { json: JSON.parse(raw), attempt, latencyMs: Date.now() - startedAt };
+    }
+
+    const kind = classifyHttp(res.status);
+    if (kind === "permanent" || attempt >= MAX_TRANSPORT_ATTEMPTS) {
+      throw new Error(`${config.name} HTTP ${res.status}: ${raw.slice(0, 500)}`);
+    }
+
+    if (res.status === 503) consecutive503 += 1;
+    else consecutive503 = 0;
+
+    if (consecutive503 >= MAX_CONSECUTIVE_503) {
+      throw new Error(`${config.name} HTTP 503 persistente: ${consecutive503} falhas consecutivas; abortando como failed_controlled`);
+    }
+
+    const retryAfter = parseRetryAfterMs(res.headers.get("retry-after"));
+    const delayMs = retryDelayMs(attempt, retryAfter);
+    console.warn(JSON.stringify({
+      provider: config.name,
+      phase,
+      attempt,
+      httpStatus: res.status,
+      latencyMs: Date.now() - startedAt,
+      retryAfterMs: retryAfter,
+      decision: "retry",
+      delayMs,
+    }));
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+  }
+
+  throw new Error(`${config.name} ${phase} excedeu o limite de tentativas de transporte`);
+}
+
 export async function chatJson({ system, user, temperature = 0.3, maxTokens = 700, reasoning = false }) {
   const config = getProviderConfig();
   if (!config.key) throw new Error(`${config.keyEnv} não definida para provider ${config.name}`);
@@ -62,48 +162,48 @@ export async function chatJson({ system, user, temperature = 0.3, maxTokens = 70
     body.chat_template_kwargs = { enable_thinking: reasoning };
   }
 
-  const startedAt = Date.now();
-  const res = await fetch(config.endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.key}` },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(Number(process.env.AI_TIMEOUT_MS || 60000)),
-  });
-  const raw = await res.text();
-  if (!res.ok) throw new Error(`${config.name} HTTP ${res.status}: ${raw.slice(0, 500)}`);
-  const json = JSON.parse(raw);
-  const content = json.choices?.[0]?.message?.content ?? "";
+  const timeoutMs = Number(process.env.AI_TIMEOUT_MS || 45000);
+  const first = await requestCompletion({ config, body, timeoutMs, phase: "generation" });
   let parsed;
+  let usage = normalizeUsage(first.json.usage);
+
   try {
+    const content = first.json.choices?.[0]?.message?.content ?? "";
     parsed = extractJson(content);
   } catch (firstError) {
-    // One controlled retry for malformed structured output. This is not a
-    // semantic retry: same prompt, lower temperature, explicit JSON request.
+    // Exactly one controlled contract retry. It does not attempt to repair or
+    // rewrite content locally; the model is asked to emit the same answer as
+    // valid JSON only. Schema/semantic validation remains downstream.
     const retryBody = {
       ...body,
       temperature: 0,
       messages: [
         ...body.messages,
-        { role: "user", content: "Return the same answer again as syntactically valid JSON only. No markdown, no prose outside the JSON object." }
-      ]
+        {
+          role: "user",
+          content: "Return the same answer again as syntactically valid JSON only. No markdown, no prose outside the JSON object.",
+        },
+      ],
     };
-    const retryRes = await fetch(config.endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.key}` },
-      body: JSON.stringify(retryBody),
-      signal: AbortSignal.timeout(Number(process.env.AI_TIMEOUT_MS || 60000)),
+    const retry = await requestCompletion({
+      config,
+      body: retryBody,
+      timeoutMs,
+      phase: "contract_retry",
     });
-    const retryRaw = await retryRes.text();
-    if (!retryRes.ok) throw new Error(`${config.name} retry HTTP ${retryRes.status}: ${retryRaw.slice(0, 500)}`);
-    const retryJson = JSON.parse(retryRaw);
-    const retryContent = retryJson.choices?.[0]?.message?.content ?? "";
-    try { parsed = extractJson(retryContent); }
-    catch { throw new Error(`resposta JSON inválida após retry: ${firstError.message}`); }
+    const retryContent = retry.json.choices?.[0]?.message?.content ?? "";
+    try {
+      parsed = extractJson(retryContent);
+      usage = normalizeUsage(retry.json.usage);
+    } catch {
+      throw new Error(`resposta JSON inválida após retry corretivo: ${firstError.message}`);
+    }
   }
+
   return {
     parsed,
-    usage: normalizeUsage(json.usage),
-    latencyMs: Date.now() - startedAt,
+    usage,
+    latencyMs: first.latencyMs,
     provider: config.name,
     model: config.model,
   };
