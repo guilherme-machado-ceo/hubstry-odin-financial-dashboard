@@ -3,6 +3,23 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [insights-v3.2.0] — 2026-09-30
+
+### Alterado
+- Prompt do gerador shadow, alinhado ao contrato editorial do gate v1.4:
+  - a mensagem por seção declara **forma temporal** (`snapshot`,
+    `two_points`, `window_aggregate`), **referências jurídicas disponíveis**
+    (ou "nenhuma") e, para cada fonte, **o que ela publica** (registry);
+  - SYSTEM prompt: Direito Econômico só com referências listadas (sem
+    citar de memória; pt e en com as mesmas referências); What to Watch só
+    com sinais que a fonte publica, `expectedDate` nulo salvo data do
+    contexto, sem limiares nem cadência inventados; snapshot não sustenta
+    tendência; proibido reproduzir instruções no texto.
+- Contexto de blockchain: a amostra RWA é descrita como dado ("amostra
+  parcial, não total do setor") em vez de instrução ("do not sum"), que
+  vazava para o texto publicado no run 8ab9.
+- `PROMPT_VERSION` 3.1.0 → 3.2.0.
+
 ## [gate-v1.4] — 2026-09-30
 
 Origem: revisão editorial humana do run `odin-20260930-155006-8ab9`, que

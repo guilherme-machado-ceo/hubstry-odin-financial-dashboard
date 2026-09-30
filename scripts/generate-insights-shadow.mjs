@@ -7,6 +7,7 @@ import { chatJson, getProviderConfig } from "./ai-provider.mjs";
 import { PROMPT_VERSION, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION } from "./insights-schema.mjs";
 import { compareDirection } from "./evidence-consistency.mjs";
 import { buildSectionProfile } from "./section-profile-builder.mjs";
+import { SOURCE_REGISTRY } from "./editorial-contract.mjs";
 
 const OUT_DIR = path.resolve(process.cwd(), "public/data");
 const OUT_FILE = path.join(OUT_DIR, "insights.v2.shadow.json");
@@ -32,9 +33,13 @@ Regras:
 - comparações com referência: use a direção (acima/abaixo) calculada e declarada no contexto; nunca infira a direção;
 - efeitos econômicos são possibilidades, não fatos consumados;
 - Direito Econômico é lente analítica, não parecer jurídico;
-- se a relevância jurídica for alta, indique normas e instituições explicitamente presentes no contexto;
+- Direito Econômico: cite em norms e institutions SOMENTE itens da lista "Referências jurídicas disponíveis"; se a lista for "nenhuma", use relevance not_material ou low com norms e institutions vazios; nunca cite normas, instituições ou órgãos de memória; em pt e en mencione exatamente as mesmas referências;
+- se a relevância jurídica for alta, indique normas e instituições da lista de referências disponíveis;
 - stakeholder implications devem ser neutras e acionáveis como contexto, sem recomendar compra/venda ou escolha política; audience deve ser EXATAMENTE um destes valores ASCII: government, corporate, investors, startups; nunca traduza nem acrescente texto ao valor;
 - What to Watch deve apontar sinais observáveis, fonte e motivo; o campo source deve ser EXATAMENTE um sourceId ou sourceUrl presente na lista de fontes permitidas fornecida no contexto;
+- What to Watch: o sinal deve ser algo que a fonte citada PUBLICA (ver "publica:" de cada fonte); não aponte regiões, órgãos ou métricas que a fonte não cobre; expectedDate deve ser null, salvo se a data estiver literalmente no contexto; não invente limiares numéricos nem cadência (use a periodicidade da fonte);
+- forma temporal: se o contexto declarar "Forma temporal: snapshot", os dados são de um único instante — não use linguagem de tendência (crescimento, aumento, queda, expansão, tendência) fora do What to Watch;
+- nunca reproduza no texto publicado instruções deste prompt ou do contexto (ex.: "sem somar", "não totalize", "conforme instruído");
 - escreva em português e inglês;
 - mantenha tom sóbrio, analítico, compatível com Chatham House;
 - não use linguagem promocional ou de chatbot.
@@ -126,7 +131,7 @@ async function contexts() {
 
   const climateContext = `Climate vector for Brasília. Rolling 12-month window ${climateStart} to ${climateEnd}; mean temperature ${avgR}°C (${dirWord(compareDirection(avgR, TEMP_REF))} the ${TEMP_REF}°C reference); precipitation ${precipR} mm (${dirWord(compareDirection(precipR, PRECIP_REF))} the ${PRECIP_REF} mm reference). The reference benchmarks (${TEMP_REF}°C and ${PRECIP_REF} mm) are dashboard references, not an official climatology. A single city cannot establish impacts on producing regions, commodities or energy. Any transmission to commodities, hydrology, energy or FX must be a hypothesis and should be monitored against producing regions and relevant river basins. Source: source-open-meteo-brasilia.`;
 
-  const blockchainContext = `Digital assets. Stablecoin market capitalization: ${fmt(stable.data.totalMcapUsd)}; Tether: ${fmt(stable.data.assets[0].mcapUsd)}. This is market capitalization, not international payment volume. RWA sample: ${top}; do not sum these protocols or call the sample the whole sector. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.`;
+  const blockchainContext = `Digital assets. Stablecoin market capitalization: ${fmt(stable.data.totalMcapUsd)}; Tether: ${fmt(stable.data.assets[0].mcapUsd)}. This is market capitalization, not international payment volume. RWA sample: ${top}; partial sample of individual protocols, not a sector total. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.`;
 
   return [
     {
@@ -175,7 +180,7 @@ for (const item of await contexts()) {
   try {
   const {parsed,usage,latencyMs}=await chatJson({
     system:SYSTEM,
-    user:`Section: ${item.id}\nValid as of: ${item.validAsOf}\nNext review: ${item.nextReviewAt}\nProvenance permitida para esta seção (use estes sourceId/sourceUrl literalmente em evidenceRefs e whatToWatch.source):\n${item.provenance.map(p => `${p.sourceId} | ${p.sourceUrl}`).join("\n")}\nContext:\n${item.context}`,
+    user:`Section: ${item.id}\nValid as of: ${item.validAsOf}\nNext review: ${item.nextReviewAt}\nForma temporal: ${item.evidence.temporalShape}\nReferências jurídicas disponíveis: ${(item.evidence.legalRefs ?? []).length ? item.evidence.legalRefs.map(r => `${r.labels[0]} (${r.kind})`).join("; ") : "nenhuma"}\nProvenance permitida para esta seção (use estes sourceId/sourceUrl literalmente em evidenceRefs e whatToWatch.source):\n${item.provenance.map(p => `${p.sourceId} | ${p.sourceUrl} | publica: ${SOURCE_REGISTRY[p.sourceId]?.publishes ?? "não registrado"}`).join("\n")}\nContext:\n${item.context}`,
     temperature:0.2,maxTokens:3500,reasoning:false,
     onEvent: (event) => sectionEvents.push({ ...event, sectionId: item.id })
   });

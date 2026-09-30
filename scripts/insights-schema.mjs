@@ -2,7 +2,7 @@
 
 export const SCHEMA_VERSION = "2.0";
 export const INTELLIGENCE_CONTRACT_VERSION = "1.0";
-export const PROMPT_VERSION = "3.1.0";
+export const PROMPT_VERSION = "3.2.0";
 
 export const LEVELS = new Set(["high", "medium", "low"]);
 
