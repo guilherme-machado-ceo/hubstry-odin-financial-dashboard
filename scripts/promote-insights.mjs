@@ -39,7 +39,7 @@ const confidencePresent = Object.values(sections ?? {}).every(e =>
   LEVELS.has(e.confidence?.data) && LEVELS.has(e.confidence?.interpretation)
 );
 const bannedClaims = Object.values(sections ?? {}).flatMap(e => e.claims ?? [])
-  .filter(c => /\\b(always|never|guaranteed|certainly)\\b/i.test(c.textEn ?? "")).length;
+  .filter(c => /\b(always|never|guaranteed|certainly)\b/i.test(c.textEn ?? "")).length;
 
 if (generatedCount === 0) errors.push("nenhuma seção gerada");
 if (evidenceCoverage < 0.5) errors.push(`evidenceCoverage abaixo de 0.5: ${evidenceCoverage.toFixed(2)}`);
