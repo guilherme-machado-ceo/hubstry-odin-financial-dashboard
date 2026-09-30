@@ -30,8 +30,10 @@ interface InsightConfidence {
 
 interface StakeholderImplication {
   audience: Audience;
-  pt: string;
-  en: string;
+  pt?: string;
+  en?: string;
+  textPt?: string;
+  textEn?: string;
 }
 
 interface WhatToWatch {
@@ -55,8 +57,10 @@ interface EconomicLaw {
 
 interface Claim {
   kind: ClaimKind;
-  pt: string;
-  en: string;
+  pt?: string;
+  en?: string;
+  textPt?: string;
+  textEn?: string;
   evidenceRefs?: string[];
 }
 
@@ -367,7 +371,7 @@ export default function InsightBox({ section }: Props) {
                     {audienceLabels[item.audience]?.[locale === "pt" ? "pt" : "en"] ?? item.audience}
                   </div>
                   <p className="text-[10px] font-mono text-[#999] leading-relaxed">
-                    {localize(locale, item.pt, item.en)}
+                    {localize(locale, item.pt ?? item.textPt, item.en ?? item.textEn)}
                   </p>
                 </div>
               ))}
@@ -423,7 +427,7 @@ export default function InsightBox({ section }: Props) {
                     {claim.evidenceRefs?.length ? " · " + claim.evidenceRefs.join(", ") : ""}
                   </div>
                   <p className="text-[9px] font-mono text-[#777] leading-relaxed">
-                    {localize(locale, claim.pt, claim.en)}
+                    {localize(locale, claim.pt ?? claim.textPt, claim.en ?? claim.textEn)}
                   </p>
                 </div>
               ))}
