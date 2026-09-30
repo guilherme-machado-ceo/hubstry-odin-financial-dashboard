@@ -26,6 +26,9 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: scripts/earth2/requirements.txt
+      - name: Install eccodes (biblioteca C exigida pelo pygrib)
+        run: sudo apt-get update && sudo apt-get install -y libeccodes-dev
+
       - name: Install Earth2Studio (CPU only — data prep, sem inferencia local)
         run: pip install -r scripts/earth2/requirements.txt
       - name: Run FourCastNet NIM forecast snapshot
