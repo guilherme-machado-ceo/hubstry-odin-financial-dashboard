@@ -62,7 +62,7 @@ function validateWatch(value, path) {
   for (const [i, item] of value.entries()) {
     if (!item || typeof item !== "object") { errors.push(`${path}[${i}] inválido`); continue; }
     for (const f of ["signal", "source", "whyItMatters"]) if (typeof item[f] !== "string" || !item[f]) errors.push(`${path}[${i}].${f} ausente`);
-    if (item.expectedDate !== undefined && typeof item.expectedDate !== "string") errors.push(`${path}[${i}].expectedDate inválido`);
+    if (item.expectedDate !== undefined && item.expectedDate !== null && !isIsoDate(item.expectedDate)) errors.push(`${path}[${i}].expectedDate inválido`);
   }
   return errors;
 }
