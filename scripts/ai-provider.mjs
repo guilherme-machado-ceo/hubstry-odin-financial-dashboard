@@ -72,7 +72,7 @@ function classifyHttp(status) {
   return "permanent";
 }
 
-async function requestCompletion({ config, body, timeoutMs, phase }) {
+async function requestCompletion({ config, body, timeoutMs, phase, onEvent }) {
   let consecutive503 = 0;
 
   for (let attempt = 1; attempt <= MAX_TRANSPORT_ATTEMPTS; attempt += 1) {
@@ -93,21 +93,17 @@ async function requestCompletion({ config, body, timeoutMs, phase }) {
         throw new Error(`${config.name} ${phase} network failure after attempt ${attempt}: ${error.message}`);
       }
       const delayMs = retryDelayMs(attempt);
-      console.warn(JSON.stringify({
-        provider: config.name,
-        phase,
-        attempt,
-        errorType: error.name || "network",
-        latencyMs: Date.now() - startedAt,
-        decision: "retry",
-        delayMs,
-      }));
+      const event = { provider: config.name, phase, attempt, errorType: error.name || "network", latencyMs: Date.now() - startedAt, decision: "retry", delayMs };
+      onEvent?.(event);
+      console.warn(JSON.stringify(event));
       await new Promise(resolve => setTimeout(resolve, delayMs));
       continue;
     }
 
     if (res.ok) {
-      return { json: JSON.parse(raw), attempt, latencyMs: Date.now() - startedAt };
+      const result = { json: JSON.parse(raw), attempt, latencyMs: Date.now() - startedAt };
+      onEvent?.({ provider: config.name, phase, attempt, latencyMs: result.latencyMs, decision: "success" });
+      return result;
     }
 
     const kind = classifyHttp(res.status);
@@ -124,23 +120,16 @@ async function requestCompletion({ config, body, timeoutMs, phase }) {
 
     const retryAfter = parseRetryAfterMs(res.headers.get("retry-after"));
     const delayMs = retryDelayMs(attempt, retryAfter);
-    console.warn(JSON.stringify({
-      provider: config.name,
-      phase,
-      attempt,
-      httpStatus: res.status,
-      latencyMs: Date.now() - startedAt,
-      retryAfterMs: retryAfter,
-      decision: "retry",
-      delayMs,
-    }));
+    const event = { provider: config.name, phase, attempt, httpStatus: res.status, latencyMs: Date.now() - startedAt, retryAfterMs: retryAfter, decision: "retry", delayMs };
+    onEvent?.(event);
+    console.warn(JSON.stringify(event));
     await new Promise(resolve => setTimeout(resolve, delayMs));
   }
 
   throw new Error(`${config.name} ${phase} excedeu o limite de tentativas de transporte`);
 }
 
-export async function chatJson({ system, user, temperature = 0.3, maxTokens = 700, reasoning = false }) {
+export async function chatJson({ system, user, temperature = 0.3, maxTokens = 700, reasoning = false, onEvent }) {
   const config = getProviderConfig();
   if (!config.key) throw new Error(`${config.keyEnv} não definida para provider ${config.name}`);
 
@@ -163,7 +152,7 @@ export async function chatJson({ system, user, temperature = 0.3, maxTokens = 70
   }
 
   const timeoutMs = Number(process.env.AI_TIMEOUT_MS || 45000);
-  const first = await requestCompletion({ config, body, timeoutMs, phase: "generation" });
+  const first = await requestCompletion({ config, body, timeoutMs, phase: "generation", onEvent });
   let parsed;
   let usage = normalizeUsage(first.json.usage);
 
@@ -190,6 +179,7 @@ export async function chatJson({ system, user, temperature = 0.3, maxTokens = 70
       body: retryBody,
       timeoutMs,
       phase: "contract_retry",
+      onEvent,
     });
     const retryContent = retry.json.choices?.[0]?.message?.content ?? "";
     try {
