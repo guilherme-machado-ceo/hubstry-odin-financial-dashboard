@@ -121,14 +121,25 @@ export function checkEconomicLaw(entry, evidence) {
 
 const TREND_WORDS = ["crescimento", "cresceu", "crescente*", "growth", "grew", "growing", "aumento*", "aumentou", "increase*", "expansao", "expansion", "declinio", "decline*", "tendencia*", "trend*", "acelera*", "desacelera*"];
 
-/** Fonte de um único instante não sustenta linguagem de tendência (What to Watch excluído: é o que observar). */
+const NEGATION = ["nao", "sem", "nenhum*", "nenhuma", "impossivel", "no", "not", "cannot", "without", "unable"];
+const splitSentencesLocal = (text) => String(text ?? "").split(/(?<=[.;!?])\s+/).filter(Boolean);
+
+/**
+ * Fonte de um único instante não sustenta linguagem de tendência.
+ * Excluídos: What to Watch (é o que observar) e `limitations` (declarar que
+ * NÃO há tendência inferível é a afirmação epistêmica correta). Frases com
+ * negação explícita ("não é possível inferir tendência") também passam.
+ */
 export function checkTemporalShape(entry, evidence) {
   if (evidence?.temporalShape !== "snapshot") return [];
   const errors = [];
   for (const { path: at, text } of sectionTexts(entry)) {
-    if (at.startsWith("whatToWatch")) continue;
-    const w = anyTerm(text, TREND_WORDS);
-    if (w) errors.push({ rule: "snapshot_trend", path: at, detail: `fonte é snapshot; "${w.replace("*", "")}" pressupõe série temporal — "${text.slice(0, 160)}"` });
+    if (at.startsWith("whatToWatch") || at === "limitations") continue;
+    for (const sentence of splitSentencesLocal(text)) {
+      const w = anyTerm(sentence, TREND_WORDS);
+      if (!w || anyTerm(sentence, NEGATION)) continue;
+      errors.push({ rule: "snapshot_trend", path: at, detail: `fonte é snapshot; "${w.replace("*", "")}" pressupõe série temporal — "${sentence.slice(0, 160)}"` });
+    }
   }
   return errors;
 }

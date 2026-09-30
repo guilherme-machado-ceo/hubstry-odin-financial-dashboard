@@ -47,7 +47,7 @@ interface WhatToWatch {
 }
 
 interface EconomicLaw {
-  relevance?: "low" | "medium" | "high";
+  relevance?: "low" | "medium" | "high" | "not_material";
   pt?: string;
   en?: string;
   norms?: string[];
@@ -81,7 +81,7 @@ interface V2InsightEntry {
   promptVersion?: string;
   provider?: string;
   model?: string;
-  limitations?: string[];
+  limitations?: string;
   provenance?: Array<{
     sourceId?: string;
     sourceUrl?: string;
@@ -159,6 +159,7 @@ function levelLabel(level: string | undefined, locale: string): string {
     high: { pt: "alto", en: "high" },
     medium: { pt: "médio", en: "medium" },
     low: { pt: "baixo", en: "low" },
+    not_material: { pt: "não material", en: "not material" },
   };
   return labels[level]?.[locale === "pt" ? "pt" : "en"] ?? level;
 }

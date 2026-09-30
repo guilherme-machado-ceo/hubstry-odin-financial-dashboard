@@ -25,3 +25,7 @@ jobs:
         run: node scripts/verify-provenance.mjs public/data/insights.v2.json
       - name: Review summary renders gate and claims
         run: node scripts/test-review-summary.mjs
+      - name: Contract ↔ render (5 camadas no InsightBox)
+        run: node scripts/test-contract-render.mjs
+      - name: M1 layers (5 camadas, retry de contrato, snapshot)
+        run: node scripts/test-m1-layers.mjs

@@ -16,7 +16,7 @@ export function renderReviewSummary(doc, report = null, { runUrl = null, shadowR
   lines.push(`- Status do artefato: **${doc.status}** · provider/model: \`${doc.provider}\` / \`${doc.model}\` · prompt \`${doc.promptVersion}\``);
   if (v) {
     lines.push(`- Gate: **${v.decision === "publish_candidate" ? "PASS — publish_candidate" : "BLOCK"}**`);
-    const flags = ["sectionProfileValid", "evidenceConsistent", "freshnessValid", "provenanceReproducible", "economicLawHighHasNorms"]
+    const flags = ["sectionProfileValid", "evidenceConsistent", "freshnessValid", "provenanceReproducible", "layersComplete", "economicLawHighHasNorms"]
       .filter((k) => k in v).map((k) => `${k}=${v[k] ? "✅" : "❌"}`);
     if (flags.length) lines.push(`- ${flags.join(" · ")}`);
   }

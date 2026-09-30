@@ -3,6 +3,38 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [insights-v3.3.0 · M1 Emergency MVP Gate] — 2026-09-30
+
+Meta do M1: 3 seções (carbon, blockchain, climate) × 5 camadas (Contexto,
+Tese, Direito Econômico, Stakeholders, What to Watch) × evidência × revisão
+humana. Sem novos gates, profiles ou ADRs.
+
+### Alterado
+- **What to Watch = exatamente 1 item** por seção (temporário no M1).
+- **Direito Econômico com fallback `not_material`**: declaração explícita de
+  não materialidade e listas vazias; `low` sem obrigação de aparato normativo.
+- **Mínimo de 2 stakeholders.** Completude das 5 camadas verificada no
+  retry de contrato, no gate shadow e no promote (`checkLayerCompleteness`).
+- **Retry de contrato de schema** (`ai-provider.mjs`): uma única nova
+  tentativa devolvendo ao modelo os erros estruturais (ex.: itens vazios do
+  run c876). Nada é apagado ou corrigido localmente; se persistir, o gate
+  bloqueia. Eventos `schema_retry` registrados no `generationReport`.
+- **Blockchain explicitamente snapshot** no contexto, com o What to Watch
+  sugerido "próxima atualização do DefiLlama" (primeira comparação temporal).
+- Correção de falso positivo do `snapshot_trend` (run c876): `limitations` e
+  frases com negação explícita ("não é possível inferir tendência") não
+  contam como linguagem de tendência.
+- `InsightBox`: rótulo para `not_material` (antes aparecia cru) e tipo de
+  `limitations` alinhado ao contrato (string).
+- `PROMPT_VERSION` 3.2.0 → 3.3.0.
+
+### Adicionado
+- `scripts/test-contract-render.mjs` — alinhamento contrato ↔ InsightBox
+  (5 camadas com cabeçalho e campos; todo enum com rótulo). Pegou as 3
+  lacunas acima no código anterior.
+- `scripts/test-m1-layers.mjs` — completude, caso c876, fallback
+  not_material, negação em snapshot. Ambos no CI de PR.
+
 ## [gate-v1.4.1] — 2026-09-30
 
 ### Adicionado
