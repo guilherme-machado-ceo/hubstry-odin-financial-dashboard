@@ -7,6 +7,7 @@
 // ============================================================
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, LEVELS, GENERATION_STATUSES, validateInsightEntry } from "./insights-schema.mjs";
 
 const FILE = path.resolve(process.cwd(), "public/data", "insights.json");
 const errors = [];
@@ -15,7 +16,7 @@ const warnings = [];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_DT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
 const RUN_ID = /^odin-\d{8}-\d{6}-[0-9a-f]{4}$/;
-const LEVELS = new Set(["high", "medium", "low"]);
+const LEGACY_STATUSES = new Set(["generated", "preserved_after_timeout", "preserved_after_error"]);
 const STATUSES = new Set(["generated", "preserved_after_timeout", "preserved_after_error"]);
 
 let json;
@@ -27,6 +28,12 @@ try {
 }
 
 // ── nível global ─────────────────────────────────────────────
+const isV2 = json.schemaVersion === SCHEMA_VERSION;
+if (isV2) {
+  if (json.intelligenceContractVersion !== INTELLIGENCE_CONTRACT_VERSION) errors.push("global.intelligenceContractVersion inválido");
+} else if (json.schemaVersion !== undefined) {
+  errors.push(`global.schemaVersion não suportado: ${json.schemaVersion}`);
+}
 if (typeof json.promptVersion !== "string") errors.push("global.promptVersion ausente");
 if (typeof json.model !== "string") errors.push("global.model ausente");
 if (!ISO_DT.test(json.updatedAt ?? "")) errors.push("global.updatedAt não é ISO datetime");
@@ -40,6 +47,10 @@ if (!sections || typeof sections !== "object" || Object.keys(sections).length ==
 // ── por seção ────────────────────────────────────────────────
 for (const [id, s] of Object.entries(sections ?? {})) {
   const at = `sections.${id}`;
+  if (isV2) {
+    errors.push(...validateInsightEntry(s, id));
+    continue;
+  }
   if (typeof s.pt !== "string" || !s.pt.trim()) errors.push(`${at}.pt ausente/vazio`);
   if (typeof s.en !== "string" || !s.en.trim()) errors.push(`${at}.en ausente/vazio`);
   if (!(ISO_DATE.test(s.dataAsOf ?? "") || ISO_DT.test(s.dataAsOf ?? ""))) errors.push(`${at}.dataAsOf inválido: ${s.dataAsOf}`);
@@ -64,6 +75,33 @@ for (const [id, s] of Object.entries(sections ?? {})) {
     if (/(somam?|totaliza\w*|no total de)\s+(US\$|€|R\$)/i.test(text))
       warnings.push(`${at}.${lang}: possível total derivado ("somam/total" + valor) — verificar RN-006 manualmente`);
   }
+}
+
+
+// ── generation gate ─────────────────────────────────────────
+if (isV2) {
+  const entries = Object.values(sections ?? {});
+  const generatedCount = entries.filter((s) => s.status === "generated").length;
+  const controlledFailures = entries.filter((s) => s.status === "failed_controlled").length;
+  const allProvenance = entries.flatMap((s) => s.provenance ?? []);
+  const evidenceClaims = entries.flatMap((s) => s.claims ?? []).filter((c) => c.kind === "fact");
+  const evidenceCovered = evidenceClaims.length === 0
+    ? 1
+    : evidenceClaims.filter((c) => (c.evidenceRefs ?? []).length > 0).length / evidenceClaims.length;
+  const provenanceCoverage = allProvenance.length === 0 ? 0 : evidenceCovered;
+  const confidencePresent = entries.every((s) => LEVELS.has(s.confidence?.data) && LEVELS.has(s.confidence?.interpretation));
+  const freshnessOk = entries.every((s) => s.freshness === undefined || s.freshness === "fresh" || s.freshness === "stale");
+  const bannedClaims = entries.flatMap((s) => s.claims ?? []).filter((c) => /\b(always|never|guaranteed|certainly)\b/i.test(c.textEn)).length;
+  const economicLawHighHasNorms = entries.every((s) =>
+    s.economicLaw?.relevance !== "high" ||
+    (Array.isArray(s.economicLaw.norms) && s.economicLaw.norms.length > 0 &&
+     Array.isArray(s.economicLaw.institutions) && s.economicLaw.institutions.length > 0 &&
+     Array.isArray(s.economicLaw.sourceRefs) && s.economicLaw.sourceRefs.length > 0)
+  );
+  const publishAllowed = errors.length === 0 && generatedCount > 0 && controlledFailures === 0 &&
+    provenanceCoverage >= 0.5 && confidencePresent && freshnessOk && bannedClaims === 0 && economicLawHighHasNorms;
+  console.log(`Generation gate: ${publishAllowed ? "PASS" : "BLOCK"} | generated=${generatedCount} provenanceCoverage=${provenanceCoverage.toFixed(2)}`);
+  if (!publishAllowed) errors.push("generation gate bloqueou publicação do artefato v2");
 }
 
 // ── relatório ────────────────────────────────────────────────
