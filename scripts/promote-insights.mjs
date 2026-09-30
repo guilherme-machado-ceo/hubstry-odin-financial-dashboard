@@ -4,6 +4,7 @@ import { validateInsightEntry, checkFreshness, SCHEMA_VERSION, INTELLIGENCE_CONT
 import { validateSectionProfile } from "./insights-profile-validator.mjs";
 import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
 import { verifyProvenance } from "./verify-provenance.mjs";
+import { annotateErrors } from "./gh-annotations.mjs";
 
 const input = path.resolve(process.argv[2] || "public/data/insights.v2.shadow.json");
 const output = path.resolve(process.argv[3] || "public/data/insights.v2.json");
@@ -67,6 +68,7 @@ if (bannedClaims > 0) errors.push(`claims banidos detectados: ${bannedClaims}`);
 if (!sectionProfileValid) errors.push("sectionProfileValid=false");
 
 if (errors.length) {
+  annotateErrors("ODIN promote BLOCK", errors);
   for (const e of errors) console.error("ERRO:", e);
   process.exit(1);
 }

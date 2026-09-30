@@ -3,6 +3,17 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [gate-v1.4.1] — 2026-09-30
+
+### Adicionado
+- Observabilidade do gate: erros do validate-shadow e do promote viram
+  anotações `::error::` do GitHub Actions (9 individuais + 1 agregada) e o
+  resultado do gate vira `::notice::` — legíveis pela API de check-runs, sem
+  baixar logs ou artefatos (`scripts/gh-annotations.mjs`).
+- Shadow bloqueado publica o artefato `odin-insights-v2-shadow-blocked`
+  para diagnóstico. **Não é promovível**: o promote só baixa
+  `odin-insights-v2-shadow` e revalida tudo de qualquer forma.
+
 ## [insights-v3.2.0] — 2026-09-30
 
 ### Alterado
