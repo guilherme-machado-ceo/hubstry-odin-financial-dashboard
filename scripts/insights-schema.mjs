@@ -2,7 +2,7 @@
 
 export const SCHEMA_VERSION = "2.0";
 export const INTELLIGENCE_CONTRACT_VERSION = "1.0";
-export const PROMPT_VERSION = "3.0.0";
+export const PROMPT_VERSION = "3.0.1";
 
 export const LEVELS = new Set(["high", "medium", "low"]);
 export const CLAIM_KINDS = new Set(["fact", "interpretation", "hypothesis"]);
