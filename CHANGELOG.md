@@ -3,6 +3,19 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [docs · README M1] — 2026-09-30
+
+### Alterado
+- README reescrito para o estado pós-M1: nome canônico, resumo em inglês,
+  status e roadmap M1–M4, mapa das 16 seções (origem do dado, fonte, data de
+  referência, camadas ODIN), as 5 camadas e suas regras, pipeline governado,
+  proveniência e auditoria, fontes e providers (NVIDIA Nemotron ativo;
+  Huawei Cloud MaaS como provider alternativo), operação e testes.
+- Corrigido: a geração não roda mais localmente nem via MaaS por padrão; o
+  diretório `logs/` citado antes não existe no repositório; PTAX, petróleo e
+  clima consultam APIs ao vivo no navegador (não são snapshots).
+- `docs/README.md`: nota apontando para a cadeia vigente (pipeline v2).
+
 ## [M1 fechado · revisão editorial do run adef] — 2026-09-30
 
 Revisão humana do run `odin-20260930-174643-adef` (prompt 3.3.0), promovido

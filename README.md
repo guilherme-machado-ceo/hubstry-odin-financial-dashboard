@@ -6,69 +6,157 @@
   </a>
 </p>
 
-**ODIN Intelligence Dashboard** — Financial & Geoeconomic Intelligence. Produto da linha ODIN (Omnibus Digital Intelligence News), a frente de inteligência da Hubstry Deep Tech.
-
-Dashboard de inteligência financeira **BRICS+**: mercado de títulos em moeda local (LC Bonds), ouro, petróleo, precificação de carbono (CBAM), ativos digitais e vetor climático — com análises editoriais assistidas por IA e trilha de auditoria versionada no próprio repositório.
+**ODIN Intelligence Dashboard** — inteligência financeira e geoeconômica. Da informação pública ao contexto de decisão.
 
 **Produção:** https://hubstry-odin-financial-dashboard.vercel.app
 
+> **English summary.** ODIN (Omnibus Digital Intelligence News) is Hubstry Deep Tech's intelligence line. This repository hosts the ODIN Intelligence Dashboard: 16 sections on local-currency bonds, gold, oil, carbon pricing (CBAM), digital assets and climate, built from curated public sources and daily API snapshots. In three sections (Carbon, Blockchain, Climate), a governed AI pipeline adds five intelligence layers — Strategic Context, ODIN Thesis, Economic Law lens, Stakeholder Implications and What to Watch — generated in shadow mode, checked by deterministic gates (contract, freshness, claim-to-evidence consistency, hash-verified provenance) and published only after human review. Milestone M1 (3 sections × 5 layers, evidence-backed, human-reviewed) is complete. Not financial, investment or legal advice.
+
+---
+
 ## Visão geral
 
-O ODIN acompanha a transição do sistema financeiro global de um modelo centrado no dólar para um sistema multipolar — moedas locais, ouro e infraestrutura própria (CIPS, NDB, Bond Connect) — reunindo dados estáticos curados e snapshots diários de APIs abertas em 16 seções analíticas, com leitura editorial gerada por IA em três delas.
+O ODIN acompanha a transição do sistema financeiro global de um modelo centrado no dólar para um arranjo multipolar — moedas locais, ouro e infraestrutura própria (CIPS — Cross-Border Interbank Payment System, sistema chinês de pagamentos interbancários; NDB — New Development Bank, banco do BRICS; Bond Connect) — e os vetores que o atravessam: precificação de carbono, ativos digitais e clima.
 
-O projeto é **docs-as-code**: decisões de arquitetura (ADRs), mudanças (CHANGELOG), execuções do gerador de IA (run logs) e revisões externas (issues rotuladas) ficam versionados junto ao código, formando uma cadeia de auditoria ponta a ponta — decisão → mudança → execução → deploy → revisão.
+O dashboard combina dois tipos de conteúdo:
 
-## Funcionalidades
+- **Dados e indicadores** — 16 seções com séries curadas de fontes primárias, snapshots diários e consultas ao vivo a APIs abertas;
+- **Camadas de inteligência ODIN** — em três seções, leitura editorial gerada por IA sob contrato, com evidência rastreável e revisão humana antes da publicação.
 
-- **16 seções analíticas** — LC Bonds BRICS + LATAM, spreads e volatilidade cambial G20, hedge TCX, composição de dívida ML/ME, reservas de ouro, vetor petróleo, precificação de carbono e CBAM, blockchain e RWAs, vetor climático e notícias financeiras em snapshot diário;
-- **ODIN Insights** — análise editorial por seção gerada via MaaS (Huawei Cloud), com proveniência por seção (`promptVersion`, `generatedAt`, `generationStatus`, `runId`), confiança estruturada (dados vs. interpretação) e selo de transparência "IA assistida · não revisado por analista";
-- **i18n PT/EN** com arquitetura ZH-ready e dogma editorial de siglas expandidas na primeira ocorrência;
-- **Exportação** PNG/PDF/JSON por gráfico, widget de incorporação (embed) por seção e overlays de fonte primária com metodologia.
+O projeto é *docs-as-code*: decisões (ADRs — Architecture Decision Records), mudanças (CHANGELOG), contratos, fixtures de regressão e evidências de cada geração ficam versionados junto ao código.
 
-## Fontes de dados
+## Status
 
-| Fonte | Uso | Chave |
-|-------|-----|-------|
-| BCB SGS (série 10813) | Ptax BRL/USD | não |
-| Yahoo Finance | Brent/WTI | não |
-| Open-Meteo | Anomalias climáticas | não |
-| DefiLlama | Cripto, stablecoins, RWA/TVL | não |
-| Our World in Data / Global Carbon Project | CO₂ por consumo | não |
-| Google News RSS | Notícias financeiras (snapshot diário) | não |
-| MaaS (Huawei Cloud/Digiti, LiteLLM) | Geração dos ODIN Insights | sim (apenas local, nunca no browser) |
+| Marco | Escopo | Situação |
+|---|---|---|
+| **M1 — Emergency MVP Gate** | Carbono, Blockchain e Clima × 5 camadas, com evidência, proveniência e revisão humana | **Concluído** (15/15; run `odin-20260930-174643-adef`) |
+| M2 — Camadas estruturais | Fontes, data de referência, indicadores, eventos e What to Watch nas demais seções de dados, sem IA | Próximo |
+| M3 — Autonomia editorial | O modelo produz as 5 camadas de forma consistente, sem correção manual; section profiles de Blockchain e Clima | Planejado |
+| M4 — Escala | Mais seções com IA, providers, automação e monitoramento | Planejado |
 
-Snapshots diários em `public/data/*.json`, coletados no GitHub Actions (`.github/workflows/main.yml`, cron diário UTC) e commitados pelo bot `odin-data-bot`; a geração dos ODIN Insights roda localmente (`scripts/`, chave apenas em variável de ambiente).
+## As 16 seções
 
-## Documentação e auditoria
+| Seção | Origem do dado | Fonte principal | Referência | Camadas ODIN |
+|---|---|---|---|---|
+| Banner de contexto | curado estático | Hubstry (editorial) | — | — |
+| Notícias | snapshot diário | Google News RSS | diária | — |
+| Hero · PTAX | API ao vivo no navegador | BCB — Banco Central do Brasil (SGS 10813) | ao vivo | M2 |
+| Brasil em foco · Panda Bonds | curado estático | BCB; Ministério da Fazenda; Reuters | BCB jun/2025 · Panda sem data registrada | M2 |
+| Tamanho do mercado LC | curado estático | BIS — Bank for International Settlements | dez/2024 | M2 |
+| Spreads | curado estático | Bloomberg | jan/2025 | M2 |
+| Volatilidade cambial | curado estático | Bloomberg | jan/2025 | M2 |
+| Hedge TCX | curado estático | TCX — The Currency Exchange Fund | jan/2025 | M2 |
+| Composição da dívida | curado estático | IMF WEO — World Economic Outlook | out/2024 | M2 |
+| Estabilidade | curado estático | IMF WEO | out/2024 | M2 |
+| Reservas de ouro | curado estático | IMF WEO | out/2024 | M2 |
+| Vetor petróleo | curado + API ao vivo no navegador | Bloomberg; Yahoo Finance | jan/2025 · ao vivo | M2 |
+| Vetor climático | API ao vivo no navegador | Open-Meteo | ao vivo | **M1** |
+| Previsão Earth-2 | snapshot 2×/dia | NVIDIA Earth-2 (FourCastNet) | 2×/dia | fora do escopo |
+| Precificação de carbono | fonte curada versionada + snapshot | Comissão Europeia (CBAM); OWID; Banco Mundial | jul/2026 | **M1** |
+| Blockchain e RWA | snapshot diário + API ao vivo | DefiLlama; mempool.space | diária | **M1** |
 
-- `docs/README.md` — cadeia de auditoria e convenções;
-- `docs/adr/` — Architecture Decision Records (0001–0004 + template);
-- `CHANGELOG.md` — histórico de mudanças (Keep a Changelog);
-- `logs/insights-runs-AAAA-MM.jsonl` — registro técnico de execuções do gerador (tokens, latência, hashes SHA-256, runId), com rotação mensal;
-- Issues rotuladas por origem da revisão (`external-ai-review`, `human-review`, …) e Releases por milestone.
+A coluna "Referência" reproduz a data registrada em `sourceRefs` (`src/data/lcBondsData.ts`). Seções com dado curado antigo exibem essa data; a atualização desses dados é trabalho de conteúdo separado.
+
+## As cinco camadas de inteligência
+
+| Camada | O que entrega | Regra |
+|---|---|---|
+| **Contexto Estratégico** | O que os dados dizem e por que importam | Só números e datas presentes na evidência |
+| **Tese ODIN** | Interpretação derivada dos dados | Marcada como interpretação; sem tendência a partir de *snapshot* ou de dois pontos |
+| **Direito Econômico** | Relevância jurídico-institucional (`high`, `medium`, `low`, `not_material`) | Normas e instituições só se registradas na evidência da seção; `not_material` declara a ausência de incidência |
+| **Stakeholders** | Implicações para governo, empresas, investidores e startups (mínimo 2) | Sem recomendação de compra, venda ou escolha política |
+| **What to Watch** | Um sinal monitorável (M1) | A fonte citada precisa publicar o sinal; data apenas se estiver na evidência |
+
+Cada afirmação é classificada como **fato**, **interpretação** ou **hipótese**, com referência à evidência que a sustenta (contrato em `docs/odin-intelligence-contract-v1.md`).
+
+## Pipeline de inteligência governada
+
+```text
+fontes versionadas + snapshots
+        ↓
+gerador shadow (GitHub Actions, disparo manual)
+        ↓  cópia exata das fontes em public/data/evidence/<runId>/
+LLM → JSON sob contrato  ──(schema inválido)──→ 1 retry de contrato
+        ↓
+gate determinístico
+  · contrato e completude das 5 camadas
+  · section profile (Carbono)
+  · freshness (idade máxima por seção; revisão vencida bloqueia)
+  · consistência claim ↔ evidência (números, datas, datas-chave, comparações)
+  · contrato editorial (What to Watch, Direito Econômico, snapshot, vazamento de prompt)
+  · proveniência reproduzível (SHA-256 dos arquivos de evidência)
+        ↓
+resumo de revisão no Actions (claims, evidências, bloqueios)
+        ↓
+revisão humana → promoção manual (workflow com aprovação explícita)
+        ↓
+public/data/insights.v2.json + evidências do run → main → deploy
+```
+
+O que **não** é automático: a geração (disparo manual), a revisão e a promoção. O LLM não escreve a estrutura epistemológica: camadas de *profile*, datas-chave e comparações são calculadas em código.
+
+## Proveniência e auditoria
+
+- **Evidência por run** — `public/data/evidence/<runId>/` guarda os bytes exatos usados na geração; `provenance[].hash` é o SHA-256 desses arquivos. Verificação: `node scripts/verify-provenance.mjs public/data/insights.v2.json --require`.
+- **Revisão com autoria** — cada seção promovida registra `reviewedBy` (conta do GitHub que aprovou), `reviewedAt` e `reviewSource` (run shadow e run de geração). O status fica no artefato; a interface ainda não o exibe.
+- **Correções editoriais** — ajustes manuais pós-promoção ficam registrados em `editorialCorrection` (data, motivo, campos), sem regenerar nem alterar a evidência.
+- **Telemetria** — `generationReport.json` de cada run (artefato do Actions): provider, modelo, tokens, latência, retries e resultado do gate; erros do gate também aparecem como anotações do Actions.
+- **Regressão** — erros reais de runs anteriores viram fixtures em `contracts/consistency/fixtures/` e precisam continuar bloqueados.
+- **Registro de decisões** — `docs/adr/`, `docs/odin-intelligence-contract-v1.md`, `CHANGELOG.md`; issues rotuladas por origem da revisão (ex.: `external-ai-review`).
+
+## Fontes e providers
+
+| Fonte | Uso | Acesso |
+|---|---|---|
+| Comissão Europeia — CBAM (DG TAXUD) | Preço trimestral, marcos regulatórios, referências jurídicas | curadoria manual em `public/data/sources/cbam-carbon.json` |
+| DefiLlama | Stablecoins, RWA/TVL, preços de criptoativos | snapshot diário (`main.yml`), sem chave |
+| mempool.space | Taxas on-chain do Bitcoin | ao vivo, sem chave |
+| Open-Meteo | Temperatura e precipitação (Brasília) | ao vivo e na geração, sem chave |
+| BCB SGS 10813 | PTAX BRL/USD | ao vivo, sem chave |
+| Yahoo Finance | Brent/WTI | ao vivo, sem chave |
+| Our World in Data / Global Carbon Project | CO₂ por consumo | snapshot diário, sem chave |
+| Google News RSS | Notícias | snapshot diário, sem chave |
+| BIS, IMF WEO, CEPAL, NDB, CIPS, TCX, Bloomberg | Séries de títulos, dívida, ouro, câmbio | curadoria manual em `src/data/*.ts` |
+| NVIDIA Earth-2 (FourCastNet NIM) | Previsão meteorológica | snapshot 2×/dia, chave em *secrets* |
+| **NVIDIA — Nemotron** | Geração das camadas ODIN (provider ativo) | API, chave em *secrets* do Actions |
+| **Huawei Cloud MaaS** (Model as a Service, via Digiti) | Provider alternativo configurado (`AI_PROVIDER=maas`) | API, chave em variável de ambiente |
+
+Nenhuma chave de API é exposta no navegador.
+
+## Operação
+
+**Gerar e publicar camadas ODIN**
+1. Actions → **ODIN Insights Shadow** → *Run workflow*.
+2. Ler o resumo do job (claims, evidências, decisão do gate). Em bloqueio, o motivo aparece nas anotações e no artefato `odin-insights-v2-shadow-blocked`.
+3. Se aprovado: Actions → **ODIN Insights Controlled Promotion** → `shadow_run_id` do passo 1, `approve = true`. A conta que dispara fica registrada como revisora.
+
+**Atualizar o preço do CBAM** — editar `public/data/sources/cbam-carbon.json` (novo trimestre em `prices`, `validAsOf`, `nextReviewAt`). O gate bloqueia a seção de carbono quando `nextReviewAt` vence ou o dado passa de 100 dias.
+
+**Deploy** — integração GitHub → Vercel: cada push na `main` publica; cada PR gera *preview*. O plano atual tem limite diário de deploys; agrupar mudanças evita esgotá-lo.
 
 ## Desenvolvimento
 
 ```bash
 npm install
-npm run dev        # ambiente local (Vite)
-npm run build      # build de produção (tsc + vite)
+npm run dev          # ambiente local (Vite)
+npm run build        # build de produção (tsc + vite)
 
-# ODIN Insights (geração local, chave apenas em variável de ambiente)
-MAAS_KEY="sua_chave" node scripts/generate-insights.mjs
-npm run insights:usage   # consumo acumulado de tokens (run logs)
+# testes determinísticos (rodam no CI de PR, sem chamada a LLM)
+node scripts/test-insights-profiles.mjs     # section profiles, freshness, gate estrito
+node scripts/test-evidence-consistency.mjs  # claim ↔ evidência e contrato editorial
+node scripts/test-m1-layers.mjs             # 5 camadas, retry de contrato, snapshot
+node scripts/test-contract-render.mjs       # contrato ↔ InsightBox
+node scripts/test-review-summary.mjs        # resumo de revisão
 ```
 
-## Stack
+**Stack:** React 19 · TypeScript (strict) · Vite · Tailwind CSS · Recharts · html2canvas + jsPDF · i18n próprio (PT/EN).
 
-React 19 · TypeScript (strict) · Vite · Tailwind CSS · Recharts · html2canvas + jsPDF · i18n próprio (PT/EN, ZH-ready)
+## O que o ODIN não é
 
-## Deploy
-
-Integração nativa GitHub → Vercel: todo push na branch `main` dispara build e deploy automático — sem dependência de GitHub Actions.
+Não é terminal financeiro, plataforma de *trading*, recomendação de investimento, previsão de mercado, parecer jurídico nem chatbot. A lente de Direito Econômico é analítica; as implicações para stakeholders são contexto, não recomendação.
 
 ## Licença
 
 AGPL-3.0 © 2026 Hubstry Deep Tech · Overall 720°
 
-> Valores aproximados. Verificar contra fontes primárias antes de publicar ou tomar decisão de investimento. Este dashboard é para fins educativos e de análise geopolítica; não constitui recomendação financeira.
+> Verificar valores contra as fontes primárias antes de publicar ou decidir. Conteúdo para fins de análise econômica e geopolítica; não constitui recomendação financeira, de investimento ou jurídica.
