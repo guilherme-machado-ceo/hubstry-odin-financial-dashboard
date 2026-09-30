@@ -14,6 +14,7 @@ const runId = (() => {
 })();
 const sha256 = (s) => "sha256:" + createHash("sha256").update(String(s)).digest("hex");
 const provider = getProviderConfig();
+const telemetry = [];
 
 const SYSTEM = `Você é o analista editorial do ODIN — Open Financial & Geoeconomic Intelligence Platform.
 Epistemic contract: SOURCE → DATA → EVENT → CLAIM → CONTEXT → INTERPRETATION → THESIS → STAKEHOLDER.
@@ -106,11 +107,15 @@ async function contexts() {
 
 const results=[];
 for (const item of await contexts()) {
+  const sectionEvents = [];
   const {parsed,usage,latencyMs}=await chatJson({
     system:SYSTEM,
     user:`Section: ${item.id}\nValid as of: ${item.validAsOf}\nNext review: ${item.nextReviewAt}\nContext:\n${item.context}`,
-    temperature:0.2,maxTokens:3500,reasoning:false
+    temperature:0.2,maxTokens:3500,reasoning:false,
+    onEvent: (event) => sectionEvents.push({ ...event, sectionId: item.id })
   });
+  telemetry.push(...sectionEvents.map(e => ({ ...e, runId, model: provider.model, schemaVersion: SCHEMA_VERSION, intelligenceContractVersion: INTELLIGENCE_CONTRACT_VERSION, promptVersion: PROMPT_VERSION })));
+  console.log(`Telemetry ${item.id}: ${sectionEvents.length} provider events`);
   if (!parsed || typeof parsed.pt!=="string" || typeof parsed.en!=="string") throw new Error(`Invalid model output for ${item.id}`);
   const provById=new Map(item.provenance.map(p=>[p.sourceId,p]));
   for (const c of parsed.claims ?? []) for (const ref of c.evidenceRefs ?? [])
@@ -147,5 +152,19 @@ const payload={
   provider:provider.name, model:provider.model, promptVersion:PROMPT_VERSION,
   data:{sections:Object.fromEntries(results.map(x=>[x.sectionId,x]))}
 };
+const REPORT_FILE = path.join(OUT_DIR, "generationReport.json");
+const report = {
+  runId,
+  provider: provider.name,
+  model: provider.model,
+  schemaVersion: SCHEMA_VERSION,
+  intelligenceContractVersion: INTELLIGENCE_CONTRACT_VERSION,
+  promptVersion: PROMPT_VERSION,
+  decision: "shadow_generated",
+  sections: results.map(s => ({ sectionId: s.sectionId, status: s.status, latencyMs: s.usage.latencyMs, totalTokens: s.usage.total })),
+  providerEvents: telemetry,
+  generatedAt: new Date().toISOString()
+};
 await writeFile(OUT_FILE,JSON.stringify(payload,null,2)+"\n");
+await writeFile(REPORT_FILE,JSON.stringify(report,null,2)+"\n");
 console.log(`WROTE ${OUT_FILE}`);
