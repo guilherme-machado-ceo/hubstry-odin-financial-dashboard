@@ -1,0 +1,22 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://hubstry.dev/odin/contracts/intelligence-base.schema.json",
+  "title":"ODIN Intelligence Base Contract",
+  "type":"object",
+  "required":["schemaVersion","intelligenceContractVersion","sectionId","status","pt","en","claims","provenance","confidence","limitations"],
+  "properties":{
+    "schemaVersion":{"type":"string","const":"2.0"},
+    "intelligenceContractVersion":{"type":"string","const":"1.0"},
+    "sectionId":{"type":"string","minLength":1},
+    "status":{"enum":["shadow","generated","preserved_after_error","preserved_after_timeout","failed_controlled"]},
+    "pt":{"type":"string","minLength":1},
+    "en":{"type":"string","minLength":1},
+    "claims":{"type":"array"},
+    "provenance":{"type":"array"},
+    "confidence":{"type":"object","required":["data","interpretation"],"properties":{"data":{"enum":["high","medium","low"]},"interpretation":{"enum":["high","medium","low"]}},"additionalProperties":true},
+    "limitations":{"type":"string","minLength":1},
+    "sectionProfile":{"type":"string","minLength":1},
+    "profileVersion":{"type":"string","pattern":"^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+  },
+  "additionalProperties":true
+}
