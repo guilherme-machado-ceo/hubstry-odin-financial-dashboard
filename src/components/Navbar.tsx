@@ -14,6 +14,15 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-[#050505]/90 backdrop-blur-md border-b border-[#1a1a1a]">
       <div className="max-w-[1440px] mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
+          <a
+            href="https://hubstry.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Hubstry Deep Tech"
+            className="flex items-center bg-white rounded px-2 py-1 hover:opacity-90 transition-opacity"
+          >
+            <img src="/brand/hubstry-logo.png" alt="Hubstry Deep Tech" className="h-3.5 w-auto" />
+          </a>
           <div className="flex flex-col">
             <span className="text-[11px] font-mono font-bold tracking-[0.2em] text-[#e0e0e0]">{t("nav.title")}</span>
             <span className="text-[9px] font-mono tracking-[0.15em] text-[#555]">{t("nav.subtitle")}</span>
