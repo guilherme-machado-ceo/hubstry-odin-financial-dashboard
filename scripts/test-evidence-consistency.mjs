@@ -33,6 +33,27 @@ const invented = checkEvidenceConsistency(
 );
 assert(invented.some(e => e.rule === "fact_number_not_in_source"), "número inventado em fact deve bloquear");
 
+// Contrato editorial (gate v1.4): unidades e falsos positivos.
+
+const { hasTerm, checkEconomicLaw, checkWatch } = await import("./editorial-contract.mjs");
+assert(hasTerm("Atualizações da SEC", "sec") && !hasTerm("setor secundário", "sec"), "termo curto casa só palavra inteira");
+assert(hasTerm("Precipitação em Brasília", "precipitac*"), "prefixo sem acento");
+const LEGAL = [
+  { id: "eu-reg-2023-956", kind: "norm", labels: ["Regulation (EU) 2023/956", "Regulamento (UE) 2023/956", "2023/956"] },
+  { id: "european-commission", kind: "institution", labels: ["European Commission", "Comissão Europeia"] },
+];
+const base = { provenance: [{ sourceId: "source-carbon-ec" }] };
+const mismatch = checkEconomicLaw({ ...base, economicLaw: { relevance: "high", pt: "Obrigações sob o Regulamento (UE) 2023/956.", en: "Obligations for EU importers.", norms: ["Regulation (EU) 2023/956"], institutions: ["European Commission"], sourceRefs: ["source-carbon-ec"] } }, { legalRefs: LEGAL });
+assert(mismatch.some((e) => e.rule === "law_pt_en_mismatch"), "pt cita norma que en não cita → law_pt_en_mismatch");
+const equivalent = checkEconomicLaw({ ...base, economicLaw: { relevance: "high", pt: "Obrigações sob o Regulamento (UE) 2023/956.", en: "Obligations under Regulation (EU) 2023/956.", norms: ["Regulamento (UE) 2023/956"], institutions: ["Comissão Europeia"], sourceRefs: ["source-carbon-ec"] } }, { legalRefs: LEGAL });
+assert(equivalent.length === 0, `nomes diferentes da mesma norma em pt/en devem passar: ${equivalent.map(formatConsistencyError)}`);
+const incomplete = checkEconomicLaw({ ...base, economicLaw: { relevance: "high", pt: "x", en: "x", norms: [], institutions: [], sourceRefs: [] } }, { legalRefs: LEGAL });
+assert(incomplete.some((e) => e.rule === "law_high_incomplete"), "high sem norma/instituição → law_high_incomplete");
+const notMaterial = checkEconomicLaw({ ...base, economicLaw: { relevance: "not_material", pt: "Sem lente jurídica.", en: "No legal lens.", norms: [], institutions: [], sourceRefs: [] } }, { legalRefs: [] });
+assert(notMaterial.length === 0, "not_material com listas vazias deve passar");
+const annual = checkWatch({ whatToWatch: [{ signal: "Prazo da primeira declaração anual do CBAM", source: "source-carbon-ec", expectedDate: "2027-09-30", whyItMatters: "x" }] }, { material: "due by 2027-09-30", keyDates: [] });
+assert(annual.length === 0, `"declaração anual" sem métrica de preço não é erro de cadência: ${annual.map(formatConsistencyError)}`);
+
 // Fixtures de regressão.
 for (const file of (await readdir(dir)).filter(f => f.endsWith(".json")).sort()) {
   const fx = JSON.parse(await readFile(path.join(dir, file), "utf8"));

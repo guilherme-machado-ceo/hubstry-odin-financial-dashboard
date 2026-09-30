@@ -4,16 +4,64 @@
   "curation": "manual — valores conferidos na página oficial da Comissão Europeia (DG TAXUD)",
   "validAsOf": "2026-07-06",
   "nextReviewAt": "2026-10-05T00:00:00Z",
-  "legalBasis": ["Regulation (EU) 2023/956", "2025 CBAM simplification amendment"],
+  "legalBasis": [
+    "Regulation (EU) 2023/956",
+    "2025 CBAM simplification amendment"
+  ],
   "prices": [
-    { "period": "2026-Q1", "eurPerTCO2e": 75.36 },
-    { "period": "2026-Q2", "eurPerTCO2e": 75.28 }
+    {
+      "period": "2026-Q1",
+      "eurPerTCO2e": 75.36
+    },
+    {
+      "period": "2026-Q2",
+      "eurPerTCO2e": 75.28
+    }
   ],
   "sectorsCovered": 6,
-  "deMinimis": { "tonnesPerYear": 50, "scope": "annual aggregate per importer for covered goods" },
+  "deMinimis": {
+    "tonnesPerYear": 50,
+    "scope": "annual aggregate per importer for covered goods"
+  },
   "keyDates": {
     "definitiveStart": "2026-01-01",
     "firstAnnualDeclaration": "2027-09-30"
   },
-  "maintenance": "Atualizar prices, validAsOf e nextReviewAt a cada novo preço trimestral. O gate bloqueia a seção carbon quando nextReviewAt vence ou validAsOf passa de 100 dias."
+  "maintenance": "Atualizar prices, validAsOf e nextReviewAt a cada novo preço trimestral. O gate bloqueia a seção carbon quando nextReviewAt vence ou validAsOf passa de 100 dias.",
+  "legalReferences": [
+    {
+      "id": "eu-reg-2023-956",
+      "kind": "norm",
+      "labels": [
+        "Regulation (EU) 2023/956",
+        "Regulamento (UE) 2023/956",
+        "2023/956"
+      ]
+    },
+    {
+      "id": "cbam-2025-simplification",
+      "kind": "norm",
+      "labels": [
+        "2025 CBAM simplification amendment",
+        "CBAM simplification",
+        "simplification amendment",
+        "simplificação do CBAM",
+        "alteração de 2025",
+        "2025 amendment",
+        "emenda de 2025"
+      ]
+    },
+    {
+      "id": "european-commission",
+      "kind": "institution",
+      "labels": [
+        "European Commission",
+        "Comissão Europeia",
+        "DG TAXUD",
+        "Directorate-General for Taxation and Customs Union",
+        "Direção-Geral da Fiscalidade e da União Aduaneira"
+      ]
+    }
+  ],
+  "temporalShape": "two_points"
 }

@@ -22,7 +22,9 @@
         "unit": "mm",
         "direction": "below"
       }
-    ]
+    ],
+    "legalRefs": [],
+    "temporalShape": "window_aggregate"
   },
   "entry": {
     "schemaVersion": "2.0",

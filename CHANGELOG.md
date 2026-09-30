@@ -3,6 +3,48 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [gate-v1.4] — 2026-09-30
+
+Origem: revisão editorial humana do run `odin-20260930-155006-8ab9`, que
+passou nos gates v1.3 mas continha afirmações não rastreáveis. Cada erro
+encontrado virou fixture de regressão. Princípio: **rastreabilidade à
+evidência, não presença de texto**.
+
+### Adicionado
+- `contracts/sources/registry.json` — capacidades declaradas por fonte:
+  o que publica (`supports`), o que não publica (`outOfScope`) e a cadência
+  de cada métrica.
+- `scripts/editorial-contract.mjs`, aplicado dentro da consistência
+  claim ↔ evidência (gate shadow e promote):
+  - **What to Watch**: `expectedDate` e datas/números do texto presentes no
+    material da seção; sinal sustentável pela fonte citada (registry);
+    cadência compatível com a métrica (ex.: preço do CBAM é trimestral);
+  - **Economic Law**: toda norma/instituição listada corresponde a uma
+    referência jurídica registrada na evidência (`legalRefs`), em qualquer
+    relevância; `high` exige norma + instituição + sourceRef; menções a
+    normas numeradas ou siglas regulatórias sem registro bloqueiam;
+    **equivalência referencial pt ↔ en** (mesmas referências, nomes podem
+    diferir);
+  - **forma temporal**: fonte `snapshot` não sustenta linguagem de tendência
+    (What to Watch excluído);
+  - **vazamento de prompt**: instruções reproduzidas no texto bloqueiam.
+- `cbam-carbon.json`: `legalReferences` (Reg. (UE) 2023/956, simplificação
+  de 2025, Comissão Europeia/DG TAXUD) e `temporalShape`.
+- Fixtures: `8ab9-{carbon,blockchain,climate}.fail.json` (artefato real) e
+  versões corrigidas `*.pass.json`; testes unitários de falso positivo e de
+  equivalência pt/en.
+
+### Alterado
+- `corrected-climate.pass.json`: What to Watch reescrito — os sinais
+  originais (regiões produtoras, bacias, INMET/CPTEC) não são publicados
+  pela fonte citada.
+
+### Atenção
+- O `insights.v2.json` publicado (df75 corrigido) não passaria neste
+  contrato no What to Watch de clima e blockchain; será substituído na
+  próxima promoção. A fonte jurídica de blockchain continua fora de escopo:
+  sem `legalRefs`, a seção deve declarar normas e instituições vazias.
+
 ## [gate-v1.3] — 2026-09-30
 
 ### Adicionado

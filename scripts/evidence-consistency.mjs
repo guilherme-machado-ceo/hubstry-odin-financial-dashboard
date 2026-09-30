@@ -7,11 +7,16 @@
 //      CBAM ≠ prazo da primeira declaração anual);
 //   3. comparações recalculadas em código (acima/abaixo da referência).
 //
+// 4. contrato editorial (What to Watch, Economic Law, forma temporal, vazamento
+//    de prompt) — ver editorial-contract.mjs.
+//
 // Limitações conhecidas (documentadas, não silenciadas):
 //   - inteiros de 0 a 10 não são verificados (contagens textuais geram falso
 //     bloqueio); números colados a letras (CO2, Q2) são ignorados;
 //   - comparações são avaliadas por frase: se a frase contém as duas direções
 //     ("acima … e abaixo …"), ela passa — a atribuição por oração não é feita.
+
+import { checkEditorialContract } from "./editorial-contract.mjs";
 
 const MONTHS = {
   janeiro: 1, fevereiro: 2, "março": 3, marco: 3, abril: 4, maio: 5, junho: 6,
@@ -195,6 +200,7 @@ export function checkEvidenceConsistency(entry, evidence) {
     ...checkFactClaims(entry, evidence.material),
     ...checkKeyDates(entry, evidence.keyDates ?? []),
     ...checkComparisons(entry, evidence.comparisons ?? []),
+    ...checkEditorialContract(entry, evidence),
   ];
 }
 
