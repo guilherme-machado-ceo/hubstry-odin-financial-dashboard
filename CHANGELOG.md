@@ -3,6 +3,36 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [M1 fechado · revisão editorial do run adef] — 2026-09-30
+
+Revisão humana do run `odin-20260930-174643-adef` (prompt 3.3.0), promovido
+por guilherme-machado-ceo (shadow `36753798426`). Correção manual sobre o
+artefato promovido, sem nova geração e sem fato novo; cada seção registra
+`editorialCorrection`. Após a correção: gate completo PASS contra a
+evidência do próprio run; proveniência intacta.
+
+### Corrigido
+- **carbon** — tese extrapolava "estabilidade de preço" a partir de dois
+  pontos (agora marcada como interpretação, sem tendência); implicação
+  `corporate` invertia a direção dos pedidos de dados (são importadores da UE
+  que pedem a exportadores); `investors` repetia "preço estável"; grafia de
+  "de minimis" e unidade em pt.
+- **blockchain** — "permanece concentrado" pressupunha série temporal; a
+  participação de 64% (cálculo do modelo) passa a ≈64,5%, explicitada como
+  derivada.
+- **climate** — "anomalia"/"déficit" pressupunham climatologia oficial; What
+  to Watch ancorado em Brasília e na cadência diária da fonte; grafia.
+
+### Matriz de aceite M1
+Carbon, Blockchain e Climate × Contexto, Tese, Direito Econômico,
+Stakeholders, What to Watch: **15/15**, com evidência, proveniência e
+revisão humana.
+
+### Pauta do M2 (autonomia editorial)
+Tese sempre marcada como interpretação; proibir estabilidade/tendência a
+partir de dois pontos; direção dos pedidos de dados do CBAM no contexto;
+cálculos derivados explicitados; cadência da fonte também no whyItMatters.
+
 ## [insights-v3.3.0 · M1 Emergency MVP Gate] — 2026-09-30
 
 Meta do M1: 3 seções (carbon, blockchain, climate) × 5 camadas (Contexto,
