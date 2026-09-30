@@ -25,6 +25,14 @@ export default function Footer({ onSourceClick }: Props) {
             <p className="text-[9px] font-mono text-[#444] mt-2">
               {t("footer.snapshot")}
             </p>
+            <a
+              href="https://hubstry.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center bg-white rounded px-2 py-1 mt-3 hover:opacity-90 transition-opacity"
+            >
+              <img src="/brand/hubstry-logo.png" alt="Hubstry Deep Tech" className="h-3 w-auto" />
+            </a>
           </div>
 
           {/* Sources */}
