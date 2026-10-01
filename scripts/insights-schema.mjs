@@ -2,6 +2,8 @@
 
 export const SCHEMA_VERSION = "2.0";
 export const INTELLIGENCE_CONTRACT_VERSION = "1.0";
+/** Versões aceitas pelo gate. "1.1" = Data & Intelligence Contract v1.1 (docs/odin-intelligence-contract-v1.1.md), regras extras em contract-v11.mjs. */
+export const SUPPORTED_CONTRACT_VERSIONS = new Set(["1.0", "1.1"]);
 export const PROMPT_VERSION = "3.3.0";
 
 export const LEVELS = new Set(["high", "medium", "low"]);
@@ -103,7 +105,7 @@ export function validateInsightEntry(entry, sectionId = "unknown") {
   const p = `sections.${sectionId}`;
   if (!entry || typeof entry !== "object") return [`${p} deve ser objeto`];
   if (entry.schemaVersion !== SCHEMA_VERSION) errors.push(`${p}.schemaVersion deve ser ${SCHEMA_VERSION}`);
-  if (entry.intelligenceContractVersion !== INTELLIGENCE_CONTRACT_VERSION) errors.push(`${p}.intelligenceContractVersion deve ser ${INTELLIGENCE_CONTRACT_VERSION}`);
+  if (!SUPPORTED_CONTRACT_VERSIONS.has(entry.intelligenceContractVersion)) errors.push(`${p}.intelligenceContractVersion não suportada: ${entry.intelligenceContractVersion}`);
   if (entry.sectionId !== sectionId) errors.push(`${p}.sectionId inconsistente`);
   if (!GENERATION_STATUSES.has(entry.status)) errors.push(`${p}.status inválido: ${entry.status}`);
   for (const f of ["promptVersion","provider","model","runId","limitations"]) if (typeof entry[f] !== "string" || !entry[f]) errors.push(`${p}.${f} ausente`);
@@ -124,7 +126,8 @@ export function validateInsightEntry(entry, sectionId = "unknown") {
       if (!refs.has(ref)) errors.push(`${p}.claims[${i}].evidenceRefs referencia sourceId inexistente: ${ref}`);
   errors.push(...validateStakeholders(entry.stakeholderImplications, `${p}.stakeholderImplications`));
   const knownSources = new Set((entry.provenance ?? []).flatMap(r => [r.sourceId, r.sourceUrl]));
-  errors.push(...validateWatch(entry.whatToWatch, `${p}.whatToWatch`, knownSources));
+  // v1.1: What to Watch bilíngue é validado em contract-v11.mjs (checkWatchV11).
+  if (entry.intelligenceContractVersion !== "1.1") errors.push(...validateWatch(entry.whatToWatch, `${p}.whatToWatch`, knownSources));
   const law = entry.economicLaw;
   if (!law || !["high","medium","low","not_material"].includes(law.relevance)) errors.push(`${p}.economicLaw.relevance inválido`);
   if (law?.relevance === "high") {

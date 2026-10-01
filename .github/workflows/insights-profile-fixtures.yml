@@ -21,6 +21,8 @@ jobs:
         run: node scripts/test-insights-profiles.mjs
       - name: Validate claim/evidence consistency (regressão df75)
         run: node scripts/test-evidence-consistency.mjs
+      - name: Data & Intelligence Contract v1.1 (recomendação, lente, procedência, What to Watch PT/EN)
+        run: node scripts/test-contract-v11.mjs
       - name: Verify published insights provenance
         run: node scripts/verify-provenance.mjs public/data/insights.v2.json
       - name: Review summary renders gate and claims

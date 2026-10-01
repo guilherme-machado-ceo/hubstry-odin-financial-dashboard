@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { validateInsightEntry, checkFreshness, checkLayerCompleteness, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, LEVELS } from "./insights-schema.mjs";
+import { validateInsightEntry, checkFreshness, checkLayerCompleteness, SCHEMA_VERSION, SUPPORTED_CONTRACT_VERSIONS, LEVELS } from "./insights-schema.mjs";
+import { checkContractV11, formatContractError } from "./contract-v11.mjs";
 import { validateSectionProfile } from "./insights-profile-validator.mjs";
 import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
 import { verifyProvenance } from "./verify-provenance.mjs";
@@ -23,7 +24,7 @@ if (report.runId !== shadow.runId) errors.push("generationReport.runId não corr
 if (report.validation?.decision !== "publish_candidate") errors.push("generationReport não autoriza publish_candidate");
 
 if (shadow.schemaVersion !== SCHEMA_VERSION) errors.push("schemaVersion inválido");
-if (shadow.intelligenceContractVersion !== INTELLIGENCE_CONTRACT_VERSION) errors.push("intelligenceContractVersion inválido");
+if (!SUPPORTED_CONTRACT_VERSIONS.has(shadow.intelligenceContractVersion)) errors.push(`intelligenceContractVersion não suportada: ${shadow.intelligenceContractVersion}`);
 if (shadow.status !== "shadow") errors.push("artefato de entrada deve ter status shadow");
 if (typeof shadow.runId !== "string") errors.push("runId ausente");
 
@@ -56,6 +57,10 @@ const sectionProfileValid = Object.values(sections ?? {}).every(e => validateSec
 const evidenceBySection = new Map((report.sections ?? []).map(s => [s.sectionId, s.evidence]));
 for (const [id, entry] of Object.entries(sections ?? {}))
   for (const e of checkEvidenceConsistency(entry, evidenceBySection.get(id))) errors.push(`sections.${id} ${formatConsistencyError(e)}`);
+// Data & Intelligence Contract v1.1 (docs/odin-intelligence-contract-v1.1.md).
+for (const [id, entry] of Object.entries(sections ?? {}))
+  if (entry.intelligenceContractVersion === "1.1")
+    for (const e of checkContractV11(entry, evidenceBySection.get(id))) errors.push(`sections.${id} ${formatContractError(e)}`);
 
 // Proveniência reproduzível: as cópias de evidência do run devem estar no repo
 // (o workflow as copia do artefato shadow antes de chamar este script).
@@ -89,7 +94,7 @@ const productionSections = Object.fromEntries(
 
 const production = {
   schemaVersion: SCHEMA_VERSION,
-  intelligenceContractVersion: INTELLIGENCE_CONTRACT_VERSION,
+  intelligenceContractVersion: shadow.intelligenceContractVersion,
   status: "generated",
   runId: shadow.runId,
   generatedAt: shadow.generatedAt || now,

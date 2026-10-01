@@ -4,6 +4,7 @@
 - Versão: 1.0
 - Escopo: ODIN Insights / camada de inteligência editorial
 - Data: 2026-09-30
+- Sucessor: [v1.1](odin-intelligence-contract-v1.1.md) — congelado para o M3; o conteúdo v1.0 publicado continua válido
 
 ## 1. Finalidade
 

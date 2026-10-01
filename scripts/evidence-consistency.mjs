@@ -122,8 +122,14 @@ export function sectionTexts(entry) {
   for (const [i, s] of (entry.stakeholderImplications ?? []).entries()) { push(`stakeholderImplications[${i}].pt`, s.textPt); push(`stakeholderImplications[${i}].en`, s.textEn); }
   for (const [i, w] of (entry.whatToWatch ?? []).entries()) {
     const date = w.expectedDate ? ` (${w.expectedDate})` : "";
-    push(`whatToWatch[${i}]`, `${w.signal ?? ""}${date}.`);
-    push(`whatToWatch[${i}].whyItMatters`, w.whyItMatters);
+    push(`whatToWatch[${i}]`, `${w.signal ?? w.signalPt ?? ""}${date}.`);
+    push(`whatToWatch[${i}].whyItMatters`, w.whyItMatters ?? w.whyItMattersPt);
+    if (w.signalEn) push(`whatToWatch[${i}].en`, `${w.signalEn}${date}.`);
+    if (w.whyItMattersEn) push(`whatToWatch[${i}].whyItMatters.en`, w.whyItMattersEn);
+  }
+  for (const [i, imp] of (entry.decisionLens?.implications ?? []).entries()) {
+    push(`decisionLens.implications[${i}].pt`, imp.textPt);
+    push(`decisionLens.implications[${i}].en`, imp.textEn);
   }
   return out;
 }
