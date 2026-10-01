@@ -1,0 +1,45 @@
+name: ODIN Open Markets (dados abertos)
+
+# Coleta diferencial de juros 10a (OCDE MEI via FRED), volatilidade cambial
+# (Fed H.10 via FRED; TRM do Banco de la República) e petróleo (EIA via FRED),
+# sem chave de API, e grava src/data/generated/open-markets.json no próprio
+# branch. Método em scripts/fetch-open-markets.mjs.
+on:
+  schedule:
+    # Segundas, 06:41 UTC (03:41 BRT): OCDE é mensal; câmbio e petróleo, diários.
+    - cron: "41 6 * * 1"
+  workflow_dispatch:
+  push:
+    branches-ignore: [main]
+    paths:
+      - scripts/fetch-open-markets.mjs
+      - .github/workflows/open-markets.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: open-markets-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Coletar séries abertas
+        run: node scripts/fetch-open-markets.mjs
+      - name: Commit do snapshot
+        run: |
+          git config user.name "odin-data-bot"
+          git config user.email "odin-data-bot@users.noreply.github.com"
+          git add src/data/generated/open-markets.json
+          if git diff --cached --quiet; then
+            echo "Sem alterações em open-markets.json."
+            exit 0
+          fi
+          git commit -m "chore(data): open-markets snapshot [skip ci]"
+          git push
