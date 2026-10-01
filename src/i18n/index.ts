@@ -24,9 +24,9 @@ const pt: T = {
     headline: "G20 — VOLATILIDADE CAMBIAL: MOEDA LOCAL (ML) vs DOLAR AMERICANO (USD)",
     kpiMarket: "Mercado de LC Bonds (Títulos em Moeda Local)", kpiGrowth: "Crescimento em 10 Anos",
     kpiTrade: "Comércio BRICS em Moeda Local", kpiNDB: "NDB (Novo Banco de Desenvolvimento) — Desembolsos em ML",
-    kpiTCX: "TCX (The Currency Exchange Fund) — Hedge Acumulado", kpiCurrencies: "Moedas Cobertas pelo TCX",
+    kpiTCX: "TCX (The Currency Exchange Fund) — Hedge Acumulado desde 2007", kpiCurrencies: "Moedas Cobertas pelo TCX desde 2007",
     live: "AO VIVO", ptaxLabel: "BRL/USD Ptax (Taxa de Câmbio comercial do BCB)",
-    dividaBruta: "Dívida Bruta do Governo Federal (%% do PIB — Produto Interno Bruto)", inflectionTitle: "PONTOS DE VIRADA 2025-2026",
+    dividaBruta: "Dívida Bruta do Governo Geral (%% do PIB — Produto Interno Bruto)", inflectionTitle: "PONTOS DE VIRADA 2025-2026",
   },
   banner: {
     tag: "CONTEXTO GEOPOLITICO",
@@ -124,7 +124,7 @@ const pt: T = {
     seriesIndia: "India (RBI — Reserve Bank of India)", seriesBrazil: "Brasil (BCB — Banco Central do Brasil)",
     seriesTurkey: "Turquia (CBRT — Banco Central da Turquia)", seriesPoland: "Polônia (NBP — Banco Central da Polônia, parceiro — não membro BRICS)",
     embedLabel: "Incorporar", exportPNG: "Exportar PNG", exportPDF: "Exportar PDF", exportJSON: "Exportar JSON",
-    source: "Fonte: World Gold Council (WGC — Conselho Mundial do Ouro) / IMF COFER", estBadge: "⚠️ est. (estimado)",
+    source: "Fonte: World Gold Council (WGC — Conselho Mundial do Ouro), dados FMI IFS (Estatísticas Financeiras Internacionais)", estBadge: "⚠️ est. (estimado)",
   },
   goldShare: { title: "OURO COMO %% DAS RESERVAS TOTAIS (2025)", subtitle: "Quanto do cofre de cada país está em ouro vs. dólares, euros, etc. — Quanto maior o %% em ouro, menos dependência do dólar.", country: "País", goldPct: "Ouro (%% das reservas)" },
   oil: {
@@ -195,9 +195,9 @@ const en: T = {
     headline: "G20 — CURRENCY VOLATILITY: LOCAL CURRENCY (LC) vs US DOLLAR (USD)",
     kpiMarket: "LC Bond Market (Local Currency Denominated Debt)", kpiGrowth: "10-Year Growth",
     kpiTrade: "BRICS LC Trade Share", kpiNDB: "NDB (New Development Bank) LC Disbursements",
-    kpiTCX: "TCX (The Currency Exchange Fund) Cumulative Hedge", kpiCurrencies: "TCX Covered Currencies",
+    kpiTCX: "TCX (The Currency Exchange Fund) Cumulative Hedge since 2007", kpiCurrencies: "TCX Covered Currencies since 2007",
     live: "LIVE", ptaxLabel: "BRL/USD Ptax (BCB Commercial Exchange Rate)",
-    dividaBruta: "Federal Gross Debt (%% of GDP — Gross Domestic Product)", inflectionTitle: "2025-2026 INFLECTION POINTS",
+    dividaBruta: "General Government Gross Debt (%% of GDP — Gross Domestic Product)", inflectionTitle: "2025-2026 INFLECTION POINTS",
   },
   banner: {
     tag: "GEOPOLITICAL CONTEXT",
@@ -295,7 +295,7 @@ const en: T = {
     seriesIndia: "India (RBI — Reserve Bank of India)", seriesBrazil: "Brazil (BCB — Banco Central do Brasil)",
     seriesTurkey: "Turkey (CBRT — Central Bank of the Republic of Turkey)", seriesPoland: "Poland (NBP — National Bank of Poland, partner — not BRICS member)",
     embedLabel: "Embed", exportPNG: "Export PNG", exportPDF: "Export PDF", exportJSON: "Export JSON",
-    source: "Source: World Gold Council (WGC) / IMF COFER (Currency Composition of Official Foreign Exchange Reserves)", estBadge: "⚠️ est. (estimated)",
+    source: "Source: World Gold Council (WGC), IMF IFS (International Financial Statistics) data", estBadge: "⚠️ est. (estimated)",
   },
   goldShare: { title: "GOLD AS %% OF TOTAL RESERVES (2025)", subtitle: "How much of each country's vault is in gold vs. dollars, euros, etc. — Higher %% in gold = less dollar dependency.", country: "País", goldPct: "Gold (%% of reserves)" },
   oil: {
@@ -367,7 +367,8 @@ export function t(key: string): string {
   const keys = key.split(".");
   let current: T | string = translations[currentLocale];
   for (const k of keys) { if (typeof current !== "object" || current === null) return key; current = current[k]; }
-  return typeof current === "string" ? current : key;
+  // As strings usam "%%" como escape legado; a interface deve exibir "%".
+  return typeof current === "string" ? current.replace(/%%/g, "%") : key;
 }
 
 export function toggleLocale() { setLocale(currentLocale === "pt" ? "en" : "pt"); }

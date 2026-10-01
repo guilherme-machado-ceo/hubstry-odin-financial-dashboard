@@ -3,7 +3,6 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { goldReserves, goldShare } from "@/data/goldOilData";
 import { t, getLocale } from "@/i18n";
 import ExportButton from "./ExportButton";
-import EstBadge from "./EstBadge";
 import { Share2 } from "lucide-react";
 
 interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; }
@@ -17,7 +16,6 @@ export default function GoldReservesChart({ onSourceClick, onEmbedClick }: Props
       <div className="max-w-[1440px] mx-auto px-4 py-8" ref={chartRef}>
         <div className="flex items-start justify-between mb-6">
           <div>
-            <div className="flex items-center gap-2 mb-1"><EstBadge /></div>
             <h2 className="text-xl font-bold text-[#e0e0e0] tracking-tight">{t("gold.title")}</h2>
             <p className="text-[11px] font-mono text-[#555] mt-1 max-w-2xl leading-relaxed">{t("gold.subtitle")}</p>
           </div>
@@ -67,7 +65,7 @@ export default function GoldReservesChart({ onSourceClick, onEmbedClick }: Props
             </div>
           ))}
         </div>
-        <div className="mt-4"><button onClick={() => onSourceClick("imf-weo")} className="text-[9px] font-mono text-[#444] hover:text-[#00FFFF] transition-colors">{t("gold.source")} →</button></div>
+        <div className="mt-4"><button onClick={() => onSourceClick("wgc-ifs")} className="text-[9px] font-mono text-[#444] hover:text-[#00FFFF] transition-colors">{t("gold.source")} →</button></div>
       </div>
     </section>
   );

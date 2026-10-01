@@ -113,6 +113,7 @@ export default function SectionLayers({ id, region = "all" }: { id: string; regi
                     <span className="text-[#888]">
                       {L(locale, ind.labelPt, ind.labelEn)}
                       {ind.estimated && <span className="ml-1 text-[#FF8C00]">({L(locale, "est.", "est.")})</span>}
+                      {ind.unverified && <span className="ml-1 text-[#FF8C00]" data-unverified>({L(locale, "não verificado", "unverified")})</span>}
                     </span>
                     <span className="text-[#ddd] font-bold whitespace-nowrap" title={sourceName(ind.sourceId)}>
                       {L(locale, ind.valuePt, ind.valueEn)}
@@ -154,8 +155,8 @@ export default function SectionLayers({ id, region = "all" }: { id: string; regi
             <p className="md:col-span-2 text-[8px] font-mono text-[#444] leading-relaxed">
               {L(
                 locale,
-                `Valores extraídos dos mesmos dados exibidos nesta seção, sem geração por IA. Cada fonte mostra sua data de referência.${scoped ? ` Indicadores recalculados para a região selecionada (${spec.scope}).` : ""}`,
-                `Values extracted from the same data shown in this section, with no AI generation. Each source shows its reference date.${scoped ? ` Indicators recalculated for the selected region (${spec.scope}).` : ""}`,
+                `Valores extraídos dos mesmos dados exibidos nesta seção, sem geração por IA. Cada fonte mostra sua data de referência.${spec.indicators.some((i) => i.unverified) ? " \"Não verificado\": valor ainda sem conferência em fonte oficial (auditoria de 01/10/2026)." : ""}${scoped ? ` Indicadores recalculados para a região selecionada (${spec.scope}).` : ""}`,
+                `Values extracted from the same data shown in this section, with no AI generation. Each source shows its reference date.${spec.indicators.some((i) => i.unverified) ? " \"Unverified\": value not yet checked against an official source (audit of 2026-10-01)." : ""}${scoped ? ` Indicators recalculated for the selected region (${spec.scope}).` : ""}`,
               )}
             </p>
           </div>

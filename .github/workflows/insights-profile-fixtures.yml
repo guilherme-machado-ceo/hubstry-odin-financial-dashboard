@@ -33,3 +33,5 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Section layers M2 (10 seções × 5 camadas, render PT/EN)
         run: node scripts/test-section-layers.mjs
+      - name: Auditoria das fontes públicas (PR 2a)
+        run: node scripts/test-data-audit.mjs

@@ -20,7 +20,7 @@ export default function TCXChart({ onSourceClick, onEmbedClick }: Props) {
             <p className="text-[11px] font-mono text-[#555] mt-1">{t("section4.subtitle")} · {kpis.tcxCurrencies} {t("hero.kpiCurrencies")} · 2025e</p>
           </div>
           <div className="flex items-center gap-2">
-            <ExportButton chartRef={chartRef} filename="tcx-hedging" jsonData={{ tcx: tcxHedgingData, summary: { currencies: kpis.tcxCurrencies, portfolioLatest: 8.1 } }} />
+            <ExportButton chartRef={chartRef} filename="tcx-hedging" jsonData={{ tcx: tcxHedgingData, summary: { currencies: kpis.tcxCurrencies, portfolioLatest: tcxHedgingData[tcxHedgingData.length - 1].portfolioOutstanding } }} />
             <button onClick={() => onEmbedClick("tcx")} className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono text-[#555] hover:text-[#00FFFF] transition-colors border border-[#222] hover:border-[#00FFFF]/40"><Share2 size={12} /></button>
           </div>
         </div>

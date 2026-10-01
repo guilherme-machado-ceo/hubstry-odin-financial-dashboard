@@ -5,6 +5,17 @@ import { TrendingUp, Activity, Globe, Shield, Layers, Radio } from "lucide-react
 import EstBadge from "./EstBadge";
 import PtaxLive from "./PtaxLive";
 import { REGION_FILTERED_SECTIONS, type Region } from "@/data/regions";
+import { isUnverified } from "@/data/dataAudit";
+
+/** Marca de auditoria (PR 2a): valor ainda sem conferência em fonte oficial. */
+function Unverified({ auditId, locale }: { auditId: string; locale: string }) {
+  if (!isUnverified(auditId)) return null;
+  return (
+    <span className="text-[7px] font-mono uppercase tracking-wider text-[#FF8C00]" data-unverified={auditId}>
+      {locale === "pt" ? "não verificado" : "unverified"}
+    </span>
+  );
+}
 
 interface Props {
   regionFilter: Region;
@@ -105,6 +116,7 @@ export default function HeroSection({ regionFilter, onRegionChange }: Props) {
             <span className="text-lg font-mono font-bold text-[#e0e0e0]">
               {kpis.lcBondMarketTotal}
             </span>
+            <Unverified auditId="lc-market-total" locale={locale} />
           </div>
 
           {/* Growth */}
@@ -118,6 +130,7 @@ export default function HeroSection({ regionFilter, onRegionChange }: Props) {
             <span className="text-lg font-mono font-bold text-[#FF8C00]">
               +{kpis.lcBondGrowthPct}%
             </span>
+            <Unverified auditId="lc-market-total" locale={locale} />
           </div>
 
           {/* BRICS LC Trade */}
@@ -131,6 +144,7 @@ export default function HeroSection({ regionFilter, onRegionChange }: Props) {
             <span className="text-lg font-mono font-bold text-[#e0e0e0]">
               {kpis.bricsTradeLCShare}%
             </span>
+            <Unverified auditId="brics-trade-lc" locale={locale} />
           </div>
 
           {/* NDB */}
@@ -144,6 +158,7 @@ export default function HeroSection({ regionFilter, onRegionChange }: Props) {
             <span className="text-lg font-mono font-bold text-[#e0e0e0]">
               {kpis.ndbLCDisbursed}
             </span>
+            <Unverified auditId="ndb-lc-share-disbursed" locale={locale} />
           </div>
 
           {/* TCX */}
