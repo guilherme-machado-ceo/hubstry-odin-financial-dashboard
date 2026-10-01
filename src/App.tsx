@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import ContextBanner from "@/components/ContextBanner";
 import HeroSection from "@/components/HeroSection";
+import BriefingODIN from "@/components/BriefingODIN";
 import BrazilSpotlight from "@/components/BrazilSpotlight";
 import MarketSizeChart from "@/components/MarketSizeChart";
 import SpreadsTable from "@/components/SpreadsTable";
@@ -72,6 +73,9 @@ export default function App() {
 
       {/* ── 1. NAVBAR ── */}
       <Navbar />
+
+      {/* ── 1b. BRIEFING ODIN: seleção do M1 revisado (O que aconteceu → Por que importa → O que observar) ── */}
+      <RevealSection><BriefingODIN /></RevealSection>
 
       {/* ── 2. CONTEXT BANNER: Geopolitical Economy ── */}
       <RevealSection><ContextBanner /></RevealSection>

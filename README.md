@@ -30,32 +30,38 @@ O projeto é *docs-as-code*: decisões (ADRs — Architecture Decision Records),
 | Marco | Escopo | Situação |
 |---|---|---|
 | **M1 — Emergency MVP Gate** | Carbono, Blockchain e Clima × 5 camadas, com evidência, proveniência e revisão humana | **Concluído** (15/15; run `odin-20260930-174643-adef`; em produção desde 01/10/2026) |
-| **M2 — Camadas estruturais** | Fontes e data de referência, indicadores, eventos, What to Watch e status da lente jurídica nas 10 demais seções de dados, sem IA | **Concluído** |
+| **M2 — Fontes e sinais** (antes "Camadas estruturais") | Fontes e data de referência, indicadores, eventos, What to Watch e status da lente jurídica nas 10 demais seções de dados, sem IA | **Concluído** |
 | M3 — Autonomia editorial | O modelo produz as 5 camadas de forma consistente, sem correção manual; section profiles de Blockchain e Clima | Planejado |
 | M4 — Escala | Mais seções com IA, providers, automação e monitoramento | Planejado |
 
 ## As 16 seções
 
-| Seção | Origem do dado | Fonte principal | Referência | Camadas ODIN |
+| Seção | Origem do dado | Fonte principal | Referência | Camadas |
 |---|---|---|---|---|
 | Banner de contexto | curado estático | Hubstry (editorial) | — | — |
 | Notícias | snapshot diário | Google News RSS | diária | — |
-| Hero · KPIs e PTAX | curado + API ao vivo no navegador | BCB (SGS 10813 ao vivo; SGS 13762 dívida bruta); BIS; NDB; CIPS; TCX | ao vivo · jul/2026 (dívida) | estruturais |
-| Brasil em foco · Panda Bonds | curado estático | Ministério da Fazenda; Reuters; gov.cn (swap PBOC–BCB) | Panda set/2026 · swap mai/2025 | estruturais |
-| Tamanho do mercado LC | curado estático | BIS — Bank for International Settlements | dez/2024 | estruturais |
-| Spreads | curado estático · **a refazer (PR 2c)** | Bloomberg (pago, metodologia não registrada) | jan/2025 | estruturais |
-| Volatilidade cambial | curado estático · **a refazer (PR 2c)** | Bloomberg (pago, metodologia não registrada) | jan/2025 | estruturais |
-| Hedge TCX | curado estático | TCX — The Currency Exchange Fund (resultados anuais) | mai/2026 | estruturais |
-| Composição da dívida | curado estático | IMF WEO — World Economic Outlook | out/2024 | estruturais |
-| Estabilidade | curado estático · **sai da interface (PR 2c)** | score curado sem fórmula | out/2024 | estruturais |
-| Reservas de ouro | curado estático | World Gold Council (dados FMI IFS) | set/2026 (dados Q4 2025) | estruturais |
-| Vetor petróleo | curado + API ao vivo no navegador · **médias a refazer (PR 2c)** | Bloomberg; Yahoo Finance | jan/2025 · ao vivo | estruturais |
+| Hero · KPIs e PTAX | curado + API ao vivo no navegador | BCB (SGS 10813 ao vivo; SGS 13762 dívida bruta); BIS; NDB; CIPS; TCX | ao vivo · jul/2026 (dívida) | fontes e sinais |
+| Brasil em foco · Panda Bonds | curado estático | Ministério da Fazenda; Reuters; gov.cn (swap PBOC–BCB) | Panda set/2026 · swap mai/2025 | fontes e sinais |
+| Tamanho do mercado LC | curado estático | BIS — Bank for International Settlements | dez/2024 | fontes e sinais |
+| Spreads | curado estático · **a refazer (PR 2c)** | Bloomberg (pago, metodologia não registrada) | jan/2025 | fontes e sinais |
+| Volatilidade cambial | curado estático · **a refazer (PR 2c)** | Bloomberg (pago, metodologia não registrada) | jan/2025 | fontes e sinais |
+| Hedge TCX | curado estático | TCX — The Currency Exchange Fund (resultados anuais) | mai/2026 | fontes e sinais |
+| Composição da dívida | curado estático | IMF WEO — World Economic Outlook | out/2024 | fontes e sinais |
+| Estabilidade | curado estático · **sai da interface (PR 2c)** | score curado sem fórmula | out/2024 | fontes e sinais |
+| Reservas de ouro | curado estático | World Gold Council (dados FMI IFS) | set/2026 (dados Q4 2025) | fontes e sinais |
+| Vetor petróleo | curado + API ao vivo no navegador · **médias a refazer (PR 2c)** | Bloomberg; Yahoo Finance | jan/2025 · ao vivo | fontes e sinais |
 | Vetor climático | API ao vivo no navegador | Open-Meteo | ao vivo | **M1** |
 | Previsão Earth-2 | snapshot 2×/dia | NVIDIA Earth-2 (FourCastNet) | 2×/dia | fora do escopo |
 | Precificação de carbono | fonte curada versionada + snapshot | Comissão Europeia (CBAM); OWID; Banco Mundial | jul/2026 | **M1** |
 | Blockchain e RWA | snapshot diário + API ao vivo | DefiLlama; mempool.space | diária | **M1** |
 
-A coluna "Referência" reproduz a data registrada em `sourceRefs` (`src/data/lcBondsData.ts`) e, para Panda Bonds, a data de verificação dos eventos (`src/data/pandaBondsData.ts`). **Camadas ODIN:** "M1" = 5 camadas de inteligência (IA sob contrato + revisão humana); "estruturais" = bloco recolhível sem IA com fontes e data de referência, indicadores extraídos dos dados da seção, eventos, What to Watch e status da lente jurídica (`src/data/sectionLayers.ts`). Cada fonte exibe sua **data de referência** (um fato, não um julgamento editorial); a interface sinaliza apenas fontes **ao vivo**. Valores ainda sem conferência em fonte oficial aparecem marcados como **"não verificado"** (auditoria de 01/10/2026 — ver abaixo).
+A coluna "Referência" reproduz a data registrada em `sourceRefs` (`src/data/lcBondsData.ts`) e, para Panda Bonds, a data de verificação dos eventos (`src/data/pandaBondsData.ts`). **Camadas:** "M1" = 5 camadas de inteligência (IA sob contrato + revisão humana); "fontes e sinais" = bloco recolhível sem IA com fontes e data de referência, indicadores extraídos dos dados da seção, eventos, What to Watch e status da lente jurídica (`src/data/sectionLayers.ts`). Cada fonte exibe sua **data de referência** (um fato, não um julgamento editorial); a interface sinaliza apenas fontes **ao vivo**. Valores ainda sem conferência em fonte oficial aparecem marcados como **"não verificado"** (auditoria de 01/10/2026 — ver abaixo).
+
+## Briefing ODIN e vocabulário
+
+O topo do painel abre com o **Briefing ODIN**: para cada seção com M1 revisado por humano, *O que aconteceu → Por que importa → O que observar → Ver evidências*. O Briefing só **seleciona e condensa** trechos literais do M1 da própria seção (primeiro fato, Tese ODIN, What to Watch); não cria inferência nova nem tese entre seções. Regra testada em `scripts/test-briefing.mjs`.
+
+Rótulos, títulos, selos e mensagens de estado vêm de um **glossário PT/EN** (`src/data/glossary.ts`): fonte, data de referência, sinal, indicador, estimado, derivado, não verificado, ao vivo e os nomes das cinco camadas. O texto editorial do M1 continua com redação livre.
 
 ## As cinco camadas de inteligência
 
@@ -142,7 +148,7 @@ Nenhuma chave de API é exposta no navegador.
 
 **Deploy** — integração GitHub → Vercel: cada push na `main` publica; cada PR gera *preview*. O plano atual tem limite diário de deploys; agrupar mudanças evita esgotá-lo.
 
-**Filtro regional** — Todos · BRICS · LATAM, no topo. Age em Spreads, Volatilidade, Dívida e Estabilidade (aviso "Filtro aplicado" aparece quando ativo); as Camadas ODIN dessas seções recalculam os indicadores para a região. Pertencimento por país em `src/data/regions.ts` (o Brasil está nas duas regiões).
+**Filtro regional** — Todos · BRICS · LATAM, no topo. Age em Spreads, Volatilidade, Dívida e Estabilidade (aviso "Filtro aplicado" aparece quando ativo); os blocos "Fontes e sinais" dessas seções recalculam os indicadores para a região. Pertencimento por país em `src/data/regions.ts` (o Brasil está nas duas regiões).
 
 ## Desenvolvimento
 
@@ -157,7 +163,9 @@ node scripts/test-evidence-consistency.mjs  # claim ↔ evidência e contrato ed
 node scripts/test-m1-layers.mjs             # 5 camadas, retry de contrato, snapshot
 node scripts/test-contract-render.mjs       # contrato ↔ InsightBox
 node scripts/test-review-summary.mjs        # resumo de revisão
-node scripts/test-section-layers.mjs        # camadas estruturais M2 (render PT/EN; requer npm install)
+node scripts/test-section-layers.mjs        # Fontes e sinais (M2; render PT/EN; requer npm install)
+node scripts/test-data-audit.mjs            # auditoria das fontes públicas (PR 2a)
+node scripts/test-briefing.mjs              # Briefing ODIN + vocabulário controlado (PR 2b)
 ```
 
 **Stack:** React 19 · TypeScript (strict) · Vite · Tailwind CSS · Recharts · html2canvas + jsPDF · i18n próprio (PT/EN).

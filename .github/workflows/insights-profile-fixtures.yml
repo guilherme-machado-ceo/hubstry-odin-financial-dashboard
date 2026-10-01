@@ -35,3 +35,5 @@ jobs:
         run: node scripts/test-section-layers.mjs
       - name: Auditoria das fontes públicas (PR 2a)
         run: node scripts/test-data-audit.mjs
+      - name: Briefing ODIN e vocabulário controlado (PR 2b)
+        run: node scripts/test-briefing.mjs
