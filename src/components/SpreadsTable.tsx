@@ -4,17 +4,15 @@ import { t, getLocale } from "@/i18n";
 import ExportButton from "./ExportButton";
 import EstBadge from "./EstBadge";
 import { Share2, TrendingDown, Minus, TrendingUp } from "lucide-react";
+import { inRegion, type Region } from "@/data/regions";
 
-interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; regionFilter: "all" | "BRICS" | "LATAM"; }
+interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; regionFilter: Region; }
 
 export default function SpreadsTable({ onSourceClick, onEmbedClick, regionFilter }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
   const locale = getLocale();
   const filtered = spreadsData.filter((s) => {
-    if (regionFilter === "all") return true;
-    const brics = ["BR", "CN", "IN", "RU", "ZA"]; const latam = ["BR", "MX", "AR", "CO", "CL"];
-    if (regionFilter === "BRICS") return brics.includes(s.flag);
-    return latam.includes(s.flag);
+    return inRegion(s.flag, regionFilter);
   });
 
   const trendIcon = (trend: string) => {

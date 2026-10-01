@@ -5,17 +5,15 @@ import { t, getLocale } from "@/i18n";
 import ExportButton from "./ExportButton";
 import EstBadge from "./EstBadge";
 import { Share2 } from "lucide-react";
+import { inRegion, type Region } from "@/data/regions";
 
-interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; regionFilter: "all" | "BRICS" | "LATAM"; }
+interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; regionFilter: Region; }
 
 export default function StabilityScatter({ onSourceClick, onEmbedClick, regionFilter }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
   const locale = getLocale();
   const filtered = stabilityScores.filter((s) => {
-    if (regionFilter === "all") return true;
-    const bricsFlags = ["BR", "CN", "IN", "RU", "ZA"]; const latamFlags = ["BR", "MX", "AR", "CO", "CL"];
-    if (regionFilter === "BRICS") return bricsFlags.includes(s.flag);
-    return latamFlags.includes(s.flag);
+    return inRegion(s.flag, regionFilter);
   });
 
   const scatterData = filtered.map((s) => ({ x: s.lcDebtShare, y: s.stabilityScore, z: 200, name: locale === "pt" ? s.countryPt : s.country, flag: s.flag }));

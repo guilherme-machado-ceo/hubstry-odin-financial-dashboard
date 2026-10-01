@@ -3,6 +3,41 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [PR 1 · filtro regional e apresentação de datas] — 2026-10-01
+
+Origem: relato do Guilherme ("o filtro de regiões não muda nada") e revisão de
+UX com a IA parceira. Reproduzido no navegador: o clique funcionava, mas o
+efeito era invisível no topo, parcial na Volatilidade e contraditório nas
+Camadas ODIN.
+
+### Corrigido
+- **Onde o filtro age**: com BRICS/LATAM selecionado, o topo mostra "Filtro
+  aplicado: Spreads · Volatilidade · Dívida · Estabilidade ↓" (links para as
+  seções). Os KPIs do topo são globais.
+- **Volatilidade**: a tabela de detalhes passa a obedecer ao filtro (antes só
+  o ranking).
+- **Dívida**: pertencimento por país, como nas demais seções — o Brasil
+  sumia do filtro BRICS porque a seção usava outro critério.
+- **Camadas ODIN das 4 seções filtráveis** recalculam os indicadores com o
+  subconjunto da região e exibem "região: X". Regra: nenhum número aparece
+  como da região sem ter sido recalculado. Antes, com BRICS, o bloco dizia
+  "maior spread · Argentina".
+- **KPIs do topo**: cifrão duplicado ("$~$12B", "$$8.1B").
+
+### Alterado
+- **Datas, não julgamentos**: a interface deixa de exibir "desatualizado".
+  Cada fonte mostra sua data de referência; o cabeçalho do bloco mostra o
+  intervalo ("referência dos dados: 2024–2026"); só fontes ao vivo têm selo.
+  O frescor continua calculado no modelo (`sourceFreshness`) para governança.
+- `src/data/regions.ts`: fonte única de pertencimento regional.
+
+### Testes
+- `test-section-layers.mjs`: nenhum país fora da região nos indicadores
+  recalculados (falha com o comportamento antigo — verificado); rótulo de
+  região; visão global sem rótulo; nenhum "desatualizado" no HTML; "ao vivo"
+  nas fontes ao vivo; as 4 seções usando `inRegion`; tabela da volatilidade
+  filtrada; aviso no topo.
+
 ## [M2 · camadas estruturais] — 2026-10-01
 
 Meta do M2: camadas ODIN nas 10 seções de dados sem ODIN Insight, **sem IA**.
