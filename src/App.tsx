@@ -9,7 +9,6 @@ import SpreadsTable from "@/components/SpreadsTable";
 import VolatilityChart from "@/components/VolatilityChart";
 import TCXChart from "@/components/TCXChart";
 import DebtComposition from "@/components/DebtComposition";
-import StabilityScatter from "@/components/StabilityScatter";
 import GoldReservesChart from "@/components/GoldReservesChart";
 import OilVectorChart from "@/components/OilVectorChart";
 import NewsTicker from "@/components/NewsTicker";
@@ -92,10 +91,10 @@ export default function App() {
       {/* ── 6. MARKET SIZE: BRICS + LATAM LC Bonds ── */}
       <RevealSection><MarketSizeChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /><SectionLayers id="market-size" /></RevealSection>
 
-      {/* ── 7. SPREADS × VOLATILITY: Rate spreads vs FX vol ── */}
+      {/* ── 7. YIELD DIFFERENTIAL: 10y sovereign vs US (OECD MEI, open data) ── */}
       <RevealSection><SpreadsTable onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="spreads" region={regionFilter} /></RevealSection>
 
-      {/* ── 8. VOLATILITY RANKING: G20 currencies ── */}
+      {/* ── 8. FX VOLATILITY: annualized, from daily open FX data ── */}
       <RevealSection><VolatilityChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="volatility" region={regionFilter} /></RevealSection>
 
       {/* ── 9. TCX HEDGING: Local currency protection ── */}
@@ -104,13 +103,11 @@ export default function App() {
       {/* ── 10. DEBT COMPOSITION: LC vs FX ── */}
       <RevealSection><DebtComposition onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="debt" region={regionFilter} /></RevealSection>
 
-      {/* ── 11. STABILITY SCATTER: Economic stability vs LC share ── */}
-      <RevealSection><StabilityScatter onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="stability" region={regionFilter} /></RevealSection>
 
       {/* ── 12. GOLD RESERVES: Anti-dollar anchor ── */}
       <RevealSection><GoldReservesChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /><SectionLayers id="gold" /></RevealSection>
 
-      {/* ── 13. OIL VECTOR: Price + Production + Petroyuan ── */}
+      {/* ── 13. OIL VECTOR: Brent/WTI annual averages (EIA) + live quote ── */}
       <RevealSection><OilVectorChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /><SectionLayers id="oil" /></RevealSection>
 
       {/* ── 14. CLIMATE VECTOR: Temperature Anomalies + Risk Scores ── */}

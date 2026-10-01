@@ -17,8 +17,7 @@ export function inRegion(flag: string, region: Region): boolean {
 
 /** Seções cujo conteúdo responde ao filtro regional (ordem de exibição). */
 export const REGION_FILTERED_SECTIONS: { id: string; labelPt: string; labelEn: string }[] = [
-  { id: "spreads", labelPt: "Spreads", labelEn: "Spreads" },
+  { id: "spreads", labelPt: "Diferencial de juros", labelEn: "Yield differential" },
   { id: "volatility", labelPt: "Volatilidade", labelEn: "Volatility" },
   { id: "debt", labelPt: "Dívida", labelEn: "Debt" },
-  { id: "stability", labelPt: "Estabilidade", labelEn: "Stability" },
 ];

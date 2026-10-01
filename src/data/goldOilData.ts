@@ -1,11 +1,10 @@
 // ============================================================
 // GOLD & OIL DATA ENGINE v2.4
-// Sources: World Gold Council (IMF IFS data) for gold; oil series pending replacement (PR 2c)
+// Sources: World Gold Council (IMF IFS data) for gold. Oil moved to openMarkets.ts (EIA via FRED, PR 2c).
 // ============================================================
 
 export interface GoldReserve { year: number; China: number; Russia: number; India: number; Brazil: number; Turkey: number; Poland: number; }
 export interface GoldShare { flag: string; country: string; countryPt: string; pct2025: number; }
-export interface OilData { year: number; brent: number; wti: number; bricsProduction: number; petroyuanVolume: number; }
 export interface ContextBannerData { tag: string; tagPt: string; headline: string; headlinePt: string; summary: string; summaryPt: string; source: string; sourceUrl: string; date: string; datePt?: string; }
 
 // Fonte: World Gold Council, "Quarterly time series on world official gold
@@ -37,20 +36,6 @@ export const goldShare: GoldShare[] = [
   { flag: "BR", country: "Brazil", countryPt: "Brasil", pct2025: 6.8 },
   { flag: "MX", country: "Mexico", countryPt: "Mexico", pct2025: 6.6 },
   { flag: "US", country: "United States", countryPt: "Estados Unidos", pct2025: 82.4 },
-];
-
-export const oilData: OilData[] = [
-  { year: 2015, brent: 52.3, wti: 48.7, bricsProduction: 27.8, petroyuanVolume: 0 },
-  { year: 2016, brent: 43.7, wti: 43.3, bricsProduction: 28.2, petroyuanVolume: 0 },
-  { year: 2017, brent: 54.1, wti: 50.8, bricsProduction: 28.8, petroyuanVolume: 0.5 },
-  { year: 2018, brent: 71.3, wti: 64.9, bricsProduction: 29.5, petroyuanVolume: 1.2 },
-  { year: 2019, brent: 64.2, wti: 57.0, bricsProduction: 30.1, petroyuanVolume: 2.1 },
-  { year: 2020, brent: 41.7, wti: 39.2, bricsProduction: 27.4, petroyuanVolume: 3.5 },
-  { year: 2021, brent: 70.9, wti: 68.0, bricsProduction: 29.0, petroyuanVolume: 5.8 },
-  { year: 2022, brent: 99.0, wti: 94.3, bricsProduction: 30.5, petroyuanVolume: 12.4 },
-  { year: 2023, brent: 82.6, wti: 77.6, bricsProduction: 31.8, petroyuanVolume: 18.6 },
-  { year: 2024, brent: 79.8, wti: 75.2, bricsProduction: 32.5, petroyuanVolume: 24.2 },
-  { year: 2025, brent: 74.5, wti: 70.8, bricsProduction: 33.2, petroyuanVolume: 31.8 },
 ];
 
 export const contextBanner: ContextBannerData = {

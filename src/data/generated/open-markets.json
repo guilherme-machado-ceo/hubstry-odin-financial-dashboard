@@ -1,0 +1,513 @@
+{
+  "schemaVersion": "1.0",
+  "methodVersion": "1.0.0",
+  "retrievedAt": "2026-10-01T21:58:32.759Z",
+  "series": {
+    "IRLTLT01USM156N": {
+      "sourceId": "fred",
+      "title": "Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for United States (OECD MEI)",
+      "url": "https://fred.stlouisfed.org/series/IRLTLT01USM156N",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-08-01",
+      "n": 141
+    },
+    "IRLTLT01MXM156N": {
+      "sourceId": "fred",
+      "title": "Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for Mexico (OECD MEI)",
+      "url": "https://fred.stlouisfed.org/series/IRLTLT01MXM156N",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-08-01",
+      "n": 107
+    },
+    "INDIRLTLT01STM": {
+      "sourceId": "fred",
+      "title": "Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for India (OECD MEI)",
+      "url": "https://fred.stlouisfed.org/series/INDIRLTLT01STM",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-07-01",
+      "n": 140
+    },
+    "IRLTLT01ZAM156N": {
+      "sourceId": "fred",
+      "title": "Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for South Africa (OECD MEI)",
+      "url": "https://fred.stlouisfed.org/series/IRLTLT01ZAM156N",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-08-01",
+      "n": 141
+    },
+    "IRLTLT01CLM156N": {
+      "sourceId": "fred",
+      "title": "Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for Chile (OECD MEI)",
+      "url": "https://fred.stlouisfed.org/series/IRLTLT01CLM156N",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-07-01",
+      "n": 140
+    },
+    "DEXBZUS": {
+      "sourceId": "fred",
+      "title": "Brazilian Reals to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
+      "url": "https://fred.stlouisfed.org/series/DEXBZUS",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-09-25",
+      "n": 2954
+    },
+    "DEXMXUS": {
+      "sourceId": "fred",
+      "title": "Mexican Pesos to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
+      "url": "https://fred.stlouisfed.org/series/DEXMXUS",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-09-25",
+      "n": 2954
+    },
+    "DEXINUS": {
+      "sourceId": "fred",
+      "title": "Indian Rupees to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
+      "url": "https://fred.stlouisfed.org/series/DEXINUS",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-09-25",
+      "n": 2954
+    },
+    "DEXCHUS": {
+      "sourceId": "fred",
+      "title": "Chinese Yuan Renminbi to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
+      "url": "https://fred.stlouisfed.org/series/DEXCHUS",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-09-25",
+      "n": 2954
+    },
+    "DEXSFUS": {
+      "sourceId": "fred",
+      "title": "South African Rand to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
+      "url": "https://fred.stlouisfed.org/series/DEXSFUS",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-09-25",
+      "n": 2954
+    },
+    "TRM-COP": {
+      "sourceId": "banrep-trm",
+      "title": "Tasa Representativa del Mercado (TRM), COP por US$",
+      "url": "https://www.datos.gov.co/d/32sa-8pi3",
+      "firstDate": "2014-12-02",
+      "lastDate": "2026-10-02",
+      "n": 2803
+    },
+    "DCOILBRENTEU": {
+      "sourceId": "fred",
+      "title": "Crude Oil Prices: Brent - Europe (EIA)",
+      "url": "https://fred.stlouisfed.org/series/DCOILBRENTEU",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-09-29",
+      "n": 3003
+    },
+    "DCOILWTICO": {
+      "sourceId": "fred",
+      "title": "Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma (EIA)",
+      "url": "https://fred.stlouisfed.org/series/DCOILWTICO",
+      "firstDate": "2014-12-01",
+      "lastDate": "2026-09-29",
+      "n": 2951
+    }
+  },
+  "yieldDifferential": {
+    "verification": "verified",
+    "derivation": "derived",
+    "unit": "bps",
+    "benchmark": "IRLTLT01USM156N",
+    "methodPt": "Rendimento do título soberano de 10 anos do país menos o dos EUA, ambos da série OCDE MEI (mensal), em pontos-base. Média anual só com 12 meses. Tendência pelo Δ12m (|Δ| < 25 pb = estável). Não é o spread EMBI.",
+    "methodEn": "Country 10-year sovereign yield minus the US 10-year yield, both from the OECD MEI series (monthly), in basis points. Annual average only with 12 months. Trend from the 12-month change (|Δ| < 25 bps = stable). Not the EMBI spread.",
+    "countries": [
+      {
+        "flag": "MX",
+        "country": "Mexico",
+        "countryPt": "México",
+        "seriesId": "IRLTLT01MXM156N",
+        "latest": {
+          "month": "2026-08",
+          "localPct": 9.16,
+          "usPct": 4.68,
+          "bps": 448
+        },
+        "delta12mBps": -40,
+        "trend": "narrowing",
+        "annual": {}
+      },
+      {
+        "flag": "IN",
+        "country": "India",
+        "countryPt": "Índia",
+        "seriesId": "INDIRLTLT01STM",
+        "latest": {
+          "month": "2026-07",
+          "localPct": 6.78,
+          "usPct": 4.6,
+          "bps": 218
+        },
+        "delta12mBps": 22,
+        "trend": "stable",
+        "annual": {
+          "2015": 564,
+          "2016": 536,
+          "2017": 459,
+          "2018": 479,
+          "2019": 485,
+          "2020": 530,
+          "2021": 482,
+          "2022": 424,
+          "2023": 326,
+          "2024": 277,
+          "2025": 223
+        }
+      },
+      {
+        "flag": "ZA",
+        "country": "South Africa",
+        "countryPt": "África do Sul",
+        "seriesId": "IRLTLT01ZAM156N",
+        "latest": {
+          "month": "2026-08",
+          "localPct": 8.75,
+          "usPct": 4.68,
+          "bps": 407
+        },
+        "delta12mBps": -182,
+        "trend": "narrowing",
+        "annual": {
+          "2015": 602,
+          "2016": 718,
+          "2017": 673,
+          "2018": 622,
+          "2019": 693,
+          "2020": 918,
+          "2021": 835,
+          "2022": 778,
+          "2023": 767,
+          "2024": 696,
+          "2025": 594
+        }
+      },
+      {
+        "flag": "CL",
+        "country": "Chile",
+        "countryPt": "Chile",
+        "seriesId": "IRLTLT01CLM156N",
+        "latest": {
+          "month": "2026-07",
+          "localPct": 5.55,
+          "usPct": 4.6,
+          "bps": 95
+        },
+        "delta12mBps": -28,
+        "trend": "narrowing",
+        "annual": {
+          "2015": 234,
+          "2016": 256,
+          "2017": 192,
+          "2018": 159,
+          "2019": 143,
+          "2020": 191,
+          "2021": 292,
+          "2022": 331,
+          "2023": 170,
+          "2024": 158,
+          "2025": 139
+        }
+      }
+    ],
+    "gaps": [
+      {
+        "flag": "BR",
+        "country": "Brazil",
+        "countryPt": "Brasil",
+        "reasonPt": "Sem série aberta de 10 anos com a definição da OCDE (MEI). Candidatos (Tesouro Nacional, ANBIMA) exigem análise de equivalência antes de entrar.",
+        "reasonEn": "No open 10-year series with the OECD (MEI) definition. Candidates (Brazilian Treasury, ANBIMA) require an equivalence review first."
+      },
+      {
+        "flag": "CN",
+        "country": "China",
+        "countryPt": "China",
+        "reasonPt": "Sem série de 10 anos na OCDE (MEI).",
+        "reasonEn": "No 10-year series in the OECD (MEI)."
+      },
+      {
+        "flag": "RU",
+        "country": "Russia",
+        "countryPt": "Rússia",
+        "reasonPt": "Série da OCDE (MEI) encerrada em jun/2018.",
+        "reasonEn": "OECD (MEI) series discontinued in Jun 2018."
+      },
+      {
+        "flag": "CO",
+        "country": "Colombia",
+        "countryPt": "Colômbia",
+        "reasonPt": "Sem série de 10 anos na OCDE (MEI).",
+        "reasonEn": "No 10-year series in the OECD (MEI)."
+      },
+      {
+        "flag": "AR",
+        "country": "Argentina",
+        "countryPt": "Argentina",
+        "reasonPt": "Sem série de 10 anos na OCDE (MEI).",
+        "reasonEn": "No 10-year series in the OECD (MEI)."
+      }
+    ]
+  },
+  "fxVolatility": {
+    "verification": "verified",
+    "derivation": "derived",
+    "unit": "pct",
+    "methodPt": "Desvio-padrão amostral dos retornos logarítmicos diários (moeda local por US$) × √252, em %. Ano civil com ≥ 200 retornos; ano corrente com ≥ 60.",
+    "methodEn": "Sample standard deviation of daily log returns (local currency per US$) × √252, in %. Calendar year with ≥ 200 returns; current year with ≥ 60.",
+    "currencies": [
+      {
+        "code": "BRL",
+        "flag": "BR",
+        "country": "Brazil",
+        "countryPt": "Brasil",
+        "seriesId": "DEXBZUS",
+        "sourceId": "fred",
+        "annual": {
+          "2015": 20.1,
+          "2016": 18.3,
+          "2017": 13.5,
+          "2018": 14.9,
+          "2019": 11.9,
+          "2020": 20.4,
+          "2021": 16.2,
+          "2022": 17.4,
+          "2023": 12.2,
+          "2024": 11.3,
+          "2025": 11
+        },
+        "ytd": {
+          "from": "2026-01-02",
+          "to": "2026-09-25",
+          "n": 185,
+          "vol": 10.2
+        },
+        "lastDate": "2026-09-25"
+      },
+      {
+        "code": "MXN",
+        "flag": "MX",
+        "country": "Mexico",
+        "countryPt": "México",
+        "seriesId": "DEXMXUS",
+        "sourceId": "fred",
+        "annual": {
+          "2015": 10.8,
+          "2016": 16.7,
+          "2017": 10.7,
+          "2018": 12.2,
+          "2019": 8.8,
+          "2020": 19.5,
+          "2021": 10.7,
+          "2022": 10.1,
+          "2023": 11.1,
+          "2024": 13.3,
+          "2025": 9.5
+        },
+        "ytd": {
+          "from": "2026-01-02",
+          "to": "2026-09-25",
+          "n": 185,
+          "vol": 8.3
+        },
+        "lastDate": "2026-09-25"
+      },
+      {
+        "code": "INR",
+        "flag": "IN",
+        "country": "India",
+        "countryPt": "Índia",
+        "seriesId": "DEXINUS",
+        "sourceId": "fred",
+        "annual": {
+          "2015": 5.8,
+          "2016": 5,
+          "2017": 4.2,
+          "2018": 6.6,
+          "2019": 5.8,
+          "2020": 6.2,
+          "2021": 4.7,
+          "2022": 5.2,
+          "2023": 3.2,
+          "2024": 1.7,
+          "2025": 4.6
+        },
+        "ytd": {
+          "from": "2026-01-02",
+          "to": "2026-09-25",
+          "n": 185,
+          "vol": 5.4
+        },
+        "lastDate": "2026-09-25"
+      },
+      {
+        "code": "CNY",
+        "flag": "CN",
+        "country": "China",
+        "countryPt": "China",
+        "seriesId": "DEXCHUS",
+        "sourceId": "fred",
+        "annual": {
+          "2015": 2.8,
+          "2016": 3.2,
+          "2017": 3.4,
+          "2018": 4.8,
+          "2019": 3.9,
+          "2020": 4.6,
+          "2021": 3.2,
+          "2022": 5.9,
+          "2023": 4.8,
+          "2024": 3.1,
+          "2025": 2.6
+        },
+        "ytd": {
+          "from": "2026-01-02",
+          "to": "2026-09-25",
+          "n": 185,
+          "vol": 2.2
+        },
+        "lastDate": "2026-09-25"
+      },
+      {
+        "code": "ZAR",
+        "flag": "ZA",
+        "country": "South Africa",
+        "countryPt": "África do Sul",
+        "seriesId": "DEXSFUS",
+        "sourceId": "fred",
+        "annual": {
+          "2015": 15.5,
+          "2016": 21.4,
+          "2017": 15.9,
+          "2018": 16.4,
+          "2019": 12.9,
+          "2020": 16.9,
+          "2021": 13.9,
+          "2022": 15.5,
+          "2023": 15.4,
+          "2024": 12,
+          "2025": 10.1
+        },
+        "ytd": {
+          "from": "2026-01-02",
+          "to": "2026-09-25",
+          "n": 185,
+          "vol": 12.8
+        },
+        "lastDate": "2026-09-25"
+      },
+      {
+        "code": "COP",
+        "flag": "CO",
+        "country": "Colombia",
+        "countryPt": "Colômbia",
+        "seriesId": "TRM-COP",
+        "sourceId": "banrep-trm",
+        "annual": {
+          "2015": 16.7,
+          "2016": 16.8,
+          "2017": 8.7,
+          "2018": 11.1,
+          "2019": 10.1,
+          "2020": 15.9,
+          "2021": 10.7,
+          "2022": 16.5,
+          "2023": 15.9,
+          "2024": 11,
+          "2025": 11.7
+        },
+        "ytd": {
+          "from": "2026-01-03",
+          "to": "2026-10-02",
+          "n": 177,
+          "vol": 12.9
+        },
+        "lastDate": "2026-10-02"
+      }
+    ],
+    "gaps": [
+      {
+        "code": "ARS",
+        "flag": "AR",
+        "country": "Argentina",
+        "countryPt": "Argentina",
+        "reasonPt": "Câmbio oficial sob controles em boa parte do período (2011–2015, 2019–2025); não é comparável a câmbio de mercado.",
+        "reasonEn": "Official rate under capital controls for much of the period (2011–2015, 2019–2025); not comparable to a market rate."
+      },
+      {
+        "code": "RUB",
+        "flag": "RU",
+        "country": "Russia",
+        "countryPt": "Rússia",
+        "reasonPt": "Não coberto pelo Federal Reserve H.10; sem série aberta compatível.",
+        "reasonEn": "Not covered by Federal Reserve H.10; no compatible open series."
+      },
+      {
+        "code": "TRY",
+        "flag": "TR",
+        "country": "Turkey",
+        "countryPt": "Turquia",
+        "reasonPt": "Não coberto pelo H.10; a série oficial (EVDS) exige chave de API.",
+        "reasonEn": "Not covered by H.10; the official series (EVDS) requires an API key."
+      },
+      {
+        "code": "IDR",
+        "flag": "ID",
+        "country": "Indonesia",
+        "countryPt": "Indonésia",
+        "reasonPt": "Não coberto pelo H.10; sem série aberta compatível.",
+        "reasonEn": "Not covered by H.10; no compatible open series."
+      }
+    ]
+  },
+  "oil": {
+    "verification": "verified",
+    "derivation": "derived",
+    "unit": "usd_bbl",
+    "methodPt": "Média anual dos preços spot diários (EIA, via FRED); ano com ≥ 200 observações. Último valor diário como referência.",
+    "methodEn": "Annual average of daily spot prices (EIA, via FRED); year with ≥ 200 observations. Latest daily value as reference.",
+    "brent": {
+      "seriesId": "DCOILBRENTEU",
+      "annual": {
+        "2015": 52.32,
+        "2016": 43.64,
+        "2017": 54.12,
+        "2018": 71.34,
+        "2019": 64.3,
+        "2020": 41.96,
+        "2021": 70.86,
+        "2022": 100.93,
+        "2023": 82.49,
+        "2024": 80.52,
+        "2025": 69.14
+      },
+      "latest": {
+        "date": "2026-09-29",
+        "value": 113.96
+      }
+    },
+    "wti": {
+      "seriesId": "DCOILWTICO",
+      "annual": {
+        "2015": 48.73,
+        "2016": 43.29,
+        "2017": 50.8,
+        "2018": 65.23,
+        "2019": 56.99,
+        "2020": 39.16,
+        "2021": 68.14,
+        "2022": 94.9,
+        "2023": 77.58,
+        "2024": 76.63,
+        "2025": 65.39
+      },
+      "latest": {
+        "date": "2026-09-29",
+        "value": 96.16
+      }
+    }
+  },
+  "errors": []
+}

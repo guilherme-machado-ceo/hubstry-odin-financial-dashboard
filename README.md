@@ -20,7 +20,7 @@ O ODIN acompanha a transição do sistema financeiro global de um modelo centrad
 
 O dashboard combina dois tipos de conteúdo:
 
-- **Dados e indicadores** — 16 seções com séries curadas de fontes primárias, snapshots diários e consultas ao vivo a APIs abertas;
+- **Dados e indicadores** — 15 seções com séries curadas de fontes primárias, snapshots diários e consultas ao vivo a APIs abertas;
 - **Camadas de inteligência ODIN** — em três seções, leitura editorial gerada por IA sob contrato, com evidência rastreável e revisão humana antes da publicação.
 
 O projeto é *docs-as-code*: decisões (ADRs — Architecture Decision Records), mudanças (CHANGELOG), contratos, fixtures de regressão e evidências de cada geração ficam versionados junto ao código.
@@ -34,7 +34,7 @@ O projeto é *docs-as-code*: decisões (ADRs — Architecture Decision Records),
 | M3 — Autonomia editorial | O modelo produz as 5 camadas de forma consistente, sem correção manual; section profiles de Blockchain e Clima | Planejado |
 | M4 — Escala | Mais seções com IA, providers, automação e monitoramento | Planejado |
 
-## As 16 seções
+## As 15 seções
 
 | Seção | Origem do dado | Fonte principal | Referência | Camadas |
 |---|---|---|---|---|
@@ -43,13 +43,12 @@ O projeto é *docs-as-code*: decisões (ADRs — Architecture Decision Records),
 | Hero · KPIs e PTAX | curado + API ao vivo no navegador | BCB (SGS 10813 ao vivo; SGS 13762 dívida bruta); BIS; NDB; CIPS; TCX | ao vivo · jul/2026 (dívida) | fontes e sinais |
 | Brasil em foco · Panda Bonds | curado estático | Ministério da Fazenda; Reuters; gov.cn (swap PBOC–BCB) | Panda set/2026 · swap mai/2025 | fontes e sinais |
 | Tamanho do mercado LC | curado estático | BIS — Bank for International Settlements | dez/2024 | fontes e sinais |
-| Spreads | curado estático · **a refazer (PR 2c)** | Bloomberg (pago, metodologia não registrada) | jan/2025 | fontes e sinais |
-| Volatilidade cambial | curado estático · **a refazer (PR 2c)** | Bloomberg (pago, metodologia não registrada) | jan/2025 | fontes e sinais |
+| Diferencial de juros soberanos (10a) | dados abertos coletados por código (semanal) | OCDE MEI via FRED | mensal (último mês publicado) | fontes e sinais |
+| Volatilidade cambial | dados abertos coletados por código (semanal) | Federal Reserve H.10 via FRED; TRM (Banco de la República) | diária | fontes e sinais |
 | Hedge TCX | curado estático | TCX — The Currency Exchange Fund (resultados anuais) | mai/2026 | fontes e sinais |
 | Composição da dívida | curado estático | IMF WEO — World Economic Outlook | out/2024 | fontes e sinais |
-| Estabilidade | curado estático · **sai da interface (PR 2c)** | score curado sem fórmula | out/2024 | fontes e sinais |
 | Reservas de ouro | curado estático | World Gold Council (dados FMI IFS) | set/2026 (dados Q4 2025) | fontes e sinais |
-| Vetor petróleo | curado + API ao vivo no navegador · **médias a refazer (PR 2c)** | Bloomberg; Yahoo Finance | jan/2025 · ao vivo | fontes e sinais |
+| Vetor petróleo | dados abertos coletados por código + API ao vivo no navegador | EIA via FRED; Yahoo Finance | diária · ao vivo | fontes e sinais |
 | Vetor climático | API ao vivo no navegador | Open-Meteo | ao vivo | **M1** |
 | Previsão Earth-2 | snapshot 2×/dia | NVIDIA Earth-2 (FourCastNet) | 2×/dia | fora do escopo |
 | Precificação de carbono | fonte curada versionada + snapshot | Comissão Europeia (CBAM); OWID; Banco Mundial | jul/2026 | **M1** |
@@ -112,9 +111,15 @@ O que **não** é automático: a geração (disparo manual), a revisão e a prom
 
 ## Auditoria das fontes públicas
 
-O ODIN usa apenas dados abertos (OSINT — Open Source Intelligence); nenhuma fonte paga. O registro `src/data/dataAudit.ts` guarda, para cada dado curado, o status (**verificado**, **corrigido**, **não verificado** ou **a substituir no PR 2c**), a URL oficial e a data da evidência. A interface lê esse registro para marcar KPIs e indicadores não verificados, e `scripts/test-data-audit.mjs` (CI) falha se o código divergir das evidências. Resumo legível: [`docs/data-audit.md`](docs/data-audit.md).
+O ODIN usa apenas dados abertos (OSINT — Open Source Intelligence); nenhuma fonte paga. O registro `src/data/dataAudit.ts` guarda, para cada dado curado, o status (**verificado**, **corrigido**, **não verificado** ou **retirado**), a URL oficial e a data da evidência. A interface lê esse registro para marcar KPIs e indicadores não verificados, e `scripts/test-data-audit.mjs` (CI) falha se o código divergir das evidências. Resumo legível: [`docs/data-audit.md`](docs/data-audit.md).
 
-A série atribuída ao Bloomberg Terminal (spreads, volatilidade, médias de petróleo) não tem metodologia registrada no repositório — referência, prazo e data de observação são desconhecidos. Ela será refeita com dados abertos e método explícito no PR 2c (por exemplo, "Spread soberano (pb)" = juro local de 10 anos − Treasury de 10 anos).
+**Dados abertos de mercado (PR 2c).** A série atribuída ao Bloomberg Terminal não tinha metodologia registrada e foi retirada. `scripts/fetch-open-markets.mjs` (workflow `open-markets.yml`, semanal, sem chave de API) coleta e calcula, com método no próprio arquivo gerado (`src/data/generated/open-markets.json`):
+
+- **Diferencial de juros soberanos de 10 anos (pb)** = rendimento de 10 anos do país − o dos EUA, ambos da série da OCDE (Main Economic Indicators). É uma métrica diferente do spread EMBI e leva nome próprio. Sem série aberta compatível: Brasil, China, Rússia, Colômbia e Argentina, listados na interface como lacunas, com o motivo.
+- **Volatilidade cambial anualizada** = desvio-padrão dos retornos logarítmicos diários × √252, do câmbio público (Fed H.10; TRM do Banco de la República). Lacunas: ARS, RUB, TRY, IDR.
+- **Petróleo**: médias anuais de Brent e WTI a partir dos preços diários da EIA. Produção BRICS+ e petroyuan saíram (sem série aberta compatível).
+
+**Procedência em dois eixos.** Todo indicador das camadas "Fontes e sinais" declara *verificação* (verificado | não verificado) e *derivação* (direto | transformado | derivado | estimado); a interface expõe os dois em atributos e *tooltip*. O **score de estabilidade** saiu da interface, das camadas, do filtro regional e dos testes até existir um índice com fórmula publicada.
 
 ## Fontes e providers
 
@@ -130,7 +135,8 @@ A série atribuída ao Bloomberg Terminal (spreads, volatilidade, médias de pet
 | Yahoo Finance | Brent/WTI | ao vivo, sem chave |
 | Our World in Data / Global Carbon Project | CO₂ por consumo | snapshot diário, sem chave |
 | Google News RSS | Notícias | snapshot diário, sem chave |
-| BIS, IMF WEO, CEPAL, NDB, CIPS, TCX, Bloomberg | Séries de títulos, dívida e câmbio | curadoria manual em `src/data/*.ts` (status por dado em `dataAudit.ts`) |
+| OCDE MEI, Fed H.10, EIA (via FRED); Banco de la República (TRM) | Diferencial de juros 10a, volatilidade cambial, petróleo | coleta semanal por código, sem chave |
+| BIS, IMF WEO, CEPAL, NDB, CIPS, TCX | Séries de títulos e dívida | curadoria manual em `src/data/*.ts` (status por dado em `dataAudit.ts`) |
 | NVIDIA Earth-2 (FourCastNet NIM) | Previsão meteorológica | snapshot 2×/dia, chave em *secrets* |
 | **NVIDIA — Nemotron** | Geração das camadas ODIN (provider ativo) | API, chave em *secrets* do Actions |
 | **Huawei Cloud MaaS** (Model as a Service, via Digiti) | Provider alternativo configurado (`AI_PROVIDER=maas`) | API, chave em variável de ambiente |
@@ -148,7 +154,7 @@ Nenhuma chave de API é exposta no navegador.
 
 **Deploy** — integração GitHub → Vercel: cada push na `main` publica; cada PR gera *preview*. O plano atual tem limite diário de deploys; agrupar mudanças evita esgotá-lo.
 
-**Filtro regional** — Todos · BRICS · LATAM, no topo. Age em Spreads, Volatilidade, Dívida e Estabilidade (aviso "Filtro aplicado" aparece quando ativo); os blocos "Fontes e sinais" dessas seções recalculam os indicadores para a região. Pertencimento por país em `src/data/regions.ts` (o Brasil está nas duas regiões).
+**Filtro regional** — Todos · BRICS · LATAM, no topo. Age em Diferencial de juros, Volatilidade e Dívida (aviso "Filtro aplicado" aparece quando ativo); os blocos "Fontes e sinais" dessas seções recalculam os indicadores para a região. Pertencimento por país em `src/data/regions.ts` (o Brasil está nas duas regiões).
 
 ## Desenvolvimento
 
@@ -166,6 +172,8 @@ node scripts/test-review-summary.mjs        # resumo de revisão
 node scripts/test-section-layers.mjs        # Fontes e sinais (M2; render PT/EN; requer npm install)
 node scripts/test-data-audit.mjs            # auditoria das fontes públicas (PR 2a)
 node scripts/test-briefing.mjs              # Briefing ODIN + vocabulário controlado (PR 2b)
+node scripts/test-open-markets.mjs          # dados abertos + procedência em dois eixos (PR 2c)
+node scripts/fetch-open-markets.mjs         # coleta (precisa de rede; roda no workflow open-markets.yml)
 ```
 
 **Stack:** React 19 · TypeScript (strict) · Vite · Tailwind CSS · Recharts · html2canvas + jsPDF · i18n próprio (PT/EN).

@@ -39,7 +39,7 @@ await build({
 const m = await import(pathToFileURL(path.join(outdir, "bundle.mjs")).href);
 
 // 1. Estrutura do registro
-const STATUSES = new Set(["verified", "corrected", "unverified", "replace_2c"]);
+const STATUSES = new Set(["verified", "corrected", "unverified", "retired"]);
 const ids = m.DATA_AUDIT.map((e) => e.id);
 assert(new Set(ids).size === ids.length, "ids duplicados na auditoria");
 for (const e of m.DATA_AUDIT) {
@@ -81,8 +81,10 @@ for (const r of m.sourceRefs) {
   assert(!Number.isNaN(Date.parse(r.lastUpdated)), `sourceRef ${r.id} com data inválida`);
   assert(!/%%/.test(r.methodologyPt + r.methodology), `sourceRef ${r.id} com "%%" (não passa pelo i18n)`);
 }
-const bbg = m.sourceRefs.find((r) => r.id === "bloomberg");
-assert(/não registrada/.test(bbg.methodologyPt) && /No methodology recorded/.test(bbg.methodology), "Bloomberg deve declarar metodologia não registrada");
+// PR 2c: Bloomberg saiu (fonte paga, sem metodologia); séries retiradas não voltam.
+assert(!m.sourceRefs.some((r) => r.id === "bloomberg"), "sourceRef bloomberg deveria ter sido removido (PR 2c)");
+for (const id of ["spreads", "volatility", "stability", "oil-bricsplus", "oil-prices"]) assert(m.auditEntry(id)?.status === "retired", `[${id}] deveria estar retirado`);
+for (const id of ["yield-differential", "fx-volatility", "oil-eia"]) assert(m.auditEntry(id)?.status === "verified", `[${id}] deveria estar verificado`);
 
 // 4. Marcação na interface
 for (const locale of ["pt", "en"]) {
@@ -96,15 +98,15 @@ for (const locale of ["pt", "en"]) {
 }
 let flagged = 0;
 for (const s of m.SECTION_LAYERS) {
-  for (const ind of s.indicators) if (ind.unverified) flagged += 1;
-  if (s.indicators.some((i) => i.unverified)) {
+  for (const ind of s.indicators) if (ind.verification === "unverified") flagged += 1;
+  if (s.indicators.some((i) => i.verification === "unverified")) {
     const html = m.renderLayers(s.id, "pt");
     assert(html.includes("não verificado"), `[${s.id}] indicador não verificado sem marca no HTML`);
   }
 }
-assert(flagged >= 10, `esperava ≥10 indicadores marcados, obteve ${flagged}`);
+assert(flagged >= 5, `esperava ≥5 indicadores marcados, obteve ${flagged}`);
 const gold = m.SECTION_LAYERS.find((s) => s.id === "gold");
-assert(gold.indicators.every((i) => !i.unverified && i.sourceId === "wgc-ifs"), "ouro deve estar verificado e citar wgc-ifs");
+assert(gold.indicators.every((i) => i.verification === "verified" && i.sourceId === "wgc-ifs"), "ouro deve estar verificado e citar wgc-ifs");
 
 const counts = m.DATA_AUDIT.reduce((a, e) => ({ ...a, [e.status]: (a[e.status] ?? 0) + 1 }), {});
 console.log("auditoria:", JSON.stringify(counts), "· indicadores marcados:", flagged);

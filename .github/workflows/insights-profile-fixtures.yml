@@ -37,3 +37,5 @@ jobs:
         run: node scripts/test-data-audit.mjs
       - name: Briefing ODIN e vocabulário controlado (PR 2b)
         run: node scripts/test-briefing.mjs
+      - name: Dados abertos, procedência em dois eixos e retiradas (PR 2c)
+        run: node scripts/test-open-markets.mjs

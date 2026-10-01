@@ -10,7 +10,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const root = process.cwd();
-const EXPECTED = ["hero", "brazil", "market-size", "spreads", "volatility", "tcx", "debt", "stability", "gold", "oil"];
+const EXPECTED = ["hero", "brazil", "market-size", "spreads", "volatility", "tcx", "debt", "gold", "oil"];
 let failures = 0;
 const assert = (c, m) => { if (!c) { failures += 1; console.error("FALHA:", m); } };
 
@@ -20,10 +20,11 @@ import { createElement } from "react";
 import SectionLayers from "@/components/SectionLayers";
 import { SECTION_LAYERS, sourceFreshness, getSectionLayers } from "@/data/sectionLayers";
 import { REGION_FLAGS, REGION_FILTERED_SECTIONS } from "@/data/regions";
-import { spreadsData, volatilityRanking, countryDebtData, stabilityScores } from "@/data/lcBondsData";
+import { countryDebtData } from "@/data/lcBondsData";
+import { openMarkets } from "@/data/openMarkets";
 import { setLocale } from "@/i18n";
 export function render(id, locale, region = "all") { setLocale(locale); return renderToStaticMarkup(createElement(SectionLayers, { id, region })); }
-export { SECTION_LAYERS, sourceFreshness, getSectionLayers, REGION_FLAGS, REGION_FILTERED_SECTIONS, spreadsData, volatilityRanking, countryDebtData, stabilityScores };
+export { SECTION_LAYERS, sourceFreshness, getSectionLayers, REGION_FLAGS, REGION_FILTERED_SECTIONS, countryDebtData, openMarkets };
 `;
 // Dentro do projeto, para o Node resolver react/react-dom do node_modules.
 const outdir = path.join(root, "node_modules/.cache/odin-layers");
@@ -79,8 +80,9 @@ for (const s of SECTION_LAYERS) {
 
 // ── Filtro regional: nenhum país fora da região nos indicadores recalculados. ──
 const flagOf = new Map();
-for (const row of [...mod.spreadsData, ...mod.countryDebtData, ...mod.stabilityScores]) { flagOf.set(row.country, row.flag); flagOf.set(row.countryPt, row.flag); }
-for (const row of mod.volatilityRanking) { flagOf.set(row.code, row.flag); flagOf.set(row.country, row.flag); flagOf.set(row.countryPt, row.flag); }
+const om = mod.openMarkets;
+for (const row of [...om.yieldDifferential.countries, ...om.yieldDifferential.gaps, ...mod.countryDebtData]) { flagOf.set(row.country, row.flag); flagOf.set(row.countryPt, row.flag); }
+for (const row of [...om.fxVolatility.currencies, ...om.fxVolatility.gaps]) { flagOf.set(row.code, row.flag); flagOf.set(row.country, row.flag); flagOf.set(row.countryPt, row.flag); }
 const names = [...flagOf.keys()].filter((n) => n.length > 2 || /^[A-Z]{3}$/.test(n));
 for (const sec of REGION_FILTERED_SECTIONS) {
   for (const region of ["BRICS", "LATAM"]) {
@@ -101,14 +103,14 @@ for (const sec of REGION_FILTERED_SECTIONS) {
   }
   assert(!render(sec.id, "pt", "all").includes("data-layers-scope"), `[${sec.id}/all] visão global não deve exibir rótulo de região`);
 }
-// Global (sem filtro) deve continuar citando o país de maior spread do universo completo.
+// Global (sem filtro) cita todos os países com série; BRICS só os do bloco.
 const spreadsAll = getSectionLayers("spreads", "all");
-assert(spreadsAll.indicators.some((i) => i.labelPt.includes("Argentina")), "visão global de spreads deveria citar a Argentina (maior spread)");
+assert(spreadsAll.indicators.length === om.yieldDifferential.countries.length, "visão global do diferencial deveria listar todos os países com série aberta");
 const spreadsBrics = getSectionLayers("spreads", "BRICS");
-assert(!spreadsBrics.indicators.some((i) => i.labelPt.includes("Argentina")), "spreads/BRICS não pode citar a Argentina");
+assert(spreadsBrics.indicators.every((i) => om.yieldDifferential.countries.some((c) => i.labelPt.startsWith(c.countryPt) && REGION_FLAGS.BRICS.includes(c.flag))), "diferencial/BRICS só pode citar países do BRICS");
 
 // Fonte única de região nas seções filtráveis + aviso no topo + blocos recebendo a região.
-const comps = { spreads: "SpreadsTable", volatility: "VolatilityChart", debt: "DebtComposition", stability: "StabilityScatter" };
+const comps = { spreads: "SpreadsTable", volatility: "VolatilityChart", debt: "DebtComposition" };
 for (const [id, comp] of Object.entries(comps)) {
   const src = await readFile(path.join(root, `src/components/${comp}.tsx`), "utf8");
   assert(src.includes("inRegion("), `${comp} deve usar inRegion (fonte única de região)`);

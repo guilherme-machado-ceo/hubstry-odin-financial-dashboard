@@ -1,9 +1,9 @@
 import { useRef, useEffect, useState } from "react";
-import { Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Bar, ComposedChart } from "recharts";
-import { oilData } from "@/data/goldOilData";
+import { Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart } from "recharts";
+import { openMarkets, formatDay } from "@/data/openMarkets";
+import { term } from "@/data/glossary";
 import { t, getLocale } from "@/i18n";
 import ExportButton from "./ExportButton";
-import EstBadge from "./EstBadge";
 import { Share2, Radio, TrendingUp, TrendingDown } from "lucide-react";
 
 interface LivePrice {
@@ -20,12 +20,19 @@ const YAHOO_TICKERS = [
   { symbol: "CL=F", name: "WTI" },
 ];
 
+// Médias anuais de Brent e WTI (EIA via FRED), calculadas por
+// scripts/fetch-open-markets.mjs. A produção do bloco e o volume em yuan saíram (PR 2c):
+// sem série aberta compatível.
+const oil = openMarkets.oil;
+const oilData = Object.keys(oil.brent?.annual ?? {}).map((y) => ({ year: Number(y), brent: oil.brent?.annual[y], wti: oil.wti?.annual[y] }));
+
 export default function OilVectorChart({ onSourceClick, onEmbedClick }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
   const [livePrices, setLivePrices] = useState<LivePrice[]>([]);
   const [isLive, setIsLive] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const locale = getLocale();
+  const money = (v: number) => v.toLocaleString(locale === "pt" ? "pt-BR" : "en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   useEffect(() => {
     async function fetchLivePrices() {
@@ -77,15 +84,13 @@ export default function OilVectorChart({ onSourceClick, onEmbedClick }: Props) {
                   {locale === "pt" ? "DADOS AO VIVO" : "LIVE DATA"}
                   {lastUpdated && <span className="text-[#00FF88]/60">— {lastUpdated}</span>}
                 </span>
-              ) : (
-                <EstBadge />
-              )}
+              ) : null}
             </div>
             <h2 className="text-xl font-bold text-[#e0e0e0] tracking-tight">{t("oil.title")}</h2>
             <p className="text-[11px] font-mono text-[#555] mt-1 max-w-2xl leading-relaxed">{t("oil.subtitle")}</p>
           </div>
           <div className="flex items-center gap-2">
-            <ExportButton chartRef={chartRef} filename="oil-vector" jsonData={{ oil: oilData, livePrices }} />
+            <ExportButton chartRef={chartRef} filename="oil-vector" jsonData={{ method: locale === "pt" ? oil.methodPt : oil.methodEn, oil: oilData, latest: { brent: oil.brent?.latest, wti: oil.wti?.latest }, livePrices }} />
             <button onClick={() => onEmbedClick("oil")} className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono text-[#555] hover:text-[#00FFFF] transition-colors border border-[#222] hover:border-[#00FFFF]/40"><Share2 size={12} /></button>
           </div>
         </div>
@@ -111,25 +116,26 @@ export default function OilVectorChart({ onSourceClick, onEmbedClick }: Props) {
 
         <div className="h-[400px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={oilData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <LineChart data={oilData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
               <XAxis dataKey="year" tick={{ fontSize: 10, fill: "#555", fontFamily: "JetBrains Mono" }} axisLine={{ stroke: "#222" }} tickLine={false} />
-              <YAxis yAxisId="left" tick={{ fontSize: 10, fill: "#555", fontFamily: "JetBrains Mono" }} axisLine={false} tickLine={false} label={{ value: "US$/barril", angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 9, fill: "#555" } }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: "#555", fontFamily: "JetBrains Mono" }} axisLine={false} tickLine={false} label={{ value: "US$ bi / mbd", angle: -90, position: "insideRight", offset: 10, style: { fontSize: 9, fill: "#555" } }} />
+              <YAxis tick={{ fontSize: 10, fill: "#555", fontFamily: "JetBrains Mono" }} axisLine={false} tickLine={false} label={{ value: locale === "pt" ? "US$/barril" : "US$/bbl", angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 9, fill: "#555" } }} />
               <Tooltip contentStyle={{ backgroundColor: "#111", border: "1px solid #222", borderRadius: 0, fontSize: 11, fontFamily: "JetBrains Mono", color: "#e0e0e0" }} />
               <Legend wrapperStyle={{ fontSize: 10, fontFamily: "JetBrains Mono", color: "#555" }} />
-              <Line yAxisId="left" type="monotone" dataKey="brent" name={t("oil.seriesBrent")} stroke="#FF8C00" strokeWidth={2} dot={false} />
-              <Line yAxisId="left" type="monotone" dataKey="wti" name={t("oil.seriesWTI")} stroke="#e0e0e0" strokeWidth={1} strokeDasharray="4 4" dot={false} />
-              <Bar yAxisId="right" dataKey="bricsProduction" name={t("oil.seriesProduction")} fill="#333" barSize={20} />
-              <Line yAxisId="right" type="monotone" dataKey="petroyuanVolume" name={t("oil.seriesPetroyuan")} stroke="#00FFFF" strokeWidth={1.5} dot={false} />
-            </ComposedChart>
+              <Line type="monotone" dataKey="brent" name={t("oil.seriesBrent")} stroke="#FF8C00" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="wti" name={t("oil.seriesWTI")} stroke="#e0e0e0" strokeWidth={1} strokeDasharray="4 4" dot={false} />
+            </LineChart>
           </ResponsiveContainer>
         </div>
 
+        {oil.brent && (
+          <p className="mt-2 text-[9px] font-mono text-[#666]" data-oil-latest>
+            {t("oil.latestDaily")}: Brent US$ {money(oil.brent.latest.value)}{oil.wti ? ` · WTI US$ ${money(oil.wti.latest.value)}` : ""} ({formatDay(oil.brent.latest.date, locale)}) · <span data-term="derived">{term("derived", locale)}</span> {locale === "pt" ? "(médias anuais)" : "(annual averages)"} · <span data-term="verified">{term("verified", locale)}</span>
+          </p>
+        )}
         <div className="mt-4 flex items-center justify-between">
-          <button onClick={() => onSourceClick("bloomberg")} className="text-[9px] font-mono text-[#444] hover:text-[#00FFFF] transition-colors">
-            {isLive ? "Fonte: Yahoo Finance (BZ=F, CL=F) + EIA — " : t("oil.source")}
-            {isLive ? locale === "pt" ? "atualiza a cada 60s" : "refreshes every 60s" : "→"}
+          <button onClick={() => onSourceClick("eia-fred")} className="text-[9px] font-mono text-[#444] hover:text-[#00FFFF] transition-colors">
+            {t("oil.source")} →{isLive ? (locale === "pt" ? " · cotação ao vivo: Yahoo Finance (BZ=F, CL=F), atualiza a cada 60s" : " · live quote: Yahoo Finance (BZ=F, CL=F), refreshes every 60s") : ""}
           </button>
           {isLive && (
             <span className="text-[8px] font-mono text-[#00FF88]/60">
