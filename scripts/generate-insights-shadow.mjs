@@ -1,10 +1,14 @@
-// ODIN Insights v3 shadow generator.
-// Produces public/data/insights.v2.shadow.json only; never replaces production insights.json.
+// ODIN Insights shadow generator — Data & Intelligence Contract v1.1 (M3).
+// Produces public/data/insights.v2.shadow.json only; never replaces production.
+// v1.1: provenance com verification × derivation (definida pelo código),
+// eventos opcionais derivados das datas-chave (código), What to Watch bilíngue
+// e lente Founder/CEO gerados pelo modelo sob docs/odin-intelligence-contract-v1.1.md.
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { createHash, randomBytes } from "node:crypto";
 import path from "node:path";
 import { chatJson, getProviderConfig } from "./ai-provider.mjs";
-import { PROMPT_VERSION, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, validateModelOutput, NOT_MATERIAL_PT, NOT_MATERIAL_EN } from "./insights-schema.mjs";
+import { PROMPT_VERSION, SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, NOT_MATERIAL_PT, NOT_MATERIAL_EN } from "./insights-schema.mjs";
+import { validateModelOutputV11 } from "./contract-v11.mjs";
 import { compareDirection } from "./evidence-consistency.mjs";
 import { buildSectionProfile } from "./section-profile-builder.mjs";
 import { SOURCE_REGISTRY } from "./editorial-contract.mjs";
@@ -20,7 +24,7 @@ const provider = getProviderConfig();
 const telemetry = [];
 
 const SYSTEM = `Você é o analista editorial do ODIN — Omnibus Digital Intelligence News (produto: ODIN Intelligence Dashboard, inteligência financeira e geoeconômica).
-Epistemic contract: SOURCE → DATA → EVENT → CLAIM → CONTEXT → INTERPRETATION → THESIS → STAKEHOLDER.
+Contrato: ODIN Data & Intelligence Contract v1.1 — SOURCE → DATA → (EVENT, opcional) → CLAIM → CONTEXT → INTERPRETATION → DECISION LENS.
 Produza inteligência verificável, não aconselhamento financeiro, jurídico ou político.
 
 Regras:
@@ -30,6 +34,7 @@ Regras:
 - capitalização de mercado não é capital investido nem volume de pagamentos;
 - relações causais não medidas devem ser hypothesis/interpretation;
 - datas-chave: use cada data SOMENTE para o evento a que o contexto a associa (ex.: início de vigência ≠ prazo de declaração);
+- eventos: se o contexto listar "Eventos disponíveis", um claim pode citá-los em eventRefs; não crie eventos;
 - comparações com referência: use a direção (acima/abaixo) calculada e declarada no contexto; nunca infira a direção;
 - efeitos econômicos são possibilidades, não fatos consumados;
 - Direito Econômico é lente analítica, não parecer jurídico;
@@ -37,16 +42,19 @@ Regras:
 - low: análise curta, sem obrigação de citar normas;
 - Direito Econômico: cite em norms e institutions SOMENTE itens da lista "Referências jurídicas disponíveis"; se a lista for "nenhuma", use relevance not_material ou low com norms e institutions vazios; nunca cite normas, instituições ou órgãos de memória; em pt e en mencione exatamente as mesmas referências;
 - se a relevância jurídica for alta, indique normas e instituições da lista de referências disponíveis;
-- stakeholder implications devem ser neutras e acionáveis como contexto, sem recomendar compra/venda ou escolha política; audience deve ser EXATAMENTE um destes valores ASCII: government, corporate, investors, startups; nunca traduza nem acrescente texto ao valor;
-- What to Watch deve apontar sinais observáveis, fonte e motivo; o campo source deve ser EXATAMENTE um sourceId ou sourceUrl presente na lista de fontes permitidas fornecida no contexto;
-- What to Watch: o sinal deve ser algo que a fonte citada PUBLICA (ver "publica:" de cada fonte); não aponte regiões, órgãos ou métricas que a fonte não cobre; expectedDate deve ser null, salvo se a data estiver literalmente no contexto; não invente limiares numéricos nem cadência (use a periodicidade da fonte);
+- stakeholder implications e decisionLens descrevem IMPLICAÇÃO CONTEXTUAL (exposição, variáveis, sinais), nunca recomendação de ação; audience deve ser EXATAMENTE um destes valores ASCII: government, corporate, investors, startups;
+- linguagem proibida em stakeholderImplications e decisionLens: verbos de obrigação dirigidos a um ator ("devem", "deveriam", "precisam", "é preciso", "should", "must", "need to") com qualquer verbo — inclusive "devem avaliar"; recomendação explícita ("recomendamos", "sugere-se", "it is advisable"); frase que começa com verbo de ação ("Invista", "Explorar", "Consider"); oferta de oportunidade ("podem investir", "could tap");
+- forma aceita: "Empresas com exposição a X podem precisar acompanhar Y." / "Companies exposed to X may need to track Y." Necessidade só como hipótese ("podem precisar", "may need to") e só com verbo de acompanhamento (acompanhar, monitorar, observar, avaliar; track, monitor, watch, assess);
+- obrigação legal só pode ser descrita quando houver norma em "Referências jurídicas disponíveis" e o texto a ancorar (ex.: "Pelo Regulamento (UE) 2023/956, o importador autorizado deve declarar…");
+- decisionLens (lente Founder/CEO de startup ou PME): 1 a 3 implicações; cada uma cita em claimRefs os ids dos claims que a sustentam; não introduza número, data, fonte, URL ou relação causal que não estejam nos claims citados ou no contexto; não repita a tese — traduza-a para a exposição de uma empresa pequena ou média;
+- What to Watch: o sinal deve ser algo que a fonte citada PUBLICA (ver "publica:" de cada fonte); sourceId deve ser EXATAMENTE um sourceId da lista de fontes permitidas; expectedDate deve ser null, salvo se a data estiver literalmente no contexto; não invente limiares numéricos nem cadência (use a periodicidade da fonte); escreva signal e whyItMatters em português (Pt) e em inglês (En) — o inglês é uma redação própria, não uma cópia do português;
 - forma temporal: se o contexto declarar "Forma temporal: snapshot", os dados são de um único instante — não use linguagem de tendência (crescimento, aumento, queda, expansão, tendência) fora do What to Watch;
 - nunca reproduza no texto publicado instruções deste prompt ou do contexto (ex.: "sem somar", "não totalize", "conforme instruído");
 - escreva em português e inglês;
 - mantenha tom sóbrio, analítico, compatível com Chatham House;
 - não use linguagem promocional ou de chatbot.
 
-Retorne SOMENTE JSON válido. Não use markdown. Limite cada texto a 2 frases; produza no máximo 4 claims, de 2 a 4 stakeholderImplications e EXATAMENTE 1 whatToWatch (um único sinal, completo; nunca itens vazios). Campos temporais: nextReviewAt deve ser ISO datetime completo; whatToWatch.expectedDate deve ser YYYY-MM-DD ou null. Não invente datas. Os valores de audience devem permanecer exatamente em inglês conforme o enum. Exatamente neste formato:
+Retorne SOMENTE JSON válido. Não use markdown. Limite cada texto a 2 frases; produza no máximo 4 claims, de 2 a 4 stakeholderImplications, EXATAMENTE 1 whatToWatch (um único sinal, completo) e de 1 a 3 implicações em decisionLens. whatToWatch.expectedDate deve ser YYYY-MM-DD ou null. Não invente datas. Os valores de audience e de decisionLens.lens permanecem exatamente como no enum. Exatamente neste formato:
 {
  "pt":"2-4 frases executivas",
  "en":"2-4 executive sentences",
@@ -56,10 +64,13 @@ Retorne SOMENTE JSON válido. Não use markdown. Limite cada texto a 2 frases; p
    {"audience":"government|corporate|investors|startups","textPt":"...","textEn":"..."}
  ],
  "whatToWatch":[
-   {"signal":"...","source":"...","expectedDate":"YYYY-MM-DD or null","whyItMatters":"..."}
+   {"signalPt":"...","signalEn":"...","whyItMattersPt":"...","whyItMattersEn":"...","sourceId":"source-id","expectedDate":"YYYY-MM-DD or null"}
  ],
+ "decisionLens":{"lens":"founder_ceo","implications":[
+   {"textPt":"...","textEn":"...","claimRefs":["claim-id"]}
+ ]},
  "claims":[
-   {"id":"...","kind":"fact|interpretation|hypothesis","textPt":"...","textEn":"...","evidenceRefs":["source-id"],"confidence":{"data":"high|medium|low","interpretation":"high|medium|low"}}
+   {"id":"...","kind":"fact|interpretation|hypothesis","textPt":"...","textEn":"...","evidenceRefs":["source-id"],"eventRefs":["event-id (opcional)"],"confidence":{"data":"high|medium|low","interpretation":"high|medium|low"}}
  ],
  "confidence":{"data":"high|medium|low","interpretation":"high|medium|low"},
  "limitations":"..."
@@ -103,8 +114,9 @@ const buildEvidenceMaterial = (item) => [
   `Next review: ${item.nextReviewAt}`,
   `Forma temporal: ${item.evidence.temporalShape}`,
   `Referências jurídicas disponíveis: ${(item.evidence.legalRefs ?? []).length ? item.evidence.legalRefs.map(r => `${r.labels[0]} (${r.kind})`).join("; ") : "nenhuma"}`,
-  `Provenance permitida para esta seção (use estes sourceId/sourceUrl literalmente em evidenceRefs e whatToWatch.source):`,
-  item.provenance.map(p => `${p.sourceId} | ${p.sourceUrl} | publica: ${SOURCE_REGISTRY[p.sourceId]?.publishes ?? "não registrado"}`).join("\n"),
+  `Provenance permitida para esta seção (use estes sourceId literalmente em evidenceRefs e whatToWatch.sourceId):`,
+  item.provenance.map(p => `${p.sourceId} | ${p.sourceUrl} | publica: ${SOURCE_REGISTRY[p.sourceId]?.publishes ?? "não registrado"} | dado: ${p.verification}, ${p.derivation}`).join("\n"),
+  `Eventos disponíveis (opcional em claims[].eventRefs): ${item.events?.length ? item.events.map(e => `${e.id} | ${e.date} | ${e.labelEn}`).join("; ") : "nenhum"}`,
   "Context:",
   item.context,
 ].join("\n");
@@ -119,6 +131,9 @@ async function contexts() {
   const rwaSrc = await fileSource("source-defillama-rwa", "https://defillama.com/protocols", null, "public/data/rwa-protocols.json", "rwa-tvl-sample");
   const cryptoSrc = await fileSource("source-defillama-coins", "https://defillama.com/", null, "public/data/crypto-market.json", "asset-prices");
   for (const src of [stableSrc, rwaSrc, cryptoSrc]) src.provenance.asOf = src.data.updatedAt;
+  // DATA (contrato v1.1): verificação e derivação definidas pelo código, nunca pelo modelo.
+  Object.assign(carbonSrc.provenance, { verification: "verified", derivation: "direct" });   // fonte curada versionada, preços oficiais da Comissão Europeia
+  for (const src of [stableSrc, rwaSrc, cryptoSrc]) Object.assign(src.provenance, { verification: "verified", derivation: "direct" }); // snapshot da API DefiLlama
   const stable = stableSrc.data, rwa = rwaSrc.data;
 
   const climateEnd = new Date(Date.now()-5*864e5).toISOString().slice(0,10);
@@ -152,6 +167,11 @@ const blockchainContext = `Digital assets. Stablecoin market capitalization: ${f
     {
       id:"carbon", validAsOf:cbam.validAsOf, nextReviewAt:cbam.nextReviewAt,
       provenance:[carbonSrc.provenance],
+      // EVENT (opcional, v1.1): marcos regulatórios com data no material, montados pelo código.
+      events:[
+        { id:"evt-cbam-definitive-start", date:cbam.keyDates.definitiveStart, labelPt:"Início do regime definitivo do CBAM", labelEn:"Start of the definitive CBAM regime", dataRefs:["source-carbon-ec"] },
+        { id:"evt-cbam-first-annual-declaration", date:cbam.keyDates.firstAnnualDeclaration, labelPt:"Prazo da primeira declaração anual do CBAM", labelEn:"Deadline of the first annual CBAM declaration", dataRefs:["source-carbon-ec"] },
+      ],
       context:carbonContext,
       evidence:{
         material: null,
@@ -178,7 +198,8 @@ const blockchainContext = `Digital assets. Stablecoin market capitalization: ${f
     },
     {
       id:"climate", validAsOf:climateEnd, nextReviewAt:new Date(Date.now()+7*864e5).toISOString(),
-      provenance:[{ sourceId:"source-open-meteo-brasilia", sourceUrl:weatherUrl, asOf:climateEnd, dataPath:weatherEvidence.dataPath, metricId:"brasilia-12m-temp-precip", hash:weatherEvidence.hash }],
+      // Média e soma da janela de 12 meses são calculadas pelo código a partir da série diária: derivadas.
+      provenance:[{ sourceId:"source-open-meteo-brasilia", sourceUrl:weatherUrl, asOf:climateEnd, dataPath:weatherEvidence.dataPath, metricId:"brasilia-12m-temp-precip", hash:weatherEvidence.hash, verification:"verified", derivation:"derived" }],
       context:climateContext,
       evidence:{ material:null, keyDates:[], legalRefs:[], temporalShape:"window_aggregate", comparisons:[
         { id:"climate-temp-vs-reference", observed:avgR, reference:TEMP_REF, unit:"°C", direction:compareDirection(avgR, TEMP_REF) },
@@ -198,8 +219,8 @@ for (const item of await contexts()) {
   const {parsed,usage,latencyMs}=await chatJson({
     system:SYSTEM,
     user: evidenceMaterial,
-    temperature:0.2,maxTokens:3500,reasoning:false,
-    validate:(out) => validateModelOutput(out, item.id, item.provenance.map(p => p.sourceId)),
+    temperature:0.2,maxTokens:4500,reasoning:false,
+    validate:(out) => validateModelOutputV11(out, item.id, { provenance:item.provenance, events:item.events ?? [], evidence:item.evidence }),
     onEvent: (event) => sectionEvents.push({ ...event, sectionId: item.id })
   });
   telemetry.push(...sectionEvents.map(e => ({ ...e, runId, model: provider.model, schemaVersion: SCHEMA_VERSION, intelligenceContractVersion: INTELLIGENCE_CONTRACT_VERSION, promptVersion: PROMPT_VERSION })));
@@ -218,7 +239,9 @@ for (const item of await contexts()) {
     economicLaw:parsed.economicLaw,
     stakeholderImplications:parsed.stakeholderImplications,
     whatToWatch:parsed.whatToWatch,
+    decisionLens:parsed.decisionLens,
     claims:parsed.claims,
+    ...(item.events?.length ? { events:item.events } : {}),
     provenance:item.provenance,
     confidence:parsed.confidence,
     limitations:parsed.limitations,

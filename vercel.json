@@ -3,10 +3,30 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/assets/:path*", "destination": "/assets/:path*" },
-    { "source": "/favicon.ico", "destination": "/favicon.ico" },
-    { "source": "/3d-infra.jpg", "destination": "/3d-infra.jpg" },
-    { "source": "/embed/:id", "destination": "/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+    {
+      "source": "/assets/:path*",
+      "destination": "/assets/:path*"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/favicon.ico"
+    },
+    {
+      "source": "/3d-infra.jpg",
+      "destination": "/3d-infra.jpg"
+    },
+    {
+      "source": "/embed/:id",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "shadow-samples": false
+    }
+  }
 }

@@ -41,3 +41,5 @@ jobs:
         run: node scripts/test-briefing.mjs
       - name: Dados abertos, procedência em dois eixos e retiradas (PR 2c)
         run: node scripts/test-open-markets.mjs
+      - name: Pipeline v1.1 hermético (gerador → gate → promoção → Briefing, sem rede e sem custo)
+        run: node scripts/test-pipeline-v11.mjs

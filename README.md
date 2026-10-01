@@ -178,6 +178,7 @@ node scripts/test-data-audit.mjs            # auditoria das fontes públicas (PR
 node scripts/test-briefing.mjs              # Briefing ODIN + vocabulário controlado (PR 2b)
 node scripts/test-open-markets.mjs          # dados abertos + procedência em dois eixos (PR 2c)
 node scripts/test-contract-v11.mjs          # Data & Intelligence Contract v1.1
+node scripts/test-pipeline-v11.mjs          # pipeline v1.1 hermético (sem rede, sem custo de modelo)
 node scripts/fetch-open-markets.mjs         # coleta (precisa de rede; roda no workflow open-markets.yml)
 ```
 

@@ -40,7 +40,12 @@ export function renderReviewSummary(doc, report = null, { runUrl = null, shadowR
     lines.push("");
     if ((s.whatToWatch ?? []).length) {
       lines.push("**What to Watch**");
-      for (const w of s.whatToWatch) lines.push(`- ${esc(w.signal)} — ${esc(w.source)}${w.expectedDate ? ` · ${w.expectedDate}` : ""}`);
+      for (const w of s.whatToWatch) lines.push(`- ${esc(w.signal ?? w.signalPt)}${w.signalEn ? ` / _${esc(w.signalEn)}_` : ""} — ${esc(w.source ?? w.sourceId)}${w.expectedDate ? ` · ${w.expectedDate}` : ""}`);
+      lines.push("");
+    }
+    if ((s.decisionLens?.implications ?? []).length) {
+      lines.push(`**Lente ${esc(s.decisionLens.lens)}**`);
+      for (const imp of s.decisionLens.implications) lines.push(`- ${esc(imp.textPt)} _(claims: ${esc((imp.claimRefs ?? []).join(", "))})_`);
       lines.push("");
     }
     if ((s.stakeholderImplications ?? []).length) {
@@ -49,7 +54,7 @@ export function renderReviewSummary(doc, report = null, { runUrl = null, shadowR
       lines.push("");
     }
     lines.push("**Evidências**");
-    for (const p of s.provenance ?? []) lines.push(`- \`${p.sourceId}\` · ${esc(p.dataPath)} · \`${String(p.hash).slice(0, 23)}…\``);
+    for (const p of s.provenance ?? []) lines.push(`- \`${p.sourceId}\` · ${esc(p.dataPath)} · \`${String(p.hash).slice(0, 23)}…\`${p.verification ? ` · ${p.verification} + ${p.derivation}` : ""}`);
     lines.push("");
   }
   return lines.join("\n");

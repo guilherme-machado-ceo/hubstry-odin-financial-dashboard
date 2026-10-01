@@ -29,6 +29,7 @@
 import { norm, hasTerm, SOURCE_REGISTRY, watchView } from "./editorial-contract.mjs";
 export { watchView };
 import { extractDates, extractNumbers } from "./evidence-consistency.mjs";
+import { checkLayerCompleteness, validateClaim, LEVELS } from "./insights-schema.mjs";
 
 export const CONTRACT_V11 = "1.1";
 export const VERIFICATION = new Set(["verified", "unverified"]);
@@ -103,6 +104,8 @@ const DEONTIC = [
   ["tem", "que"], ["tem", "de"], ["e", "preciso"], ["e", "necessario"], ["e", "recomendavel"], ["e", "aconselhavel"], ["convem"],
   ["should"], ["must"], ["need", "to"], ["needs", "to"], ["ought", "to"], ["have", "to"], ["has", "to"],
 ];
+// Necessidade hipotética ("podem precisar", "may need to"): contextual só com verbo de acompanhamento.
+const HEDGE = new Set(["pode", "podem", "poderia", "poderiam", "may", "might", "could"]);
 const SKIP_AFTER_DEONTIC = new Set(["tambem", "ainda", "urgentemente", "rapidamente", "imediatamente", "agora", "nao", "se", "also", "still", "urgently", "immediately", "quickly", "now", "not", "then", "entao", "logo", "possivelmente", "eventualmente"]);
 const COPULA = new Set(["ser", "estar", "be", "being", "get"]);
 // Marcadores de obrigação jurídica descrita (não é recomendação do ODIN).
@@ -120,16 +123,25 @@ function deonticAt(toks, i) {
 }
 
 /**
- * Classifica uma frase. Devolve null (contextual) ou { rule, match }.
- * Regras: R1 deôntico + verbo de ação (não de acompanhamento), exceto quando
- * a frase descreve obrigação jurídica; R2 ato de fala de recomendação; R3 frase
- * iniciada por imperativo/infinitivo de ação; R4 modal de possibilidade + verbo
- * de oportunidade/transação ("podem investir", "could tap").
+ * Classifica uma frase em três categorias (contrato v1.1, seção 7):
+ *   DESCRIÇÃO DE OBRIGAÇÃO LEGAL → permitida só quando ancorada em norma/
+ *     evidência jurídica da seção (ctx.legalAnchors não vazio) e a frase traz
+ *     marcador jurídico;
+ *   IMPLICAÇÃO CONTEXTUAL → permitida;
+ *   RECOMENDAÇÃO DE AÇÃO → bloqueada.
+ * Devolve null (permitida) ou { rule, match }.
+ * R1 deôntico dirigido a um ator: bloqueia com QUALQUER verbo ("governos devem
+ *    avaliar" é recomendação de política), salvo necessidade hipotética
+ *    ("podem precisar acompanhar", "may need to track") com verbo de
+ *    acompanhamento; R2 ato de fala de recomendação; R3 frase iniciada por
+ *    imperativo/infinitivo de ação; R4 modal de possibilidade + verbo de
+ *    oportunidade/transação ("podem investir", "could tap").
  */
-export function classifyRecommendation(sentence) {
+export function classifyRecommendation(sentence, ctx = {}) {
   const t = tokens(sentence);
   if (!t.length) return null;
-  const legal = LEGAL_DESCRIPTION.some((m) => hasTerm(sentence, m));
+  const anchored = (ctx.legalAnchors ?? []).filter(Boolean).length > 0;
+  const legal = anchored && LEGAL_DESCRIPTION.some((m) => hasTerm(sentence, m));
   // R2
   const act = SPEECH_ACT.find((m) => hasTerm(sentence, m));
   if (act) return { rule: "R2_speech_act", match: act.replace("*", "") };
@@ -149,9 +161,11 @@ export function classifyRecommendation(sentence) {
       if (COPULA.has(t[j])) j++;
       const verb = t[j];
       if (!verb) continue;
-      if (isMonitor(verb)) continue;
-      if (verb === "precisar" || verb === "need") continue; // "podem precisar acompanhar": o verbo seguinte decide
-      return { rule: "R1_deontic_action", match: `${t.slice(i, i + n).join(" ")} ${verb}` };
+      if (verb === "precisar" || verb === "need") continue; // o deôntico seguinte decide
+      const hedged = HEDGE.has(t[i - 1]) || (t[i - 1] === "to" && HEDGE.has(t[i - 3]));
+      const necessity = ["precisar", "precisam", "precisa", "need", "needs"].includes(t[i]);
+      if (hedged && necessity && isMonitor(verb)) continue;
+      return { rule: "R1_deontic", match: `${t.slice(i, i + n).join(" ")} ${verb}` };
     }
   }
   // R4
@@ -165,13 +179,21 @@ export function classifyRecommendation(sentence) {
   return null;
 }
 
-export function checkRecommendationLanguage(path, text) {
+export function checkRecommendationLanguage(path, text, ctx = {}) {
   const errors = [];
   for (const s of splitSentences(text)) {
-    const hit = classifyRecommendation(s);
+    const hit = classifyRecommendation(s, ctx);
     if (hit) errors.push(err("recommendation_language", path, `${hit.rule} ("${hit.match}") — "${s.slice(0, 160)}"`));
   }
   return errors;
+}
+
+/** Âncoras jurídicas da seção: normas citadas (relevância material) e referências jurídicas da evidência. */
+export function legalContext(entry, evidence) {
+  const material = ["high", "medium"].includes(entry?.economicLaw?.relevance);
+  const norms = material ? (entry.economicLaw.norms ?? []) : [];
+  const refs = (evidence?.legalRefs ?? []).flatMap((r) => r.labels ?? [r.id]).filter(Boolean);
+  return { legalAnchors: [...norms, ...refs] };
 }
 
 // ── 4. DECISION LENS ────────────────────────────────────────────────────────
@@ -219,7 +241,7 @@ export function checkDecisionLens(entry, evidence) {
       }
       const causal = hasCausal(text);
       if (causal && !cited.some((c) => hasCausal(`${c.textPt ?? ""} ${c.textEn ?? ""}`))) errors.push(err("lens_new_causality", p, `"${causal.replace("*", "")}" sem relação causal nos claims citados`));
-      errors.push(...checkRecommendationLanguage(p, text));
+      errors.push(...checkRecommendationLanguage(p, text, legalContext(entry, evidence)));
     }
   }
   return errors;
@@ -252,9 +274,10 @@ export function structuralCorrectionCount(entry) {
 
 /** Todas as regras v1.1 de uma seção (estrutura + semântica determinística). */
 export function checkContractV11(entry, evidence) {
+  const ctx = legalContext(entry, evidence);
   const stakeholderErrors = (entry.stakeholderImplications ?? []).flatMap((s, i) => [
-    ...checkRecommendationLanguage(`stakeholderImplications[${i}].pt`, s.textPt),
-    ...checkRecommendationLanguage(`stakeholderImplications[${i}].en`, s.textEn),
+    ...checkRecommendationLanguage(`stakeholderImplications[${i}].pt`, s.textPt, ctx),
+    ...checkRecommendationLanguage(`stakeholderImplications[${i}].en`, s.textEn, ctx),
   ]);
   return [
     ...checkProvenanceAxes(entry),
@@ -267,3 +290,38 @@ export function checkContractV11(entry, evidence) {
 }
 
 export const formatContractError = (e) => `[${e.rule}] ${e.path}: ${e.detail}`;
+
+/**
+ * Contrato da saída crua do modelo (v1.1), usado no retry de contrato do
+ * gerador: estrutura das 5 camadas + What to Watch bilíngue + lente
+ * Founder/CEO + regras semânticas determinísticas da lente e da linguagem
+ * não recomendativa. `ctx` traz a provenance, os eventos e a evidência da
+ * seção (montados pelo código, não pelo modelo).
+ */
+export function validateModelOutputV11(parsed, sectionId, ctx = {}) {
+  if (!parsed || typeof parsed !== "object") return ["saída não é objeto JSON"];
+  const provenance = ctx.provenance ?? [];
+  const allowed = new Set(provenance.map((p) => p.sourceId));
+  const errors = [...checkLayerCompleteness(parsed, sectionId)];
+  for (const [i, c] of (parsed.claims ?? []).entries()) {
+    errors.push(...validateClaim(c, `claims[${i}]`));
+    for (const ref of c?.evidenceRefs ?? []) if (allowed.size && !allowed.has(ref)) errors.push(`claims[${i}].evidenceRefs: ${ref} fora da provenance permitida`);
+  }
+  for (const [i, s] of (parsed.stakeholderImplications ?? []).entries()) {
+    if (!["government", "corporate", "investors", "startups"].includes(s?.audience)) errors.push(`stakeholderImplications[${i}].audience inválido`);
+    if (!nonEmpty(s?.textPt) || !nonEmpty(s?.textEn)) errors.push(`stakeholderImplications[${i}] textPt/textEn ausente`);
+  }
+  if (!LEVELS.has(parsed.confidence?.data) || !LEVELS.has(parsed.confidence?.interpretation)) errors.push("confidence inválida");
+  if (!nonEmpty(parsed.limitations)) errors.push("limitations ausente");
+  const entry = { ...parsed, provenance, events: ctx.events ?? [] };
+  const semantic = [
+    ...checkWatchV11(entry),
+    ...checkEvents(entry, ctx.evidence),
+    ...checkDecisionLens(entry, ctx.evidence),
+    ...(entry.stakeholderImplications ?? []).flatMap((s, i) => [
+      ...checkRecommendationLanguage(`stakeholderImplications[${i}].pt`, s?.textPt, legalContext(entry, ctx.evidence)),
+      ...checkRecommendationLanguage(`stakeholderImplications[${i}].en`, s?.textEn, legalContext(entry, ctx.evidence)),
+    ]),
+  ];
+  return [...errors, ...semantic.map(formatContractError)];
+}

@@ -3,6 +3,44 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [M3 passo 2 · gerador e prompt Founder/CEO (contrato v1.1)] — 2026-10-01
+
+Aprovado por Guilherme e pela IA parceira. **Sem chamada ao Nemotron**: o
+shadow continua manual e o primeiro run com custo é o passo 3. O M1 publicado
+(v1.0) não foi alterado e segue como baseline de regressão.
+
+### Alterado
+- **Recomendação × obrigação legal × implicação** (revisão da IA parceira):
+  deôntico dirigido a um ator é recomendação com QUALQUER verbo ("governos
+  devem avaliar" agora bloqueia); só passa necessidade hipotética com verbo de
+  acompanhamento ("podem precisar acompanhar"). Obrigação legal só é aceita
+  quando ancorada em norma da seção ou referência jurídica da evidência — a
+  mesma frase sem âncora bloqueia. Fixtures em três categorias (17
+  contextuais, 3 obrigações ancoradas, 23 recomendações) + 2 sem âncora.
+- **Gerador** (`generate-insights-shadow.mjs`, prompt 4.0.0, contrato 1.1):
+  provenance com `verification × derivation` definida pelo código; eventos do
+  CBAM montados pelo código a partir das datas-chave (EVENT opcional); prompt
+  pede What to Watch PT/EN e lente Founder/CEO com claimRefs e linguagem
+  contextual; retry de contrato usa `validateModelOutputV11` (estrutura +
+  regras semânticas da lente e da recomendação).
+- **Interface**: InsightBox mostra a lente Founder/CEO e o What to Watch no
+  idioma; Briefing usa a 1ª implicação da lente em "Por que importa" (v1.1),
+  What to Watch em EN quando gerado e passa a mostrar "De onde veio" (link da
+  fonte do fato). Resumo de revisão mostra lente, What to Watch EN e eixos de
+  procedência.
+- **Workflow shadow**: toda geração (aprovada ou bloqueada) é salva no branch
+  `shadow-samples` (`samples/<runId>/`), para calibração; `vercel.json` não
+  faz deploy desse branch.
+
+### Adicionado
+- `scripts/test-pipeline-v11.mjs` (CI): roda gerador → gate → promoção →
+  Briefing num diretório temporário, com entradas congeladas e
+  `scripts/pipeline-mock.mjs` (relógio fixo, Open-Meteo sintético, respostas
+  v1.1). Cenários ok, retry (lente com recomendação corrigida no retry) e
+  block (gate bloqueia, artefato é escrito, promoção recusa).
+- `scripts/briefing-literal-check.mjs`: regra literal do Briefing + as 4
+  respostas do teste dos 3 minutos (CI), compartilhada pelos testes.
+
 ## [Contrato v1.1 · Data & Intelligence Contract] — 2026-10-01
 
 Passo 1 do M3, aprovado por Guilherme e pela IA parceira: congelar o contrato

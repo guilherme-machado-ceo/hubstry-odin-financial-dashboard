@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { t, getLocale } from "@/i18n";
 import { fetchSnapshot, formatUpdatedAt } from "@/lib/api";
+import { term } from "@/data/glossary";
 
 type Audience = "government" | "corporate" | "investors" | "startups";
 type ClaimKind = "fact" | "interpretation" | "hypothesis";
@@ -37,10 +38,17 @@ interface StakeholderImplication {
 }
 
 interface WhatToWatch {
-  signal: string;
-  source: string;
+  /** v1.0 */
+  signal?: string;
+  source?: string;
+  whyItMatters?: string;
+  /** v1.1 (bilíngue, gerado pela IA) */
+  signalPt?: string;
+  signalEn?: string;
+  whyItMattersPt?: string;
+  whyItMattersEn?: string;
+  sourceId?: string;
   expectedDate?: string | null;
-  whyItMatters: string;
   ownerLens?: string;
   relatedSection?: string;
   nextReviewAt?: string;
@@ -73,6 +81,8 @@ interface V2InsightEntry {
   economicLaw?: EconomicLaw;
   stakeholderImplications?: StakeholderImplication[];
   whatToWatch?: WhatToWatch[];
+  /** Contrato v1.1: lente Founder/CEO (implicação contextual que cita claims). */
+  decisionLens?: { lens: string; implications: Array<{ textPt: string; textEn: string; claimRefs: string[] }> };
   claims?: Claim[];
   confidence?: InsightConfidence;
   generatedAt?: string;
@@ -357,6 +367,19 @@ export default function InsightBox({ section }: Props) {
           </div>
         )}
 
+        {(entry.decisionLens?.implications ?? []).length > 0 && (
+          <div className="mt-4 border-l border-[#FF8C00]/50 pl-3" data-decision-lens={entry.decisionLens!.lens}>
+            <div className="text-[9px] font-mono uppercase tracking-widest text-[#777] mb-2" data-term="founderLens">
+              {term("founderLens", locale)}
+            </div>
+            <ul className="space-y-1.5">
+              {entry.decisionLens!.implications.map((imp, i) => (
+                <li key={i} className="text-[11px] font-mono text-[#bbb] leading-relaxed">{localize(locale, imp.textPt, imp.textEn)}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {stakeholders.length > 0 && (
           <div className="mt-4">
             <div className="flex items-center gap-2 mb-2">
@@ -392,15 +415,15 @@ export default function InsightBox({ section }: Props) {
               {watch.map((item, i) => (
                 <div key={i} className="border border-[#1a1a1a] bg-[#080808] p-3">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
-                    <span className="text-[9px] font-mono font-bold text-[#bbb]">{item.signal}</span>
+                    <span className="text-[9px] font-mono font-bold text-[#bbb]">{localize(locale, item.signalPt ?? item.signal, item.signalEn ?? item.signal)}</span>
                     {item.expectedDate && (
                       <span className="text-[8px] font-mono text-[#4488FF]">{item.expectedDate}</span>
                     )}
                     <span className="text-[8px] font-mono text-[#555]">
-                      {"source: " + item.source}
+                      {"source: " + (item.sourceId ?? item.source)}
                     </span>
                   </div>
-                  <p className="text-[9px] font-mono text-[#888] leading-relaxed">{item.whyItMatters}</p>
+                  <p className="text-[9px] font-mono text-[#888] leading-relaxed">{localize(locale, item.whyItMattersPt ?? item.whyItMatters, item.whyItMattersEn ?? item.whyItMatters)}</p>
                   {(item.ownerLens || item.relatedSection) && (
                     <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[8px] font-mono text-[#555]">
                       {item.ownerLens && <span>{"lens: " + item.ownerLens}</span>}

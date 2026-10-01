@@ -19,7 +19,9 @@ function formatDate(iso: string | undefined, locale: string): string | null {
   return d.toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
 }
 
-function Question({ k, locale }: { k: "whatHappened" | "whyItMatters" | "whatToObserve"; locale: string }) {
+const hostOf = (url?: string) => { try { return url ? new URL(url).hostname.replace(/^www\./, "") : null; } catch { return null; } };
+
+function Question({ k, locale }: { k: "whatHappened" | "whyItMatters" | "whatToObserve" | "sourceLink"; locale: string }) {
   return (
     <div className="text-[8px] font-mono uppercase tracking-widest text-[#00FFFF]/80 mb-1" data-term={k}>
       {term(k, locale)}
@@ -64,9 +66,15 @@ export function BriefingView({ items, locale, updatedAt }: { items: BriefingItem
                 </div>
                 <div>
                   <Question k="whatToObserve" locale={locale} />
-                  <p className="text-[11px] font-mono font-bold text-[#bbb] leading-relaxed">{it.watchSignal}</p>
-                  <p className="text-[10px] font-mono text-[#888] leading-relaxed mt-0.5">{it.watchWhy}</p>
+                  <p className="text-[11px] font-mono font-bold text-[#bbb] leading-relaxed">{pt ? it.watchSignalPt : it.watchSignalEn}</p>
+                  <p className="text-[10px] font-mono text-[#888] leading-relaxed mt-0.5">{pt ? it.watchWhyPt : it.watchWhyEn}</p>
                 </div>
+                {it.sourceUrl && (
+                  <div data-briefing-source>
+                    <Question k="sourceLink" locale={locale} />
+                    <a href={it.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-mono text-[#888] hover:text-[#00FFFF] underline-offset-2 hover:underline">{hostOf(it.sourceUrl)} ↗</a>
+                  </div>
+                )}
                 <a href={it.anchor} className="mt-auto inline-flex items-center gap-1 text-[9px] font-mono uppercase tracking-widest text-[#777] hover:text-[#00FFFF]">
                   <span data-term="seeEvidence">{term("seeEvidence", locale)}</span> <ArrowDown size={10} />
                 </a>

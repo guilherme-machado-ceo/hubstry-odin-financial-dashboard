@@ -19,9 +19,13 @@ const load = async (p) => JSON.parse(await readFile(path.join(root, p), "utf8"))
 
 // ── 1. Recomendação ─────────────────────────────────────────────────────────
 const rec = await load("contracts/contract-v1.1/recommendation-fixtures.json");
-for (const s of rec.pass) { const r = classifyRecommendation(s); assert(!r, `falso positivo (${r?.rule}): "${s}"`); }
-for (const s of rec.block) assert(classifyRecommendation(s), `recomendação não bloqueada: "${s}"`);
-assert(rec.pass.length >= 15 && rec.block.length >= 15, "fixtures de recomendação insuficientes");
+for (const s of rec.contextual) { const r = classifyRecommendation(s); assert(!r, `falso positivo (${r?.rule}): "${s}"`); }
+for (const { text, legalAnchors } of rec.legal_description) { const r = classifyRecommendation(text, { legalAnchors }); assert(!r, `obrigação legal ancorada bloqueada (${r?.rule}): "${text}"`); }
+for (const s of rec.legal_without_anchor) assert(classifyRecommendation(s), `obrigação legal SEM âncora deveria bloquear: "${s}"`);
+for (const s of rec.recommendation) assert(classifyRecommendation(s), `recomendação não bloqueada: "${s}"`);
+// Âncora não vira passe livre: recomendação continua bloqueada mesmo com norma na seção.
+for (const s of rec.recommendation) assert(classifyRecommendation(s, { legalAnchors: ["Regulation (EU) 2023/956"] }), `âncora jurídica liberou recomendação: "${s}"`);
+assert(rec.contextual.length >= 15 && rec.recommendation.length >= 20 && rec.legal_description.length >= 2, "fixtures de recomendação insuficientes");
 
 // ── 2. Base v1.1 ────────────────────────────────────────────────────────────
 const base = await load("contracts/contract-v1.1/carbon-v1.1.pass.json");
@@ -107,6 +111,6 @@ for (const f of ["scripts/validate-insights-shadow.mjs", "scripts/promote-insigh
 const doc = await readFile(path.join(root, "docs/odin-intelligence-contract-v1.1.md"), "utf8");
 for (const term of ["SOURCE", "DATA", "(EVENT)", "CLAIM", "CONTEXT", "INTERPRETATION", "DECISION LENS", "verification", "derivation", "signalEn", "whyItMattersEn", "structural"]) assert(doc.includes(term), `documento v1.1 sem "${term}"`);
 
-console.log(`contrato v1.1: ${rec.pass.length} frases contextuais e ${rec.block.length} recomendações classificadas · ${cases.length} mutações · ${Object.keys(pub).length} seções v1.0 compatíveis`);
+console.log(`contrato v1.1: ${rec.contextual.length} contextuais, ${rec.legal_description.length} obrigações legais ancoradas, ${rec.recommendation.length} recomendações · ${cases.length} mutações · ${Object.keys(pub).length} seções v1.0 compatíveis`);
 if (failures) { console.error(`${failures} falha(s)`); process.exit(1); }
 console.log("OK — Data & Intelligence Contract v1.1 coerente e retrocompatível.");

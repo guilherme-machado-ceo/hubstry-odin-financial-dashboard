@@ -1,10 +1,11 @@
 // ODIN Insights v2 — contrato estrutural compartilhado por geração e validação.
 
 export const SCHEMA_VERSION = "2.0";
-export const INTELLIGENCE_CONTRACT_VERSION = "1.0";
+/** Versão do contrato usada nas NOVAS gerações (M3). O M1 publicado segue em 1.0 (baseline de regressão). */
+export const INTELLIGENCE_CONTRACT_VERSION = "1.1";
 /** Versões aceitas pelo gate. "1.1" = Data & Intelligence Contract v1.1 (docs/odin-intelligence-contract-v1.1.md), regras extras em contract-v11.mjs. */
 export const SUPPORTED_CONTRACT_VERSIONS = new Set(["1.0", "1.1"]);
-export const PROMPT_VERSION = "3.3.0";
+export const PROMPT_VERSION = "4.0.0";
 
 export const LEVELS = new Set(["high", "medium", "low"]);
 
