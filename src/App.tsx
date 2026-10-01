@@ -19,6 +19,7 @@ import BlockchainSection from "@/components/BlockchainSection";
 import Footer from "@/components/Footer";
 import SourceOverlay from "@/components/SourceOverlay";
 import EmbedOverlay from "@/components/EmbedOverlay";
+import SectionLayers from "@/components/SectionLayers";
 
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -78,34 +79,34 @@ export default function App() {
       <RevealSection><NewsTicker /></RevealSection>
 
       {/* ── 4. HERO: KPIs + Region Filter + Inflection Points ── */}
-      <RevealSection><HeroSection regionFilter={regionFilter} onRegionChange={setRegionFilter} /></RevealSection>
+      <RevealSection><HeroSection regionFilter={regionFilter} onRegionChange={setRegionFilter} /><SectionLayers id="hero" /></RevealSection>
 
       {/* ── 5. BRAZIL SPOTLIGHT: Panda Bond + NDB Progress + Flowchart ── */}
-      <RevealSection><BrazilSpotlight onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>
+      <RevealSection><BrazilSpotlight onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /><SectionLayers id="brazil" /></RevealSection>
 
       {/* ── 6. MARKET SIZE: BRICS + LATAM LC Bonds ── */}
-      <RevealSection><MarketSizeChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>
+      <RevealSection><MarketSizeChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /><SectionLayers id="market-size" /></RevealSection>
 
       {/* ── 7. SPREADS × VOLATILITY: Rate spreads vs FX vol ── */}
-      <RevealSection><SpreadsTable onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /></RevealSection>
+      <RevealSection><SpreadsTable onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="spreads" /></RevealSection>
 
       {/* ── 8. VOLATILITY RANKING: G20 currencies ── */}
-      <RevealSection><VolatilityChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /></RevealSection>
+      <RevealSection><VolatilityChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="volatility" /></RevealSection>
 
       {/* ── 9. TCX HEDGING: Local currency protection ── */}
-      <RevealSection><TCXChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>
+      <RevealSection><TCXChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /><SectionLayers id="tcx" /></RevealSection>
 
       {/* ── 10. DEBT COMPOSITION: LC vs FX ── */}
-      <RevealSection><DebtComposition onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /></RevealSection>
+      <RevealSection><DebtComposition onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="debt" /></RevealSection>
 
       {/* ── 11. STABILITY SCATTER: Economic stability vs LC share ── */}
-      <RevealSection><StabilityScatter onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /></RevealSection>
+      <RevealSection><StabilityScatter onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="stability" /></RevealSection>
 
       {/* ── 12. GOLD RESERVES: Anti-dollar anchor ── */}
-      <RevealSection><GoldReservesChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>
+      <RevealSection><GoldReservesChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /><SectionLayers id="gold" /></RevealSection>
 
       {/* ── 13. OIL VECTOR: Price + Production + Petroyuan ── */}
-      <RevealSection><OilVectorChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>
+      <RevealSection><OilVectorChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /><SectionLayers id="oil" /></RevealSection>
 
       {/* ── 14. CLIMATE VECTOR: Temperature Anomalies + Risk Scores ── */}
       <RevealSection><ClimateVectorChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>

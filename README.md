@@ -29,8 +29,8 @@ O projeto é *docs-as-code*: decisões (ADRs — Architecture Decision Records),
 
 | Marco | Escopo | Situação |
 |---|---|---|
-| **M1 — Emergency MVP Gate** | Carbono, Blockchain e Clima × 5 camadas, com evidência, proveniência e revisão humana | **Concluído** (15/15; run `odin-20260930-174643-adef`) |
-| M2 — Camadas estruturais | Fontes, data de referência, indicadores, eventos e What to Watch nas demais seções de dados, sem IA | Próximo |
+| **M1 — Emergency MVP Gate** | Carbono, Blockchain e Clima × 5 camadas, com evidência, proveniência e revisão humana | **Concluído** (15/15; run `odin-20260930-174643-adef`; em produção desde 01/10/2026) |
+| **M2 — Camadas estruturais** | Fontes, data de referência e frescor, indicadores, eventos, What to Watch e status da lente jurídica nas 10 demais seções de dados, sem IA | **Concluído** |
 | M3 — Autonomia editorial | O modelo produz as 5 camadas de forma consistente, sem correção manual; section profiles de Blockchain e Clima | Planejado |
 | M4 — Escala | Mais seções com IA, providers, automação e monitoramento | Planejado |
 
@@ -40,22 +40,22 @@ O projeto é *docs-as-code*: decisões (ADRs — Architecture Decision Records),
 |---|---|---|---|---|
 | Banner de contexto | curado estático | Hubstry (editorial) | — | — |
 | Notícias | snapshot diário | Google News RSS | diária | — |
-| Hero · PTAX | API ao vivo no navegador | BCB — Banco Central do Brasil (SGS 10813) | ao vivo | M2 |
-| Brasil em foco · Panda Bonds | curado estático | BCB; Ministério da Fazenda; Reuters | BCB jun/2025 · Panda sem data registrada | M2 |
-| Tamanho do mercado LC | curado estático | BIS — Bank for International Settlements | dez/2024 | M2 |
-| Spreads | curado estático | Bloomberg | jan/2025 | M2 |
-| Volatilidade cambial | curado estático | Bloomberg | jan/2025 | M2 |
-| Hedge TCX | curado estático | TCX — The Currency Exchange Fund | jan/2025 | M2 |
-| Composição da dívida | curado estático | IMF WEO — World Economic Outlook | out/2024 | M2 |
-| Estabilidade | curado estático | IMF WEO | out/2024 | M2 |
-| Reservas de ouro | curado estático | IMF WEO | out/2024 | M2 |
-| Vetor petróleo | curado + API ao vivo no navegador | Bloomberg; Yahoo Finance | jan/2025 · ao vivo | M2 |
+| Hero · PTAX | API ao vivo no navegador | BCB — Banco Central do Brasil (SGS 10813) | ao vivo | estruturais |
+| Brasil em foco · Panda Bonds | curado estático | BCB; Ministério da Fazenda; Reuters | Panda set/2026 · BCB jun/2025 | estruturais |
+| Tamanho do mercado LC | curado estático | BIS — Bank for International Settlements | dez/2024 | estruturais |
+| Spreads | curado estático | Bloomberg | jan/2025 | estruturais |
+| Volatilidade cambial | curado estático | Bloomberg | jan/2025 | estruturais |
+| Hedge TCX | curado estático | TCX — The Currency Exchange Fund | jan/2025 | estruturais |
+| Composição da dívida | curado estático | IMF WEO — World Economic Outlook | out/2024 | estruturais |
+| Estabilidade | curado estático | IMF WEO | out/2024 | estruturais |
+| Reservas de ouro | curado estático | IMF WEO | out/2024 | estruturais |
+| Vetor petróleo | curado + API ao vivo no navegador | Bloomberg; Yahoo Finance | jan/2025 · ao vivo | estruturais |
 | Vetor climático | API ao vivo no navegador | Open-Meteo | ao vivo | **M1** |
 | Previsão Earth-2 | snapshot 2×/dia | NVIDIA Earth-2 (FourCastNet) | 2×/dia | fora do escopo |
 | Precificação de carbono | fonte curada versionada + snapshot | Comissão Europeia (CBAM); OWID; Banco Mundial | jul/2026 | **M1** |
 | Blockchain e RWA | snapshot diário + API ao vivo | DefiLlama; mempool.space | diária | **M1** |
 
-A coluna "Referência" reproduz a data registrada em `sourceRefs` (`src/data/lcBondsData.ts`). Seções com dado curado antigo exibem essa data; a atualização desses dados é trabalho de conteúdo separado.
+A coluna "Referência" reproduz a data registrada em `sourceRefs` (`src/data/lcBondsData.ts`) e, para Panda Bonds, a data de verificação dos eventos (`src/data/pandaBondsData.ts`). **Camadas ODIN:** "M1" = 5 camadas de inteligência (IA sob contrato + revisão humana); "estruturais" = bloco recolhível sem IA com fontes, data e frescor, indicadores extraídos dos dados da seção, eventos, What to Watch e status da lente jurídica (`src/data/sectionLayers.ts`). Dado curado com mais de 180 dias aparece como **desatualizado**; a atualização desses dados é trabalho de conteúdo separado.
 
 ## As cinco camadas de inteligência
 
@@ -147,6 +147,7 @@ node scripts/test-evidence-consistency.mjs  # claim ↔ evidência e contrato ed
 node scripts/test-m1-layers.mjs             # 5 camadas, retry de contrato, snapshot
 node scripts/test-contract-render.mjs       # contrato ↔ InsightBox
 node scripts/test-review-summary.mjs        # resumo de revisão
+node scripts/test-section-layers.mjs        # camadas estruturais M2 (render PT/EN; requer npm install)
 ```
 
 **Stack:** React 19 · TypeScript (strict) · Vite · Tailwind CSS · Recharts · html2canvas + jsPDF · i18n próprio (PT/EN).
