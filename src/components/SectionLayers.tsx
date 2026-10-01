@@ -1,5 +1,5 @@
 // ============================================================
-// ODIN — Camadas estruturais por seção (M2) · sem IA
+// ODIN — Fontes e sinais por seção (M2; antes "Camadas estruturais") · sem IA
 // Bloco recolhível (fechado por padrão) com fontes, data de referência e
 // frescor, indicadores, eventos, What to Watch e status da lente de Direito
 // Econômico. Conteúdo vem de src/data/sectionLayers.ts, que extrai os valores
@@ -10,11 +10,12 @@ import { Layers, ChevronDown, Database, BarChart3, CalendarClock, Radar, Scale, 
 import { getLocale, subscribe } from "@/i18n";
 import { getSectionLayers, type LayerSource } from "@/data/sectionLayers";
 import type { Region } from "@/data/regions";
+import { term, termDef, type TermKey } from "@/data/glossary";
 
 const L = (locale: string, pt: string, en: string) => (locale === "pt" ? pt : en);
 
 function formatAsOf(asOf: string, locale: string): string {
-  if (asOf === "live") return L(locale, "ao vivo", "live");
+  if (asOf === "live") return term("live", locale);
   const d = new Date(`${asOf.slice(0, 10)}T12:00:00Z`);
   if (Number.isNaN(d.getTime())) return asOf;
   return d.toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US", { month: "short", year: "numeric" });
@@ -28,7 +29,7 @@ function formatAsOf(asOf: string, locale: string): string {
  */
 function LiveBadge({ source, locale }: { source: LayerSource; locale: string }) {
   if (source.asOf !== "live") return null;
-  return <span className="text-[8px] font-mono uppercase tracking-wider border px-1.5 py-[1px] text-[#00CC88] border-[#00CC88]/30">{L(locale, "ao vivo", "live")}</span>;
+  return <span className="text-[8px] font-mono uppercase tracking-wider border px-1.5 py-[1px] text-[#00CC88] border-[#00CC88]/30" data-term="live">{term("live", locale)}</span>;
 }
 
 /** "2024–2026" a partir das datas das fontes curadas (fontes ao vivo não entram). */
@@ -39,11 +40,11 @@ function referenceRange(sources: LayerSource[]): string | null {
   return min === max ? String(min) : `${min}–${max}`;
 }
 
-function Heading({ icon: Icon, children }: { icon: typeof Layers; children: React.ReactNode }) {
+function Heading({ icon: Icon, k, locale }: { icon: typeof Layers; k: TermKey; locale: string }) {
   return (
     <div className="flex items-center gap-2 mb-2">
       <Icon size={11} className="text-[#00FFFF]" />
-      <span className="text-[9px] font-mono uppercase tracking-widest text-[#777]">{children}</span>
+      <span className="text-[9px] font-mono uppercase tracking-widest text-[#777]" data-term={k}>{term(k, locale)}</span>
     </div>
   );
 }
@@ -69,20 +70,20 @@ export default function SectionLayers({ id, region = "all" }: { id: string; regi
           <summary className="list-none cursor-pointer select-none px-4 py-3 flex items-center justify-between gap-3 hover:bg-[#00FFFF]/5 transition-colors">
             <div className="flex items-center gap-2 min-w-0 flex-wrap">
               <Layers size={12} className="text-[#00FFFF] shrink-0" />
-              <span className="text-[9px] font-mono uppercase tracking-widest text-[#00FFFF]">
-                {L(locale, "Camadas ODIN", "ODIN Layers")}
+              <span className="text-[9px] font-mono uppercase tracking-widest text-[#00FFFF]" data-term="sourcesAndSignals">
+                {term("sourcesAndSignals", locale)}
               </span>
               <span className="text-[8px] font-mono text-[#444]">
-                · {L(locale, "estruturais · sem IA", "structural · no AI")}
+                · <span data-term="noAI">{term("noAI", locale)}</span>
               </span>
               {range && (
                 <span className="text-[8px] font-mono text-[#666]">
-                  · {L(locale, "referência dos dados", "data reference")}: {range}{hasLive ? L(locale, " + ao vivo", " + live") : ""}
+                  · <span data-term="referenceDate">{term("referenceDate", locale)}</span>: {range}{hasLive ? <> + <span data-term="live">{term("live", locale)}</span></> : ""}
                 </span>
               )}
               {scoped && (
                 <span className="text-[8px] font-mono uppercase tracking-wider border px-1.5 py-[1px] text-[#00FFFF] border-[#00FFFF]/30" data-layers-scope={spec.scope}>
-                  {L(locale, "região", "region")}: {spec.scope}
+                  <span data-term="region">{term("region", locale)}</span>: {spec.scope}
                 </span>
               )}
             </div>
@@ -91,7 +92,7 @@ export default function SectionLayers({ id, region = "all" }: { id: string; regi
 
           <div className="border-t border-[#00FFFF]/10 px-4 pb-4 grid gap-5 md:grid-cols-2">
             <div className="pt-4">
-              <Heading icon={Database}>{L(locale, "Fontes e data de referência", "Sources and reference date")}</Heading>
+              <Heading icon={Database} k="sourcesAndReferenceDate" locale={locale} />
               <ul className="space-y-1.5">
                 {spec.sources.map((s) => (
                   <li key={s.id} className="flex items-center gap-2 flex-wrap text-[10px] font-mono text-[#999]">
@@ -106,14 +107,14 @@ export default function SectionLayers({ id, region = "all" }: { id: string; regi
             </div>
 
             <div className="pt-4">
-              <Heading icon={BarChart3}>{L(locale, "Indicadores-chave", "Key indicators")}</Heading>
+              <Heading icon={BarChart3} k="keyIndicators" locale={locale} />
               <ul className="space-y-1.5">
                 {spec.indicators.map((ind, i) => (
                   <li key={i} className="flex items-baseline justify-between gap-3 text-[10px] font-mono">
                     <span className="text-[#888]">
                       {L(locale, ind.labelPt, ind.labelEn)}
                       {ind.estimated && <span className="ml-1 text-[#FF8C00]">({L(locale, "est.", "est.")})</span>}
-                      {ind.unverified && <span className="ml-1 text-[#FF8C00]" data-unverified>({L(locale, "não verificado", "unverified")})</span>}
+                      {ind.unverified && <span className="ml-1 text-[#777]" data-unverified title={termDef("unverified", locale)}>(<span data-term="unverified">{term("unverified", locale)}</span>)</span>}
                     </span>
                     <span className="text-[#ddd] font-bold whitespace-nowrap" title={sourceName(ind.sourceId)}>
                       {L(locale, ind.valuePt, ind.valueEn)}
@@ -124,7 +125,7 @@ export default function SectionLayers({ id, region = "all" }: { id: string; regi
             </div>
 
             <div>
-              <Heading icon={CalendarClock}>{L(locale, "Eventos e marcos", "Events and milestones")}</Heading>
+              <Heading icon={CalendarClock} k="eventsAndMilestones" locale={locale} />
               {spec.events.length ? (
                 <ul className="space-y-1.5">
                   {spec.events.map((e, i) => (
@@ -141,22 +142,22 @@ export default function SectionLayers({ id, region = "all" }: { id: string; regi
             </div>
 
             <div>
-              <Heading icon={Radar}>What to Watch</Heading>
+              <Heading icon={Radar} k="whatToWatch" locale={locale} />
               <p className="text-[10px] font-mono font-bold text-[#bbb]">{L(locale, spec.watch.signalPt, spec.watch.signalEn)}</p>
               <p className="text-[9px] font-mono text-[#888] leading-relaxed mt-1">{L(locale, spec.watch.whyPt, spec.watch.whyEn)}</p>
-              <p className="text-[8px] font-mono text-[#555] mt-1">{L(locale, "fonte", "source")}: {sourceName(spec.watch.sourceId)}</p>
+              <p className="text-[8px] font-mono text-[#555] mt-1"><span data-term="source">{term("source", locale)}</span>: {sourceName(spec.watch.sourceId)}</p>
             </div>
 
             <div className="md:col-span-2">
-              <Heading icon={Scale}>{L(locale, "Lente de Direito Econômico", "Economic Law Lens")}</Heading>
+              <Heading icon={Scale} k="economicLawLens" locale={locale} />
               <p className="text-[10px] font-mono text-[#888]">{L(locale, spec.legal.notePt, spec.legal.noteEn)}</p>
             </div>
 
             <p className="md:col-span-2 text-[8px] font-mono text-[#444] leading-relaxed">
               {L(
                 locale,
-                `Valores extraídos dos mesmos dados exibidos nesta seção, sem geração por IA. Cada fonte mostra sua data de referência.${spec.indicators.some((i) => i.unverified) ? " \"Não verificado\": valor ainda sem conferência em fonte oficial (auditoria de 01/10/2026)." : ""}${scoped ? ` Indicadores recalculados para a região selecionada (${spec.scope}).` : ""}`,
-                `Values extracted from the same data shown in this section, with no AI generation. Each source shows its reference date.${spec.indicators.some((i) => i.unverified) ? " \"Unverified\": value not yet checked against an official source (audit of 2026-10-01)." : ""}${scoped ? ` Indicators recalculated for the selected region (${spec.scope}).` : ""}`,
+                `Valores extraídos dos mesmos dados exibidos nesta seção, sem geração por IA. Cada fonte mostra sua data de referência.${scoped ? ` Indicadores recalculados para a região selecionada (${spec.scope}).` : ""}`,
+                `Values extracted from the same data shown in this section, with no AI generation. Each source shows its reference date.${scoped ? ` Indicators recalculated for the selected region (${spec.scope}).` : ""}`,
               )}
             </p>
           </div>

@@ -5,14 +5,15 @@ import { TrendingUp, Activity, Globe, Shield, Layers, Radio } from "lucide-react
 import EstBadge from "./EstBadge";
 import PtaxLive from "./PtaxLive";
 import { REGION_FILTERED_SECTIONS, type Region } from "@/data/regions";
-import { isUnverified } from "@/data/dataAudit";
+import { isUnverified, DATA_AUDIT_VERIFIED_AT } from "@/data/dataAudit";
+import { term, termDef } from "@/data/glossary";
 
 /** Marca de auditoria (PR 2a): valor ainda sem conferência em fonte oficial. */
 function Unverified({ auditId, locale }: { auditId: string; locale: string }) {
   if (!isUnverified(auditId)) return null;
   return (
-    <span className="text-[7px] font-mono uppercase tracking-wider text-[#FF8C00]" data-unverified={auditId}>
-      {locale === "pt" ? "não verificado" : "unverified"}
+    <span className="text-[7px] font-mono uppercase tracking-wider text-[#777]" data-unverified={auditId} title={termDef("unverified", locale)}>
+      <span data-term="unverified">{term("unverified", locale)}</span>
     </span>
   );
 }
@@ -203,6 +204,13 @@ export default function HeroSection({ regionFilter, onRegionChange }: Props) {
             </span>
           </div>
         </div>
+
+        {/* Legenda única do estado "não verificado" (PR 2b). */}
+        <p className="mt-2 text-[8px] font-mono text-[#666]" data-unverified-legend>
+          <span className="uppercase tracking-wider text-[#777]" data-term="unverified">{term("unverified", locale)}</span>
+          {" — "}{termDef("unverified", locale)}{" "}
+          {locale === "pt" ? `Auditoria de fontes de ${DATA_AUDIT_VERIFIED_AT.split("-").reverse().join("/")}.` : `Source audit of ${DATA_AUDIT_VERIFIED_AT}.`}
+        </p>
 
         {/* Inflection Points Strip */}
         <div className="mt-4 border border-[#1a1a1a] bg-[#0a0a0a]">

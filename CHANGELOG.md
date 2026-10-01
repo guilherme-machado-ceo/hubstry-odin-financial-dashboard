@@ -3,6 +3,34 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [PR 2b · Briefing ODIN e linguagem de produto] — 2026-10-01
+
+Origem: plano aprovado por Guilherme e pela IA parceira, com duas salvaguardas:
+vocabulário controlado só para rótulos/títulos/selos/estados, e Briefing sem
+inferência nova (seleção + condensação do M1 revisado).
+
+### Adicionado
+- **Briefing ODIN** no topo (`src/components/BriefingODIN.tsx`,
+  `src/data/briefing.ts`): por seção com M1 aprovado e `reviewedBy`, *O que
+  aconteceu* (primeiro claim de fato), *Por que importa* (Tese ODIN, sem o
+  rótulo "Interpretação:" e com maiúscula inicial), *O que observar* (What to Watch) e *Ver
+  evidências* (âncora da seção). Trechos literais; nenhuma tese entre seções.
+- **Glossário PT/EN** (`src/data/glossary.ts`, 24 termos) para rótulos,
+  títulos, selos e estados; elementos marcados com `data-term`.
+- Teste `scripts/test-briefing.mjs` no CI: cada linha do Briefing é trecho
+  literal do M1 da própria seção, nada vem de outra seção, seções não
+  revisadas ficam fora; todo `data-term` exibe exatamente o termo do
+  glossário em PT e EN; nomes das camadas do M1 iguais ao glossário.
+
+### Alterado
+- "Camadas ODIN · estruturais · sem IA" → **"Fontes e sinais"** (· sem IA
+  como informação secundária).
+- **"não verificado"** em cinza (antes laranja, como alerta), com a definição
+  no *tooltip* e uma **legenda única** abaixo dos KPIs do topo.
+
+### Sem alteração
+- Dados, fontes, série Bloomberg, score de estabilidade e pipeline de IA.
+
 ## [PR 2a · auditoria das fontes públicas] — 2026-10-01
 
 Origem: plano aprovado por Guilherme e pela IA parceira (PR 1 → 2a → 2b → 2c →
