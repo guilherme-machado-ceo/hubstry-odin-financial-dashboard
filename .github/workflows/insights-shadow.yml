@@ -2,11 +2,14 @@ name: ODIN Insights Shadow
 
 # MVP Readiness Gate: chamadas ao LLM (Nemotron) só por disparo manual.
 # Nenhuma geração shadow automática em PR antes dos gates determinísticos.
+# M3 (contrato v1.1): toda geração — aprovada OU bloqueada pelo gate — é salva
+# como amostra de calibração no branch `shadow-samples`
+# (samples/<runId>/), sem tocar em main nem no M1 publicado.
 on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write   # apenas para gravar a amostra no branch shadow-samples
 
 jobs:
   shadow:
@@ -36,6 +39,28 @@ jobs:
           else
             echo "Nenhum artefato shadow gerado — ver logs da geração." >> "$GITHUB_STEP_SUMMARY"
           fi
+      - name: Salvar amostra de calibração (branch shadow-samples)
+        if: always() && hashFiles('public/data/generationReport.json') != ''
+        run: |
+          RUN=$(node -e "console.log(JSON.parse(require('fs').readFileSync('public/data/generationReport.json','utf8')).runId)")
+          SRC="$PWD"
+          git config --global user.name "odin-data-bot"
+          git config --global user.email "odin-data-bot@users.noreply.github.com"
+          git worktree add --detach /tmp/samples
+          cd /tmp/samples
+          if git ls-remote --exit-code --heads origin shadow-samples >/dev/null; then
+            git fetch -q origin shadow-samples && git checkout -q -B shadow-samples FETCH_HEAD
+          else
+            git checkout -q --orphan shadow-samples && git rm -rq --cached . && rm -rf -- * .github
+          fi
+          mkdir -p "samples/$RUN"
+          cp "$SRC/public/data/generationReport.json" "samples/$RUN/"
+          [ -f "$SRC/public/data/insights.v2.shadow.json" ] && cp "$SRC/public/data/insights.v2.shadow.json" "samples/$RUN/"
+          [ -d "$SRC/public/data/evidence/$RUN" ] && cp -r "$SRC/public/data/evidence/$RUN" "samples/$RUN/evidence"
+          git add "samples/$RUN"
+          git commit -q -m "sample: $RUN [skip ci]"
+          git push -q origin shadow-samples
+          echo "Amostra salva: shadow-samples/samples/$RUN" >> "$GITHUB_STEP_SUMMARY"
       - name: Upload shadow artifact
         uses: actions/upload-artifact@v4
         with:

@@ -100,16 +100,24 @@ Exemplo bloqueado: "Empresas expostas ao câmbio devem reduzir sua exposição."
 
 ## 7. Linguagem de recomendação (bloqueio determinístico)
 
-Aplica-se à DECISION LENS e às Implicações para Stakeholders. O bloqueio é por **padrão**, não por palavra solta:
+Aplica-se à DECISION LENS e às Implicações para Stakeholders. Três categorias (revisão de 01/10/2026):
+
+| Categoria | Tratamento |
+|---|---|
+| **Descrição de obrigação legal** | permitida **somente** quando ancorada em norma/evidência jurídica da seção (norma citada em `economicLaw.norms` com relevância high/medium, ou referência jurídica da evidência) e a frase traz marcador jurídico (declaração, regulamento, importador autorizado…). A mesma frase sem âncora é bloqueada. |
+| **Implicação contextual** | permitida |
+| **Recomendação de ação** | bloqueada |
+
+O bloqueio é por **padrão**, não por palavra solta, e não admite exceção lexical (ex.: "devem avaliar" não é liberado por conter um verbo de análise):
 
 | Regra | Padrão | Bloqueia | Não bloqueia |
 |---|---|---|---|
-| R1 | deôntico + verbo de ação | "devem reduzir", "should hedge", "podem precisar reduzir" | "podem precisar acompanhar", "devem avaliar"; obrigação jurídica descrita ("importadores autorizados devem apresentar a declaração") |
+| R1 | deôntico dirigido a um ator, com qualquer verbo | "devem reduzir", "governos devem avaliar", "should hedge", "precisam acompanhar", "podem precisar reduzir" | necessidade hipotética + verbo de acompanhamento ("podem precisar acompanhar", "may need to track"); obrigação legal ancorada |
 | R2 | ato de fala de recomendação | "recomendamos", "sugere-se", "it is advisable" | — |
 | R3 | frase iniciada por imperativo/infinitivo de ação | "Invista…", "Explorar oportunidades…", "Consider shifting…" | "Monitorar…", "Avaliar a exposição…" |
 | R4 | modal de possibilidade + verbo de oportunidade/transação | "podem investir", "could tap" | "pode entrar em vigor", "may enter into force" |
 
-Verbos de acompanhamento/análise (acompanhar, monitorar, observar, avaliar, verificar, mapear; track, monitor, watch, follow, assess, review) caracterizam implicação contextual. As fixtures de aprovação e bloqueio (PT e EN) ficam em `contracts/contract-v1.1/recommendation-fixtures.json`; frase nova que gere falso positivo ou falso negativo entra como fixture antes do ajuste da regra.
+Verbos de acompanhamento/análise (acompanhar, monitorar, observar, avaliar, verificar, mapear; track, monitor, watch, follow, assess, review) só caracterizam implicação contextual sob necessidade hipotética ("podem precisar…", "may need to…") ou em frase sem deôntico (ex.: "Monitorar a próxima publicação permite…"); com deôntico direto, são recomendação. As fixtures de aprovação e bloqueio (PT e EN) ficam em `contracts/contract-v1.1/recommendation-fixtures.json`; frase nova que gere falso positivo ou falso negativo entra como fixture antes do ajuste da regra.
 
 ## 8. Correção editorial pós-revisão
 

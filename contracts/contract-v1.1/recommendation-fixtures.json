@@ -1,9 +1,8 @@
 {
-  "description": "Linguagem de recomendação (contrato v1.1, regra 5). pass = implicação contextual; block = recomendação. Cobrir PT e EN, com frases descritivas que contêm 'deve'/'must' e não são recomendação.",
-  "pass": [
+  "description": "Linguagem de recomendação (contrato v1.1, seção 7). Três categorias: contextual (permitida), legal_description (permitida SÓ com âncora jurídica da seção: norma citada ou referência jurídica da evidência) e recommendation (bloqueada). legal_without_anchor: a mesma frase de obrigação legal, sem âncora, é bloqueada — evita que o modelo aprenda uma exceção lexical.",
+  "contextual": [
     "Empresas expostas ao câmbio podem precisar acompanhar a volatilidade.",
     "Exportadores com vendas em euro tendem a ser afetados pelo preço do CBAM.",
-    "Importadores autorizados devem apresentar a primeira declaração anual até 30 de setembro de 2027.",
     "Startups com receita em dólar ficam mais expostas a oscilações do BRL.",
     "Para empresas com dívida em moeda estrangeira, a volatilidade de 11% do BRL é uma variável de custo.",
     "Monitorar a próxima publicação da OCDE permite atualizar o diferencial de juros.",
@@ -13,16 +12,38 @@
     "A concentração em um único emissor de stablecoin é um fator de risco de contraparte para quem usa esses ativos.",
     "Fornecedores de dados de emissões podem precisar observar mudanças nos atos de execução.",
     "Não há base nos dados para afirmar tendência; o sinal a acompanhar é a próxima atualização.",
-    "Governos devem avaliar a necessidade de apoio técnico a exportadores.",
     "Companies exposed to FX may need to track volatility.",
     "Exporters with euro revenues are affected by the CBAM price.",
-    "Authorized importers must submit the first annual declaration by 30 September 2027.",
     "Firms relying on imported inputs could be affected by higher Brent prices.",
     "The regulation may enter into force for additional sectors after review.",
     "Founders with dollar-denominated debt may want to keep track of the yield differential.",
     "Monitoring the next OECD release allows the differential to be updated."
   ],
-  "block": [
+  "legal_description": [
+    {
+      "text": "Importadores autorizados devem apresentar a primeira declaração anual até 30 de setembro de 2027.",
+      "legalAnchors": [
+        "Regulation (EU) 2023/956"
+      ]
+    },
+    {
+      "text": "Authorized importers must submit the first annual declaration by 30 September 2027.",
+      "legalAnchors": [
+        "Regulation (EU) 2023/956"
+      ]
+    },
+    {
+      "text": "Pelo Regulamento (UE) 2023/956, o importador autorizado deve declarar as emissões embutidas.",
+      "legalAnchors": [
+        "Regulation (EU) 2023/956"
+      ]
+    }
+  ],
+  "legal_without_anchor": [
+    "Importadores autorizados devem apresentar a primeira declaração anual até 30 de setembro de 2027.",
+    "Authorized importers must submit the first annual declaration by 30 September 2027."
+  ],
+  "recommendation": [
     "Empresas expostas ao câmbio devem reduzir sua exposição.",
     "Recomendamos que exportadores renegociem contratos em euro.",
     "Invista em soluções de monitoramento de emissões.",
@@ -41,6 +62,10 @@
     "Firms need to hedge their dollar debt now.",
     "It is advisable to diversify suppliers.",
     "Founders must secure funding before rates rise.",
-    "Consider shifting revenue to markets with lower yield differentials."
+    "Consider shifting revenue to markets with lower yield differentials.",
+    "Governos devem avaliar a necessidade de apoio técnico a exportadores.",
+    "Governments should assess the need for technical assistance to exporters.",
+    "Investidores devem monitorar a exposição de carteiras a setores cobertos.",
+    "Empresas precisam acompanhar o câmbio diariamente."
   ]
 }

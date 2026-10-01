@@ -29,6 +29,9 @@ export const GLOSSARY = {
   seeEvidence: { pt: "Ver evidências", en: "See evidence", defPt: "Atalho para a seção, onde ficam o gráfico, as fontes e a camada de evidências.", defEn: "Link to the section, where the chart, sources and evidence layer are." },
   humanReviewed: { pt: "revisado por humano", en: "human-reviewed", defPt: "Conteúdo gerado por IA e promovido manualmente após revisão.", defEn: "AI-generated content manually promoted after review." },
 
+  founderLens: { pt: "Lente Founder/CEO", en: "Founder/CEO lens", defPt: "Implicação contextual para founders e CEOs de startups e PMEs, citando os claims que a sustentam; não é recomendação.", defEn: "Contextual implication for founders and CEOs of startups and SMEs, citing the supporting claims; not a recommendation." },
+  sourceLink: { pt: "De onde veio", en: "Where it came from", defPt: "Fonte primária do fato, com link.", defEn: "Primary source of the fact, with a link." },
+
   // ── Fontes e sinais (camadas estruturais por seção) ──
   sourcesAndSignals: { pt: "Fontes e sinais", en: "Sources and signals", defPt: "Bloco por seção com fontes, data de referência, indicadores, eventos e o sinal a acompanhar.", defEn: "Per-section block with sources, reference date, indicators, events and the signal to watch." },
   noAI: { pt: "sem IA", en: "no AI", defPt: "Valores extraídos dos dados da seção, sem geração por IA.", defEn: "Values extracted from the section's data, with no AI generation." },

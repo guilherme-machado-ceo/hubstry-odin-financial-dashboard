@@ -17,6 +17,7 @@ import { build } from "esbuild";
 import { readFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { checkBriefingItems } from "./briefing-literal-check.mjs";
 
 const root = process.cwd();
 let failures = 0;
@@ -55,31 +56,7 @@ const approved = m.BRIEFING_SECTIONS.filter((s) => sections[s.id]?.reviewStatus 
 assert(items.length >= 1, "Briefing vazio com M1 revisado publicado");
 assert(JSON.stringify(items.map((i) => i.sectionId)) === JSON.stringify(approved), `Briefing deve ter exatamente as seções revisadas, na ordem da página: ${items.map((i) => i.sectionId)} vs ${approved}`);
 
-const fieldsOf = (e) => ({
-  claimsPt: (e.claims ?? []).filter((c) => c.kind === "fact").map((c) => c.textPt ?? c.pt),
-  claimsEn: (e.claims ?? []).filter((c) => c.kind === "fact").map((c) => c.textEn ?? c.en),
-  thesisPt: e.thesis?.pt ?? "", thesisEn: e.thesis?.en ?? "",
-  watch: (e.whatToWatch ?? []).flatMap((w) => [w.signal, w.whyItMatters]),
-});
-for (const it of items) {
-  const own = fieldsOf(sections[it.sectionId]);
-  const at = `[briefing:${it.sectionId}]`;
-  assert(own.claimsPt.includes(it.happenedPt), `${at} "O que aconteceu" (PT) não é um claim de fato literal da seção`);
-  assert(own.claimsEn.includes(it.happenedEn), `${at} "O que aconteceu" (EN) não é um claim de fato literal da seção`);
-  const sameTail = (full, part) => full.toLowerCase().endsWith(part.toLowerCase()) && full.endsWith(part.slice(1));
-  assert(it.whyPt.length > 20 && sameTail(own.thesisPt, it.whyPt), `${at} "Por que importa" (PT) não é a tese literal da seção`);
-  assert(it.whyEn.length > 20 && sameTail(own.thesisEn, it.whyEn), `${at} "Por que importa" (EN) não é a tese literal da seção`);
-  const rest = own.thesisPt.replace(/^Interpretação\s*:\s*/, "");
-  assert(rest.charAt(0).toUpperCase() + rest.slice(1) === it.whyPt, `${at} tese PT alterada além do rótulo e da maiúscula inicial`);
-  assert(own.watch.includes(it.watchSignal) && own.watch.includes(it.watchWhy), `${at} "O que observar" não vem do What to Watch da seção`);
-  assert(it.anchor === `#${it.sectionId}`, `${at} âncora errada`);
-  // Nenhuma linha pode vir de outra seção.
-  for (const other of items.filter((o) => o.sectionId !== it.sectionId)) {
-    const o = fieldsOf(sections[other.sectionId]);
-    const pool = [...o.claimsPt, ...o.claimsEn, o.thesisPt, o.thesisEn, ...o.watch].join("\n");
-    for (const line of [it.happenedPt, it.whyPt, it.watchSignal]) assert(!pool.includes(line), `${at} linha aparece em ${other.sectionId}: "${line.slice(0, 60)}"`);
-  }
-}
+for (const e of checkBriefingItems(items, sections)) assert(false, e);
 // Mutações: seção não revisada sai; seção sem fato sai; ordem fixa.
 const clone = structuredClone(sections);
 clone.carbon.reviewStatus = "pending";
@@ -116,7 +93,7 @@ function checkTerms(html, locale, where, required) {
 }
 for (const locale of ["pt", "en"]) {
   const b = m.renderBriefing(items, locale);
-  checkTerms(b, locale, "briefing", ["briefing", "humanReviewed", "whatHappened", "whyItMatters", "whatToObserve", "seeEvidence", "referenceDate"]);
+  checkTerms(b, locale, "briefing", ["briefing", "humanReviewed", "whatHappened", "whyItMatters", "whatToObserve", "seeEvidence", "referenceDate", "sourceLink"]);
   for (const it of items) assert(b.includes(`href="${it.anchor}"`), `[briefing/${locale}] sem link de evidência para ${it.sectionId}`);
   assert(!/undefined|NaN/.test(b), `[briefing/${locale}] valor inválido no HTML`);
 
