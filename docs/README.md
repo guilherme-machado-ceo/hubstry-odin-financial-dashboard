@@ -1,5 +1,13 @@
 # ODIN — Documentação e Auditoria
 
+> **Atualização (set/2026):** a cadeia vigente é a do pipeline v2 — shadow no
+> GitHub Actions, gate determinístico, evidência por run em
+> `public/data/evidence/<runId>/`, revisão humana e promoção controlada
+> (ver `README.md`, seções "Pipeline" e "Proveniência e auditoria"). As
+> referências abaixo a `insights.json` e a run logs em `logs/` descrevem o
+> gerador legado v2.x (execução local); esses logs não são versionados no
+> repositório.
+
 Estrutura **docs-as-code**: toda decisão, mudança e execução relevante é
 registrada em arquivos versionados junto ao código.
 
