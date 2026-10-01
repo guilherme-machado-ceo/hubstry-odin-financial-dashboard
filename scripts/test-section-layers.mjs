@@ -18,10 +18,12 @@ const entry = `
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import SectionLayers from "@/components/SectionLayers";
-import { SECTION_LAYERS, sourceFreshness } from "@/data/sectionLayers";
+import { SECTION_LAYERS, sourceFreshness, getSectionLayers } from "@/data/sectionLayers";
+import { REGION_FLAGS, REGION_FILTERED_SECTIONS } from "@/data/regions";
+import { spreadsData, volatilityRanking, countryDebtData, stabilityScores } from "@/data/lcBondsData";
 import { setLocale } from "@/i18n";
-export function render(id, locale) { setLocale(locale); return renderToStaticMarkup(createElement(SectionLayers, { id })); }
-export { SECTION_LAYERS, sourceFreshness };
+export function render(id, locale, region = "all") { setLocale(locale); return renderToStaticMarkup(createElement(SectionLayers, { id, region })); }
+export { SECTION_LAYERS, sourceFreshness, getSectionLayers, REGION_FLAGS, REGION_FILTERED_SECTIONS, spreadsData, volatilityRanking, countryDebtData, stabilityScores };
 `;
 // Dentro do projeto, para o Node resolver react/react-dom do node_modules.
 const outdir = path.join(root, "node_modules/.cache/odin-layers");
@@ -34,7 +36,7 @@ await build({
   external: ["react", "react-dom", "react-dom/server", "lucide-react"],
 });
 const mod = await import(pathToFileURL(path.join(outdir, "bundle.mjs")).href);
-const { SECTION_LAYERS, render, sourceFreshness } = mod;
+const { SECTION_LAYERS, render, sourceFreshness, getSectionLayers, REGION_FLAGS, REGION_FILTERED_SECTIONS } = mod;
 
 const ids = SECTION_LAYERS.map((s) => s.id);
 assert(JSON.stringify([...ids].sort()) === JSON.stringify([...EXPECTED].sort()), `seções esperadas ${EXPECTED} ≠ ${ids}`);
@@ -67,11 +69,62 @@ for (const s of SECTION_LAYERS) {
       ? ["Fontes e data de referência", "Indicadores-chave", "Eventos e marcos", "What to Watch", "Lente de Direito Econômico"]
       : ["Sources and reference date", "Key indicators", "Events and milestones", "What to Watch", "Economic Law Lens"];
     for (const h of heads) assert(html.includes(h), `${at}/${locale} sem a camada "${h}"`);
+    // UX (01/10/2026): data de referência é fato; nenhum rótulo editorial de "desatualizado".
+    assert(!/desatualizad|outdated/i.test(html), `${at}/${locale} a interface não deve exibir "desatualizado"`);
+    const live = s.sources.filter((x) => x.asOf === "live").length;
+    const liveLabel = locale === "pt" ? "ao vivo" : "live";
+    assert(!live || html.includes(liveLabel), `${at}/${locale} fonte ao vivo sem o rótulo "${liveLabel}"`);
   }
 }
 
+// ── Filtro regional: nenhum país fora da região nos indicadores recalculados. ──
+const flagOf = new Map();
+for (const row of [...mod.spreadsData, ...mod.countryDebtData, ...mod.stabilityScores]) { flagOf.set(row.country, row.flag); flagOf.set(row.countryPt, row.flag); }
+for (const row of mod.volatilityRanking) { flagOf.set(row.code, row.flag); flagOf.set(row.country, row.flag); flagOf.set(row.countryPt, row.flag); }
+const names = [...flagOf.keys()].filter((n) => n.length > 2 || /^[A-Z]{3}$/.test(n));
+for (const sec of REGION_FILTERED_SECTIONS) {
+  for (const region of ["BRICS", "LATAM"]) {
+    const spec = getSectionLayers(sec.id, region);
+    const at = `[${sec.id}/${region}]`;
+    assert(spec?.scope === region, `${at} escopo deveria ser ${region}, veio ${spec?.scope}`);
+    for (const ind of spec.indicators) {
+      for (const label of [ind.labelPt, ind.labelEn]) {
+        for (const n of names) {
+          if (new RegExp(`(^|[^A-Za-zÀ-ÿ])${n}([^A-Za-zÀ-ÿ]|$)`).test(label) && !REGION_FLAGS[region].includes(flagOf.get(n))) {
+            assert(false, `${at} indicador "${label}" cita ${n}, fora da região ${region}`);
+          }
+        }
+      }
+    }
+    const html = render(sec.id, "pt", region);
+    assert(html.includes(`data-layers-scope="${region}"`), `${at} bloco sem o rótulo de região`);
+  }
+  assert(!render(sec.id, "pt", "all").includes("data-layers-scope"), `[${sec.id}/all] visão global não deve exibir rótulo de região`);
+}
+// Global (sem filtro) deve continuar citando o país de maior spread do universo completo.
+const spreadsAll = getSectionLayers("spreads", "all");
+assert(spreadsAll.indicators.some((i) => i.labelPt.includes("Argentina")), "visão global de spreads deveria citar a Argentina (maior spread)");
+const spreadsBrics = getSectionLayers("spreads", "BRICS");
+assert(!spreadsBrics.indicators.some((i) => i.labelPt.includes("Argentina")), "spreads/BRICS não pode citar a Argentina");
+
+// Fonte única de região nas seções filtráveis + aviso no topo + blocos recebendo a região.
+const comps = { spreads: "SpreadsTable", volatility: "VolatilityChart", debt: "DebtComposition", stability: "StabilityScatter" };
+for (const [id, comp] of Object.entries(comps)) {
+  const src = await readFile(path.join(root, `src/components/${comp}.tsx`), "utf8");
+  assert(src.includes("inRegion("), `${comp} deve usar inRegion (fonte única de região)`);
+  assert(!/\["BR", "CN", "IN", "RU", "ZA"\]/.test(src), `${comp} ainda tem lista de região própria`);
+}
+const vol = await readFile(path.join(root, "src/components/VolatilityChart.tsx"), "utf8");
+assert(vol.includes("detailsFiltered.map("), "tabela de detalhes da volatilidade deve obedecer ao filtro");
+const hero = await readFile(path.join(root, "src/components/HeroSection.tsx"), "utf8");
+assert(hero.includes("REGION_FILTERED_SECTIONS") && hero.includes("data-region-applied"), "topo deve indicar onde o filtro age");
+
 const app = await readFile(path.join(root, "src/App.tsx"), "utf8");
-for (const id of EXPECTED) assert(app.includes(`<SectionLayers id="${id}" />`), `App.tsx não monta o bloco "${id}"`);
+for (const id of EXPECTED) {
+  const filtered = REGION_FILTERED_SECTIONS.some((x) => x.id === id);
+  const tag = filtered ? `<SectionLayers id="${id}" region={regionFilter} />` : `<SectionLayers id="${id}" />`;
+  assert(app.includes(tag), `App.tsx deveria montar ${tag}`);
+}
 assert(!/Earth2ForecastSection[^\n]*SectionLayers/.test(app), "Earth-2 está fora do escopo do M2");
 
 if (failures) { console.error(`section layers: ${failures} falha(s)`); process.exit(1); }

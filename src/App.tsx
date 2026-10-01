@@ -20,6 +20,7 @@ import Footer from "@/components/Footer";
 import SourceOverlay from "@/components/SourceOverlay";
 import EmbedOverlay from "@/components/EmbedOverlay";
 import SectionLayers from "@/components/SectionLayers";
+import type { Region } from "@/data/regions";
 
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -49,7 +50,7 @@ function RevealSection({ children, className = "" }: { children: React.ReactNode
 export default function App() {
   const [activeSource, setActiveSource] = useState<string | null>(null);
   const [activeEmbed, setActiveEmbed] = useState<string | null>(null);
-  const [regionFilter, setRegionFilter] = useState<"all" | "BRICS" | "LATAM">("all");
+  const [regionFilter, setRegionFilter] = useState<Region>("all");
 
   const handleSourceClick = useCallback((id: string) => setActiveSource(id), []);
   const handleEmbedClick = useCallback((id: string) => setActiveEmbed(id), []);
@@ -88,19 +89,19 @@ export default function App() {
       <RevealSection><MarketSizeChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /><SectionLayers id="market-size" /></RevealSection>
 
       {/* ── 7. SPREADS × VOLATILITY: Rate spreads vs FX vol ── */}
-      <RevealSection><SpreadsTable onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="spreads" /></RevealSection>
+      <RevealSection><SpreadsTable onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="spreads" region={regionFilter} /></RevealSection>
 
       {/* ── 8. VOLATILITY RANKING: G20 currencies ── */}
-      <RevealSection><VolatilityChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="volatility" /></RevealSection>
+      <RevealSection><VolatilityChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="volatility" region={regionFilter} /></RevealSection>
 
       {/* ── 9. TCX HEDGING: Local currency protection ── */}
       <RevealSection><TCXChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /><SectionLayers id="tcx" /></RevealSection>
 
       {/* ── 10. DEBT COMPOSITION: LC vs FX ── */}
-      <RevealSection><DebtComposition onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="debt" /></RevealSection>
+      <RevealSection><DebtComposition onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="debt" region={regionFilter} /></RevealSection>
 
       {/* ── 11. STABILITY SCATTER: Economic stability vs LC share ── */}
-      <RevealSection><StabilityScatter onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="stability" /></RevealSection>
+      <RevealSection><StabilityScatter onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} regionFilter={regionFilter} /><SectionLayers id="stability" region={regionFilter} /></RevealSection>
 
       {/* ── 12. GOLD RESERVES: Anti-dollar anchor ── */}
       <RevealSection><GoldReservesChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /><SectionLayers id="gold" /></RevealSection>

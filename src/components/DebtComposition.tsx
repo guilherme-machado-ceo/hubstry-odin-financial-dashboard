@@ -5,13 +5,16 @@ import { t, getLocale } from "@/i18n";
 import ExportButton from "./ExportButton";
 import EstBadge from "./EstBadge";
 import { Share2 } from "lucide-react";
+import { inRegion, type Region } from "@/data/regions";
 
-interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; regionFilter: "all" | "BRICS" | "LATAM"; }
+interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; regionFilter: Region; }
 
 export default function DebtComposition({ onSourceClick, onEmbedClick, regionFilter }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
   const locale = getLocale();
-  const filtered = countryDebtData.filter((c) => regionFilter === "all" || c.region === regionFilter);
+  // Pertencimento por bandeira (fonte única em regions.ts): o Brasil está em BRICS e em LATAM,
+  // como nas demais seções — antes, pelo campo `region`, ele sumia do filtro BRICS.
+  const filtered = countryDebtData.filter((c) => inRegion(c.flag, regionFilter));
   const chartData = filtered.map((c) => ({ country: locale === "pt" ? c.countryPt : c.country, countryEn: c.country, localCurrency: c.localCurrencyDebt[latestYearIndex], foreignCurrency: c.foreignCurrencyDebt[latestYearIndex], total: c.totalDebt[latestYearIndex], debtToGDP: c.debtToGDP, debtToGDPLabel: c.debtToGDPLabel, debtToGDPSource: c.debtToGDPSource, debtToGDPSnapshot: c.debtToGDPSnapshot }));
 
   return (

@@ -13,6 +13,7 @@ import {
 } from "./lcBondsData";
 import { goldReserves, oilData } from "./goldOilData";
 import { PANDA_BOND_EVENTS } from "./pandaBondsData";
+import { inRegion, type Region } from "./regions";
 
 export type LayerMode = "curated" | "live" | "mixed";
 
@@ -36,9 +37,12 @@ export interface SectionLayerSpec {
   events: LayerEvent[];
   watch: LayerWatch;
   legal: { status: "not_applicable"; notePt: string; noteEn: string };
+  /** "global" = seção não filtrável; Region = indicadores recalculados com o subconjunto da região. */
+  scope: "global" | Region;
 }
 
-/** Idade máxima (dias) para um dado curado ser exibido como atual. */
+/** Idade máxima (dias) de um dado curado antes de precisar de revisão editorial — uso interno
+ * (governança/CI); a interface mostra apenas a data de referência, sem rótulo de "desatualizado". */
 export const CURATED_MAX_AGE_DAYS = 180;
 
 const LEGAL_NA = {
@@ -67,19 +71,7 @@ const minBy = <T,>(arr: T[], f: (x: T) => number) => arr.reduce((a, b) => (f(b) 
 // ── Dados derivados (sempre dos módulos exibidos) ─────────────────────────────
 const lcLast = lastOf(bricsLatamTotal);
 const tcxLast = lastOf(tcxHedgingData);
-const debtBR = countryDebtData.find((c) => c.country === "Brazil")!;
 const lcShare = (c: typeof countryDebtData[number]) => (c.localCurrencyDebt[latestYearIndex] / c.totalDebt[latestYearIndex]) * 100;
-const debtMaxLC = maxBy(countryDebtData, lcShare);
-const debtMinLC = minBy(countryDebtData, lcShare);
-const spreadBR = spreadsData.find((s) => s.country === "Brazil")!;
-const spreadMax = maxBy(spreadsData, (s) => s.spread2025e);
-const spreadMin = minBy(spreadsData, (s) => s.spread2025e);
-const volMax = maxBy(volatilityRanking, (v) => v.volatility);
-const volMin = minBy(volatilityRanking, (v) => v.volatility);
-const volBR = volatilityRanking.find((v) => v.code === "BRL")!;
-const stabMax = maxBy(stabilityScores, (s) => s.stabilityScore);
-const stabMin = minBy(stabilityScores, (s) => s.stabilityScore);
-const stabBR = stabilityScores.find((s) => s.country === "Brazil")!;
 const goldLast = lastOf(goldReserves);
 const oilLast = lastOf(oilData);
 const swapLine = inflectionPoints.find((p) => p.event.startsWith("PBOC↔BCB"));
@@ -94,6 +86,123 @@ const pandaSources: LayerSource[] = [...new Map(pandaCited.map((e) => [e.sourceU
   .map((e) => ({ id: `panda-${e.id}`, name: e.source, url: e.sourceUrl, asOf: e.verifiedAt }));
 const pandaSourceId = (e: typeof PANDA_BOND_EVENTS[number]) =>
   pandaSources.find((s) => s.url === e.sourceUrl)?.id ?? pandaSources[0].id;
+
+// ── Seções filtráveis: indicadores recalculados com o subconjunto da região. ──
+function build_spreads(region: Region): SectionLayerSpec {
+  const rows = spreadsData.filter((x) => inRegion(x.flag, region));
+  const spreadBR = rows.find((x) => x.country === "Brazil")!;
+  const spreadMax = maxBy(rows, (x) => x.spread2025e);
+  const spreadMin = minBy(rows, (x) => x.spread2025e);
+  return {
+    id: "spreads",
+    titlePt: "Spreads soberanos",
+    titleEn: "Sovereign spreads",
+    mode: "curated",
+    sources: [ref("bloomberg")],
+    indicators: [
+      { labelPt: "Spread do Brasil (2025e)", labelEn: "Brazil spread (2025e)", ...val((_, l) => `${spreadBR.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true },
+      { labelPt: `Maior spread · ${spreadMax.countryPt}`, labelEn: `Widest spread · ${spreadMax.country}`, ...val((_, l) => `${spreadMax.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true },
+      { labelPt: `Menor spread · ${spreadMin.countryPt}`, labelEn: `Tightest spread · ${spreadMin.country}`, ...val((_, l) => `${spreadMin.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true },
+    ],
+    events: [],
+    watch: {
+      signalPt: "Revisão da série curada de spreads soberanos",
+      signalEn: "Review of the curated sovereign spread series",
+      whyPt: "Os valores de 2025 são estimativas; a revisão os substitui por observações.",
+      whyEn: "2025 values are estimates; the review replaces them with observations.",
+      sourceId: "bloomberg",
+    },
+    legal: LEGAL_NA,
+    scope: region === "all" ? "global" : region,
+  };
+}
+
+function build_volatility(region: Region): SectionLayerSpec {
+  const rows = volatilityRanking.filter((x) => inRegion(x.flag, region));
+  const volBR = rows.find((x) => x.code === "BRL")!;
+  const volMax = maxBy(rows, (x) => x.volatility);
+  const volMin = minBy(rows, (x) => x.volatility);
+  return {
+    id: "volatility",
+    titlePt: "Volatilidade cambial",
+    titleEn: "FX volatility",
+    mode: "curated",
+    sources: [ref("bloomberg")],
+    indicators: [
+      { labelPt: "Volatilidade do BRL", labelEn: "BRL volatility", ...val((n) => `${n(volBR.volatility)}%`), sourceId: "bloomberg", estimated: true },
+      { labelPt: `Maior · ${volMax.code}`, labelEn: `Highest · ${volMax.code}`, ...val((n) => `${n(volMax.volatility)}%`), sourceId: "bloomberg", estimated: true },
+      { labelPt: `Menor · ${volMin.code}`, labelEn: `Lowest · ${volMin.code}`, ...val((n) => `${n(volMin.volatility)}%`), sourceId: "bloomberg", estimated: true },
+    ],
+    events: [],
+    watch: {
+      signalPt: "Revisão da série curada de volatilidade cambial",
+      signalEn: "Review of the curated FX volatility series",
+      whyPt: "Atualiza o ranking e substitui estimativas por observações.",
+      whyEn: "Updates the ranking and replaces estimates with observations.",
+      sourceId: "bloomberg",
+    },
+    legal: LEGAL_NA,
+    scope: region === "all" ? "global" : region,
+  };
+}
+
+function build_debt(region: Region): SectionLayerSpec {
+  const rows = countryDebtData.filter((x) => inRegion(x.flag, region));
+  const debtBR = rows.find((x) => x.country === "Brazil")!;
+  const debtMaxLC = maxBy(rows, lcShare);
+  const debtMinLC = minBy(rows, lcShare);
+  return {
+    id: "debt",
+    titlePt: "Composição da dívida (moeda local × estrangeira)",
+    titleEn: "Debt composition (local × foreign currency)",
+    mode: "curated",
+    sources: [ref("imf-weo")],
+    indicators: [
+      { labelPt: "Brasil · dívida em moeda local", labelEn: "Brazil · local-currency debt share", ...val((n) => `${n(lcShare(debtBR))}%`), sourceId: "imf-weo" },
+      { labelPt: `Maior participação · ${debtMaxLC.countryPt}`, labelEn: `Highest share · ${debtMaxLC.country}`, ...val((n) => `${n(lcShare(debtMaxLC))}%`), sourceId: "imf-weo" },
+      { labelPt: `Menor participação · ${debtMinLC.countryPt}`, labelEn: `Lowest share · ${debtMinLC.country}`, ...val((n) => `${n(lcShare(debtMinLC))}%`), sourceId: "imf-weo" },
+    ],
+    events: [],
+    watch: {
+      signalPt: "Próxima edição do IMF World Economic Outlook",
+      signalEn: "Next IMF World Economic Outlook release",
+      whyPt: "Atualiza dívida bruta e composição por moeda dos países do painel.",
+      whyEn: "Updates gross debt and currency composition for the countries shown.",
+      sourceId: "imf-weo",
+    },
+    legal: LEGAL_NA,
+    scope: region === "all" ? "global" : region,
+  };
+}
+
+function build_stability(region: Region): SectionLayerSpec {
+  const rows = stabilityScores.filter((x) => inRegion(x.flag, region));
+  const stabBR = rows.find((x) => x.country === "Brazil")!;
+  const stabMax = maxBy(rows, (x) => x.stabilityScore);
+  const stabMin = minBy(rows, (x) => x.stabilityScore);
+  return {
+    id: "stability",
+    titlePt: "Estabilidade × dívida em moeda local",
+    titleEn: "Stability × local-currency debt",
+    mode: "curated",
+    sources: [ref("imf-weo")],
+    indicators: [
+      { labelPt: "Brasil · score de estabilidade (curado)", labelEn: "Brazil · stability score (curated)", valuePt: `${stabBR.stabilityScore}/100`, valueEn: `${stabBR.stabilityScore}/100`, sourceId: "imf-weo" },
+      { labelPt: `Maior · ${stabMax.countryPt}`, labelEn: `Highest · ${stabMax.country}`, valuePt: `${stabMax.stabilityScore}/100`, valueEn: `${stabMax.stabilityScore}/100`, sourceId: "imf-weo" },
+      { labelPt: `Menor · ${stabMin.countryPt}`, labelEn: `Lowest · ${stabMin.country}`, valuePt: `${stabMin.stabilityScore}/100`, valueEn: `${stabMin.stabilityScore}/100`, sourceId: "imf-weo" },
+    ],
+    events: [],
+    watch: {
+      signalPt: "Próxima edição do IMF World Economic Outlook",
+      signalEn: "Next IMF World Economic Outlook release",
+      whyPt: "Atualiza as variáveis macroeconômicas que compõem o score curado.",
+      whyEn: "Updates the macro variables behind the curated score.",
+      sourceId: "imf-weo",
+    },
+    legal: LEGAL_NA,
+    scope: region === "all" ? "global" : region,
+  };
+}
 
 export const SECTION_LAYERS: SectionLayerSpec[] = [
   {
@@ -116,6 +225,7 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
       sourceId: "bis-debt",
     },
     legal: LEGAL_NA,
+    scope: "global",
   },
   {
     id: "brazil",
@@ -147,6 +257,7 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
       sourceId: pandaBrazilPlanned ? pandaSourceId(pandaBrazilPlanned) : pandaSources[0].id,
     },
     legal: LEGAL_NA,
+    scope: "global",
   },
   {
     id: "market-size",
@@ -168,49 +279,10 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
       sourceId: "bis-debt",
     },
     legal: LEGAL_NA,
+    scope: "global",
   },
-  {
-    id: "spreads",
-    titlePt: "Spreads soberanos",
-    titleEn: "Sovereign spreads",
-    mode: "curated",
-    sources: [ref("bloomberg")],
-    indicators: [
-      { labelPt: "Spread do Brasil (2025e)", labelEn: "Brazil spread (2025e)", ...val((_, l) => `${spreadBR.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true },
-      { labelPt: `Maior spread · ${spreadMax.countryPt}`, labelEn: `Widest spread · ${spreadMax.country}`, ...val((_, l) => `${spreadMax.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true },
-      { labelPt: `Menor spread · ${spreadMin.countryPt}`, labelEn: `Tightest spread · ${spreadMin.country}`, ...val((_, l) => `${spreadMin.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true },
-    ],
-    events: [],
-    watch: {
-      signalPt: "Revisão da série curada de spreads soberanos",
-      signalEn: "Review of the curated sovereign spread series",
-      whyPt: "Os valores de 2025 são estimativas; a revisão os substitui por observações.",
-      whyEn: "2025 values are estimates; the review replaces them with observations.",
-      sourceId: "bloomberg",
-    },
-    legal: LEGAL_NA,
-  },
-  {
-    id: "volatility",
-    titlePt: "Volatilidade cambial",
-    titleEn: "FX volatility",
-    mode: "curated",
-    sources: [ref("bloomberg")],
-    indicators: [
-      { labelPt: "Volatilidade do BRL", labelEn: "BRL volatility", ...val((n) => `${n(volBR.volatility)}%`), sourceId: "bloomberg", estimated: true },
-      { labelPt: `Maior · ${volMax.code}`, labelEn: `Highest · ${volMax.code}`, ...val((n) => `${n(volMax.volatility)}%`), sourceId: "bloomberg", estimated: true },
-      { labelPt: `Menor · ${volMin.code}`, labelEn: `Lowest · ${volMin.code}`, ...val((n) => `${n(volMin.volatility)}%`), sourceId: "bloomberg", estimated: true },
-    ],
-    events: [],
-    watch: {
-      signalPt: "Revisão da série curada de volatilidade cambial",
-      signalEn: "Review of the curated FX volatility series",
-      whyPt: "Atualiza o ranking e substitui estimativas por observações.",
-      whyEn: "Updates the ranking and replaces estimates with observations.",
-      sourceId: "bloomberg",
-    },
-    legal: LEGAL_NA,
-  },
+  build_spreads("all"),
+  build_volatility("all"),
   {
     id: "tcx",
     titlePt: "Hedge em moeda local (TCX)",
@@ -231,49 +303,10 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
       sourceId: "tcx",
     },
     legal: LEGAL_NA,
+    scope: "global",
   },
-  {
-    id: "debt",
-    titlePt: "Composição da dívida (moeda local × estrangeira)",
-    titleEn: "Debt composition (local × foreign currency)",
-    mode: "curated",
-    sources: [ref("imf-weo")],
-    indicators: [
-      { labelPt: "Brasil · dívida em moeda local", labelEn: "Brazil · local-currency debt share", ...val((n) => `${n(lcShare(debtBR))}%`), sourceId: "imf-weo" },
-      { labelPt: `Maior participação · ${debtMaxLC.countryPt}`, labelEn: `Highest share · ${debtMaxLC.country}`, ...val((n) => `${n(lcShare(debtMaxLC))}%`), sourceId: "imf-weo" },
-      { labelPt: `Menor participação · ${debtMinLC.countryPt}`, labelEn: `Lowest share · ${debtMinLC.country}`, ...val((n) => `${n(lcShare(debtMinLC))}%`), sourceId: "imf-weo" },
-    ],
-    events: [],
-    watch: {
-      signalPt: "Próxima edição do IMF World Economic Outlook",
-      signalEn: "Next IMF World Economic Outlook release",
-      whyPt: "Atualiza dívida bruta e composição por moeda dos países do painel.",
-      whyEn: "Updates gross debt and currency composition for the countries shown.",
-      sourceId: "imf-weo",
-    },
-    legal: LEGAL_NA,
-  },
-  {
-    id: "stability",
-    titlePt: "Estabilidade × dívida em moeda local",
-    titleEn: "Stability × local-currency debt",
-    mode: "curated",
-    sources: [ref("imf-weo")],
-    indicators: [
-      { labelPt: "Brasil · score de estabilidade (curado)", labelEn: "Brazil · stability score (curated)", valuePt: `${stabBR.stabilityScore}/100`, valueEn: `${stabBR.stabilityScore}/100`, sourceId: "imf-weo" },
-      { labelPt: `Maior · ${stabMax.countryPt}`, labelEn: `Highest · ${stabMax.country}`, valuePt: `${stabMax.stabilityScore}/100`, valueEn: `${stabMax.stabilityScore}/100`, sourceId: "imf-weo" },
-      { labelPt: `Menor · ${stabMin.countryPt}`, labelEn: `Lowest · ${stabMin.country}`, valuePt: `${stabMin.stabilityScore}/100`, valueEn: `${stabMin.stabilityScore}/100`, sourceId: "imf-weo" },
-    ],
-    events: [],
-    watch: {
-      signalPt: "Próxima edição do IMF World Economic Outlook",
-      signalEn: "Next IMF World Economic Outlook release",
-      whyPt: "Atualiza as variáveis macroeconômicas que compõem o score curado.",
-      whyEn: "Updates the macro variables behind the curated score.",
-      sourceId: "imf-weo",
-    },
-    legal: LEGAL_NA,
-  },
+  build_debt("all"),
+  build_stability("all"),
   {
     id: "gold",
     titlePt: "Reservas de ouro",
@@ -294,6 +327,7 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
       sourceId: "imf-weo",
     },
     legal: LEGAL_NA,
+    scope: "global",
   },
   {
     id: "oil",
@@ -315,10 +349,18 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
       sourceId: "yahoo-finance",
     },
     legal: LEGAL_NA,
+    scope: "global",
   },
 ];
 
-export function getSectionLayers(id: string): SectionLayerSpec | undefined {
+const REGION_BUILDERS: Record<string, (r: Region) => SectionLayerSpec> = {
+  spreads: build_spreads, volatility: build_volatility, debt: build_debt, stability: build_stability,
+};
+
+/** Camadas da seção; seções filtráveis são recalculadas para `region`. */
+export function getSectionLayers(id: string, region: Region = "all"): SectionLayerSpec | undefined {
+  const builder = REGION_BUILDERS[id];
+  if (builder) return builder(region);
   return SECTION_LAYERS.find((s) => s.id === id);
 }
 

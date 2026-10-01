@@ -4,10 +4,11 @@ import { t, getLocale, subscribe } from "@/i18n";
 import { TrendingUp, Activity, Globe, Shield, Layers, Radio } from "lucide-react";
 import EstBadge from "./EstBadge";
 import PtaxLive from "./PtaxLive";
+import { REGION_FILTERED_SECTIONS, type Region } from "@/data/regions";
 
 interface Props {
-  regionFilter: "all" | "BRICS" | "LATAM";
-  onRegionChange: (r: "all" | "BRICS" | "LATAM") => void;
+  regionFilter: Region;
+  onRegionChange: (r: Region) => void;
 }
 
 export default function HeroSection({ regionFilter, onRegionChange }: Props) {
@@ -46,7 +47,7 @@ export default function HeroSection({ regionFilter, onRegionChange }: Props) {
         </div>
 
         {/* Region Filter */}
-        <div className="flex items-center gap-0 mb-4 border border-[#222] w-fit">
+        <div className="flex items-center gap-0 border border-[#222] w-fit max-w-full flex-wrap">
           <span className="text-[9px] font-mono uppercase tracking-widest text-[#555] px-3 py-1.5 border-r border-[#222]">
             {t("nav.region")}
           </span>
@@ -67,6 +68,23 @@ export default function HeroSection({ regionFilter, onRegionChange }: Props) {
               {item.label}
             </button>
           ))}
+        </div>
+        {/* Onde o filtro age: só aparece com BRICS/LATAM selecionado (os KPIs abaixo são globais). */}
+        <div className="mb-4 mt-1.5 min-h-[16px] text-[9px] font-mono text-[#777]" aria-live="polite" data-region-applied={regionFilter}>
+          {regionFilter !== "all" && (
+            <>
+              <span className="uppercase tracking-widest text-[#00FFFF]">{locale === "pt" ? "Filtro aplicado" : "Filter applied"}:</span>{" "}
+              {REGION_FILTERED_SECTIONS.map((sec, i) => (
+                <span key={sec.id}>
+                  {i > 0 && " · "}
+                  <a href={`#layers-${sec.id}`} className="hover:text-[#00FFFF] underline-offset-2 hover:underline">
+                    {locale === "pt" ? sec.labelPt : sec.labelEn}
+                  </a>
+                </span>
+              ))}
+              <span className="text-[#555]"> ↓</span>
+            </>
+          )}
         </div>
 
         {/* KPIs Grid */}
@@ -124,7 +142,7 @@ export default function HeroSection({ regionFilter, onRegionChange }: Props) {
               </span>
             </div>
             <span className="text-lg font-mono font-bold text-[#e0e0e0]">
-              ${kpis.ndbLCDisbursed}
+              {kpis.ndbLCDisbursed}
             </span>
           </div>
 
@@ -137,7 +155,7 @@ export default function HeroSection({ regionFilter, onRegionChange }: Props) {
               </span>
             </div>
             <span className="text-lg font-mono font-bold text-[#e0e0e0]">
-              ${kpis.tcxHedgedCumulative}
+              {kpis.tcxHedgedCumulative}
             </span>
           </div>
 

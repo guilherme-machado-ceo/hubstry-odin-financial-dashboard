@@ -30,7 +30,7 @@ O projeto é *docs-as-code*: decisões (ADRs — Architecture Decision Records),
 | Marco | Escopo | Situação |
 |---|---|---|
 | **M1 — Emergency MVP Gate** | Carbono, Blockchain e Clima × 5 camadas, com evidência, proveniência e revisão humana | **Concluído** (15/15; run `odin-20260930-174643-adef`; em produção desde 01/10/2026) |
-| **M2 — Camadas estruturais** | Fontes, data de referência e frescor, indicadores, eventos, What to Watch e status da lente jurídica nas 10 demais seções de dados, sem IA | **Concluído** |
+| **M2 — Camadas estruturais** | Fontes e data de referência, indicadores, eventos, What to Watch e status da lente jurídica nas 10 demais seções de dados, sem IA | **Concluído** |
 | M3 — Autonomia editorial | O modelo produz as 5 camadas de forma consistente, sem correção manual; section profiles de Blockchain e Clima | Planejado |
 | M4 — Escala | Mais seções com IA, providers, automação e monitoramento | Planejado |
 
@@ -55,7 +55,7 @@ O projeto é *docs-as-code*: decisões (ADRs — Architecture Decision Records),
 | Precificação de carbono | fonte curada versionada + snapshot | Comissão Europeia (CBAM); OWID; Banco Mundial | jul/2026 | **M1** |
 | Blockchain e RWA | snapshot diário + API ao vivo | DefiLlama; mempool.space | diária | **M1** |
 
-A coluna "Referência" reproduz a data registrada em `sourceRefs` (`src/data/lcBondsData.ts`) e, para Panda Bonds, a data de verificação dos eventos (`src/data/pandaBondsData.ts`). **Camadas ODIN:** "M1" = 5 camadas de inteligência (IA sob contrato + revisão humana); "estruturais" = bloco recolhível sem IA com fontes, data e frescor, indicadores extraídos dos dados da seção, eventos, What to Watch e status da lente jurídica (`src/data/sectionLayers.ts`). Dado curado com mais de 180 dias aparece como **desatualizado**; a atualização desses dados é trabalho de conteúdo separado.
+A coluna "Referência" reproduz a data registrada em `sourceRefs` (`src/data/lcBondsData.ts`) e, para Panda Bonds, a data de verificação dos eventos (`src/data/pandaBondsData.ts`). **Camadas ODIN:** "M1" = 5 camadas de inteligência (IA sob contrato + revisão humana); "estruturais" = bloco recolhível sem IA com fontes e data de referência, indicadores extraídos dos dados da seção, eventos, What to Watch e status da lente jurídica (`src/data/sectionLayers.ts`). Cada fonte exibe sua **data de referência** (um fato, não um julgamento editorial); a interface sinaliza apenas fontes **ao vivo**. A revisão dos dados curados é trabalho de conteúdo separado (PR 2).
 
 ## As cinco camadas de inteligência
 
@@ -133,6 +133,8 @@ Nenhuma chave de API é exposta no navegador.
 **Atualizar o preço do CBAM** — editar `public/data/sources/cbam-carbon.json` (novo trimestre em `prices`, `validAsOf`, `nextReviewAt`). O gate bloqueia a seção de carbono quando `nextReviewAt` vence ou o dado passa de 100 dias.
 
 **Deploy** — integração GitHub → Vercel: cada push na `main` publica; cada PR gera *preview*. O plano atual tem limite diário de deploys; agrupar mudanças evita esgotá-lo.
+
+**Filtro regional** — Todos · BRICS · LATAM, no topo. Age em Spreads, Volatilidade, Dívida e Estabilidade (aviso "Filtro aplicado" aparece quando ativo); as Camadas ODIN dessas seções recalculam os indicadores para a região. Pertencimento por país em `src/data/regions.ts` (o Brasil está nas duas regiões).
 
 ## Desenvolvimento
 

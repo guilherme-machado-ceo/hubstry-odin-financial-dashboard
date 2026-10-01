@@ -5,18 +5,19 @@ import { t, getLocale } from "@/i18n";
 import ExportButton from "./ExportButton";
 import EstBadge from "./EstBadge";
 import { Share2 } from "lucide-react";
+import { inRegion, type Region } from "@/data/regions";
 
-interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; regionFilter: "all" | "BRICS" | "LATAM"; }
+interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; regionFilter: Region; }
 
 export default function VolatilityChart({ onSourceClick, onEmbedClick, regionFilter }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
   const locale = getLocale();
   const filtered = volatilityRanking.filter((v) => {
-    if (regionFilter === "all") return true;
-    const brics = ["BR", "CN", "IN", "RU", "ZA"]; const latam = ["BR", "MX", "AR", "CO", "CL"];
-    if (regionFilter === "BRICS") return brics.includes(v.flag); return latam.includes(v.flag);
+    return inRegion(v.flag, regionFilter);
   });
   const chartData = [...filtered].reverse();
+  // A tabela de detalhes obedece ao mesmo filtro do ranking.
+  const detailsFiltered = volatilityDetails.filter((v) => inRegion(v.flag, regionFilter));
 
   return (
     <section id="volatility" className="border-b border-[#1a1a1a] bg-[#050505]">
@@ -28,7 +29,7 @@ export default function VolatilityChart({ onSourceClick, onEmbedClick, regionFil
             <p className="text-[11px] font-mono text-[#555] mt-1">{t("section3.subtitle")}</p>
           </div>
           <div className="flex items-center gap-2">
-            <ExportButton chartRef={chartRef} filename="volatility-ranking" jsonData={{ ranking: filtered, details: volatilityDetails }} />
+            <ExportButton chartRef={chartRef} filename="volatility-ranking" jsonData={{ ranking: filtered, details: detailsFiltered }} />
             <button onClick={() => onEmbedClick("volatility")} className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono text-[#555] hover:text-[#00FFFF] transition-colors border border-[#222] hover:border-[#00FFFF]/40"><Share2 size={12} /></button>
           </div>
         </div>
@@ -54,8 +55,8 @@ export default function VolatilityChart({ onSourceClick, onEmbedClick, regionFil
           <div className="grid grid-cols-12 gap-0 bg-[#111] border-b border-[#1a1a1a] text-[9px] font-mono uppercase tracking-widest text-[#555] py-2 px-3">
             <div className="col-span-3">{t("section3.currency")}</div><div className="col-span-3">{t("spreads.country")}</div><div className="col-span-3 text-right">{t("section3.official")}</div><div className="col-span-3 text-right">{t("section3.estimated")}</div>
           </div>
-          {volatilityDetails.map((v, i) => (
-            <div key={v.currency} className={`grid grid-cols-12 gap-0 py-2 px-3 text-[11px] font-mono ${i < volatilityDetails.length - 1 ? "border-b border-[#111]" : ""} hover:bg-[#0e0e0e] transition-colors`}>
+          {detailsFiltered.map((v, i) => (
+            <div key={v.currency} className={`grid grid-cols-12 gap-0 py-2 px-3 text-[11px] font-mono ${i < detailsFiltered.length - 1 ? "border-b border-[#111]" : ""} hover:bg-[#0e0e0e] transition-colors`}>
               <div className="col-span-3 font-bold text-[#aaa]">{v.currency}</div>
               <div className="col-span-3 text-[#888]">{locale === "pt" ? v.countryPt : v.country}</div>
               <div className="col-span-3 text-right text-[#555]">{v.official ? `${v.official}%` : "—"}</div>
