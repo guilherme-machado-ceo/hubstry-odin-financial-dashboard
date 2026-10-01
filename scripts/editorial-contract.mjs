@@ -32,6 +32,18 @@ export function hasTerm(text, term) {
 }
 const anyTerm = (text, terms = []) => terms.find((t) => hasTerm(text, t));
 
+/** What to Watch nas duas formas do contrato (v1.0: signal/whyItMatters/source; v1.1: bilíngue/sourceId). */
+export function watchView(w) {
+  return {
+    signalPt: w?.signalPt ?? w?.signal ?? "",
+    signalEn: w?.signalEn ?? "",
+    whyPt: w?.whyItMattersPt ?? w?.whyItMatters ?? "",
+    whyEn: w?.whyItMattersEn ?? "",
+    sourceId: w?.sourceId ?? w?.source ?? "",
+    expectedDate: w?.expectedDate ?? null,
+  };
+}
+
 const CADENCE_WORDS = {
   daily: ["diari*", "daily"],
   weekly: ["semana*", "weekly"],
@@ -52,8 +64,10 @@ function materialFacts(evidence) {
 export function checkWatch(entry, evidence) {
   const errors = [];
   const { dates, nums } = materialFacts(evidence);
-  for (const [i, w] of (entry.whatToWatch ?? []).entries()) {
+  for (const [i, raw] of (entry.whatToWatch ?? []).entries()) {
     const at = `whatToWatch[${i}]`;
+    const v = watchView(raw);
+    const w = { signal: [v.signalPt, v.signalEn].filter(Boolean).join(" / "), whyItMatters: [v.whyPt, v.whyEn].filter(Boolean).join(" "), source: v.sourceId, expectedDate: v.expectedDate };
     const text = `${w.signal ?? ""}. ${w.whyItMatters ?? ""}`;
     if (w.expectedDate && !dates.has(w.expectedDate)) errors.push({ rule: "watch_date_not_in_source", path: at, detail: `expectedDate ${w.expectedDate} não está no material da seção` });
     for (const d of extractDates(text).dates) if (!dates.has(d)) errors.push({ rule: "watch_date_not_in_source", path: at, detail: `data ${d} no texto não está no material` });

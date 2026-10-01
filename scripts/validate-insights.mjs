@@ -7,7 +7,7 @@
 // ============================================================
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { SCHEMA_VERSION, INTELLIGENCE_CONTRACT_VERSION, LEVELS, GENERATION_STATUSES, validateInsightEntry } from "./insights-schema.mjs";
+import { SCHEMA_VERSION, SUPPORTED_CONTRACT_VERSIONS, LEVELS, GENERATION_STATUSES, validateInsightEntry } from "./insights-schema.mjs";
 
 const FILE = path.resolve(process.cwd(), "public/data", "insights.json");
 const errors = [];
@@ -30,7 +30,7 @@ try {
 // ── nível global ─────────────────────────────────────────────
 const isV2 = json.schemaVersion === SCHEMA_VERSION;
 if (isV2) {
-  if (json.intelligenceContractVersion !== INTELLIGENCE_CONTRACT_VERSION) errors.push("global.intelligenceContractVersion inválido");
+  if (!SUPPORTED_CONTRACT_VERSIONS.has(json.intelligenceContractVersion)) errors.push(`global.intelligenceContractVersion não suportada: ${json.intelligenceContractVersion}`);
 } else if (json.schemaVersion !== undefined) {
   errors.push(`global.schemaVersion não suportado: ${json.schemaVersion}`);
 }

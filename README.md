@@ -62,6 +62,10 @@ O topo do painel abre com o **Briefing ODIN**: para cada seção com M1 revisado
 
 Rótulos, títulos, selos e mensagens de estado vêm de um **glossário PT/EN** (`src/data/glossary.ts`): fonte, data de referência, sinal, indicador, estimado, derivado, não verificado, ao vivo e os nomes das cinco camadas. O texto editorial do M1 continua com redação livre.
 
+## Contrato de dados e inteligência
+
+O contrato vigente para novas gerações é o **[Data & Intelligence Contract v1.1](docs/odin-intelligence-contract-v1.1.md)**: SOURCE → DATA (verificação × derivação) → (EVENT, opcional) → CLAIM → CONTEXT → INTERPRETATION → DECISION LENS (Founder/CEO). Ele exige What to Watch bilíngue gerado pela IA, lente sem fato, fonte ou causalidade novos, e bloqueia linguagem de recomendação por padrões testados com fixtures (`contracts/contract-v1.1/`). O conteúdo M1 publicado segue a [v1.0](docs/odin-intelligence-contract-v1.md) e continua válido.
+
 ## As cinco camadas de inteligência
 
 | Camada | O que entrega | Regra |
@@ -173,6 +177,7 @@ node scripts/test-section-layers.mjs        # Fontes e sinais (M2; render PT/EN;
 node scripts/test-data-audit.mjs            # auditoria das fontes públicas (PR 2a)
 node scripts/test-briefing.mjs              # Briefing ODIN + vocabulário controlado (PR 2b)
 node scripts/test-open-markets.mjs          # dados abertos + procedência em dois eixos (PR 2c)
+node scripts/test-contract-v11.mjs          # Data & Intelligence Contract v1.1
 node scripts/fetch-open-markets.mjs         # coleta (precisa de rede; roda no workflow open-markets.yml)
 ```
 

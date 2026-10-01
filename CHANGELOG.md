@@ -3,6 +3,35 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [Contrato v1.1 · Data & Intelligence Contract] — 2026-10-01
+
+Passo 1 do M3, aprovado por Guilherme e pela IA parceira: congelar o contrato
+antes de gerar a lente Founder/CEO. Sem geração por IA neste PR.
+
+### Adicionado
+- `docs/odin-intelligence-contract-v1.1.md`: cadeia SOURCE → DATA → (EVENT)
+  → CLAIM → CONTEXT → INTERPRETATION → DECISION LENS; procedência em dois
+  eixos na provenance; EVENT opcional; What to Watch bilíngue
+  (`signalPt/En`, `whyItMattersPt/En`, `sourceId`, `expectedDate`); lente
+  Founder/CEO sem número, data, fonte ou causalidade novos; correção editorial
+  `wording | structural`; critérios de aceite do M3.
+- `scripts/contract-v11.mjs`: regras determinísticas. Linguagem de
+  recomendação bloqueada por padrões (R1 deôntico + ação, R2 ato de fala,
+  R3 imperativo inicial, R4 oferta de oportunidade), com exceção para
+  obrigação jurídica descrita.
+- Fixtures `contracts/contract-v1.1/`: 20 frases contextuais e 19
+  recomendações (PT/EN) e uma seção carbon v1.1 completa.
+- `scripts/test-contract-v11.mjs` no CI: fixtures, base v1.1 em schema +
+  consistência + regras, 24 mutações com a regra esperada, compatibilidade
+  do M1 publicado (v1.0).
+
+### Alterado
+- Shadow gate e promoção aceitam `intelligenceContractVersion` 1.0 e 1.1;
+  para 1.1, `contractV11Valid` entra no gate, no `generationReport` e no
+  resumo de revisão. A promoção preserva a versão do artefato.
+- Consistência e contrato editorial leem What to Watch nas duas formas e
+  passam a cobrir o texto da lente.
+
 ## [PR 2c · dados abertos, procedência em dois eixos e retiradas] — 2026-10-01
 
 Origem: plano aprovado por Guilherme e pela IA parceira. Regras: só dados
