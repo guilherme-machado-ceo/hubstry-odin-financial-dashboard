@@ -1,6 +1,6 @@
 // ============================================================
 // GOLD & OIL DATA ENGINE v2.4
-// Sources: World Gold Council, IMF COFER, EIA, OPEC, Shanghai INE, G1, Bloomberg
+// Sources: World Gold Council (IMF IFS data) for gold; oil series pending replacement (PR 2c)
 // ============================================================
 
 export interface GoldReserve { year: number; China: number; Russia: number; India: number; Brazil: number; Turkey: number; Poland: number; }
@@ -8,30 +8,35 @@ export interface GoldShare { flag: string; country: string; countryPt: string; p
 export interface OilData { year: number; brent: number; wti: number; bricsProduction: number; petroyuanVolume: number; }
 export interface ContextBannerData { tag: string; tagPt: string; headline: string; headlinePt: string; summary: string; summaryPt: string; source: string; sourceUrl: string; date: string; datePt?: string; }
 
+// Fonte: World Gold Council, "Quarterly time series on world official gold
+// reserves since 2000" (dados do FMI IFS), atualizado em set/2026. Posição de
+// fim de período (Q4 de cada ano), em toneladas, 1 casa decimal. Uso de extrato
+// limitado com citação, conforme os termos do WGC. Auditoria: dataAudit.ts.
 export const goldReserves: GoldReserve[] = [
-  { year: 2015, China: 1743, Russia: 1275, India: 558, Brazil: 67, Turkey: 539, Poland: 103 },
-  { year: 2016, China: 1842, Russia: 1465, India: 558, Brazil: 67, Turkey: 377, Poland: 103 },
-  { year: 2017, China: 1842, Russia: 1717, India: 558, Brazil: 67, Turkey: 565, Poland: 103 },
-  { year: 2018, China: 1852, Russia: 2119, India: 591, Brazil: 67, Turkey: 428, Poland: 103 },
-  { year: 2019, China: 1948, Russia: 2270, India: 618, Brazil: 67, Turkey: 428, Poland: 228 },
-  { year: 2020, China: 1948, Russia: 2295, India: 618, Brazil: 67, Turkey: 547, Poland: 228 },
-  { year: 2021, China: 1948, Russia: 2295, India: 711, Brazil: 80, Turkey: 494, Poland: 229 },
-  { year: 2022, China: 2010, Russia: 2295, India: 785, Brazil: 130, Turkey: 542, Poland: 337 },
-  { year: 2023, China: 2235, Russia: 2333, India: 801, Brazil: 165, Turkey: 572, Poland: 359 },
-  { year: 2024, China: 2279, Russia: 2333, India: 853, Brazil: 243, Turkey: 679, Poland: 448 },
-  { year: 2025, China: 2353, Russia: 2333, India: 901, Brazil: 270, Turkey: 765, Poland: 516 },
+  { year: 2015, China: 1762.3, Russia: 1414.5, India: 557.7, Brazil: 67.2, Turkey: 116.1, Poland: 102.9 },
+  { year: 2016, China: 1842.6, Russia: 1615.2, India: 557.8, Brazil: 67.3, Turkey: 116.1, Poland: 103.0 },
+  { year: 2017, China: 1842.6, Russia: 1838.8, India: 558.1, Brazil: 67.3, Turkey: 202.0, Poland: 103.0 },
+  { year: 2018, China: 1852.5, Russia: 2113.0, India: 600.4, Brazil: 67.4, Turkey: 253.5, Poland: 128.6 },
+  { year: 2019, China: 1948.3, Russia: 2271.2, India: 635.0, Brazil: 67.4, Turkey: 379.0, Poland: 228.6 },
+  { year: 2020, China: 1948.3, Russia: 2298.5, India: 676.6, Brazil: 67.4, Turkey: 394.6, Poland: 228.7 },
+  { year: 2021, China: 1948.3, Russia: 2301.6, India: 754.1, Brazil: 129.7, Turkey: 394.2, Poland: 230.8 },
+  { year: 2022, China: 2010.5, Russia: 2332.7, India: 787.4, Brazil: 129.7, Turkey: 541.8, Poland: 228.7 },
+  { year: 2023, China: 2235.4, Russia: 2332.7, India: 803.6, Brazil: 129.7, Turkey: 540.2, Poland: 358.7 },
+  { year: 2024, China: 2279.6, Russia: 2332.7, India: 876.2, Brazil: 129.7, Turkey: 587.6, Poland: 448.2 },
+  { year: 2025, China: 2306.3, Russia: 2326.5, India: 880.3, Brazil: 172.4, Turkey: 614.3, Poland: 550.2 },
 ];
 
+// Ouro como % das reservas totais ao fim de 2025 (Q4 2025), mesma fonte WGC/FMI IFS.
+// A Rússia não aparece: o WGC não publica o total de reservas russas na série.
 export const goldShare: GoldShare[] = [
-  { flag: "RU", country: "Russia", countryPt: "Russia", pct2025: 28.2 },
-  { flag: "TR", country: "Turkey", countryPt: "Turquia", pct2025: 22.4 },
-  { flag: "PL", country: "Poland", countryPt: "Polonia", pct2025: 15.8 },
-  { flag: "IN", country: "India", countryPt: "India", pct2025: 9.1 },
-  { flag: "CN", country: "China", countryPt: "China", pct2025: 4.8 },
-  { flag: "BR", country: "Brazil", countryPt: "Brasil", pct2025: 2.8 },
-  { flag: "ZA", country: "South Africa", countryPt: "Africa do Sul", pct2025: 14.5 },
-  { flag: "MX", country: "Mexico", countryPt: "Mexico", pct2025: 3.2 },
-  { flag: "US", country: "United States", countryPt: "Estados Unidos", pct2025: 72.4 },
+  { flag: "TR", country: "Turkey", countryPt: "Turquia", pct2025: 54.6 },
+  { flag: "PL", country: "Poland", countryPt: "Polonia", pct2025: 28.4 },
+  { flag: "ZA", country: "South Africa", countryPt: "Africa do Sul", pct2025: 23.2 },
+  { flag: "IN", country: "India", countryPt: "India", pct2025: 17.7 },
+  { flag: "CN", country: "China", countryPt: "China", pct2025: 8.6 },
+  { flag: "BR", country: "Brazil", countryPt: "Brasil", pct2025: 6.8 },
+  { flag: "MX", country: "Mexico", countryPt: "Mexico", pct2025: 6.6 },
+  { flag: "US", country: "United States", countryPt: "Estados Unidos", pct2025: 82.4 },
 ];
 
 export const oilData: OilData[] = [

@@ -40,22 +40,22 @@ O projeto é *docs-as-code*: decisões (ADRs — Architecture Decision Records),
 |---|---|---|---|---|
 | Banner de contexto | curado estático | Hubstry (editorial) | — | — |
 | Notícias | snapshot diário | Google News RSS | diária | — |
-| Hero · PTAX | API ao vivo no navegador | BCB — Banco Central do Brasil (SGS 10813) | ao vivo | estruturais |
-| Brasil em foco · Panda Bonds | curado estático | BCB; Ministério da Fazenda; Reuters | Panda set/2026 · BCB jun/2025 | estruturais |
+| Hero · KPIs e PTAX | curado + API ao vivo no navegador | BCB (SGS 10813 ao vivo; SGS 13762 dívida bruta); BIS; NDB; CIPS; TCX | ao vivo · jul/2026 (dívida) | estruturais |
+| Brasil em foco · Panda Bonds | curado estático | Ministério da Fazenda; Reuters; gov.cn (swap PBOC–BCB) | Panda set/2026 · swap mai/2025 | estruturais |
 | Tamanho do mercado LC | curado estático | BIS — Bank for International Settlements | dez/2024 | estruturais |
-| Spreads | curado estático | Bloomberg | jan/2025 | estruturais |
-| Volatilidade cambial | curado estático | Bloomberg | jan/2025 | estruturais |
-| Hedge TCX | curado estático | TCX — The Currency Exchange Fund | jan/2025 | estruturais |
+| Spreads | curado estático · **a refazer (PR 2c)** | Bloomberg (pago, metodologia não registrada) | jan/2025 | estruturais |
+| Volatilidade cambial | curado estático · **a refazer (PR 2c)** | Bloomberg (pago, metodologia não registrada) | jan/2025 | estruturais |
+| Hedge TCX | curado estático | TCX — The Currency Exchange Fund (resultados anuais) | mai/2026 | estruturais |
 | Composição da dívida | curado estático | IMF WEO — World Economic Outlook | out/2024 | estruturais |
-| Estabilidade | curado estático | IMF WEO | out/2024 | estruturais |
-| Reservas de ouro | curado estático | IMF WEO | out/2024 | estruturais |
-| Vetor petróleo | curado + API ao vivo no navegador | Bloomberg; Yahoo Finance | jan/2025 · ao vivo | estruturais |
+| Estabilidade | curado estático · **sai da interface (PR 2c)** | score curado sem fórmula | out/2024 | estruturais |
+| Reservas de ouro | curado estático | World Gold Council (dados FMI IFS) | set/2026 (dados Q4 2025) | estruturais |
+| Vetor petróleo | curado + API ao vivo no navegador · **médias a refazer (PR 2c)** | Bloomberg; Yahoo Finance | jan/2025 · ao vivo | estruturais |
 | Vetor climático | API ao vivo no navegador | Open-Meteo | ao vivo | **M1** |
 | Previsão Earth-2 | snapshot 2×/dia | NVIDIA Earth-2 (FourCastNet) | 2×/dia | fora do escopo |
 | Precificação de carbono | fonte curada versionada + snapshot | Comissão Europeia (CBAM); OWID; Banco Mundial | jul/2026 | **M1** |
 | Blockchain e RWA | snapshot diário + API ao vivo | DefiLlama; mempool.space | diária | **M1** |
 
-A coluna "Referência" reproduz a data registrada em `sourceRefs` (`src/data/lcBondsData.ts`) e, para Panda Bonds, a data de verificação dos eventos (`src/data/pandaBondsData.ts`). **Camadas ODIN:** "M1" = 5 camadas de inteligência (IA sob contrato + revisão humana); "estruturais" = bloco recolhível sem IA com fontes e data de referência, indicadores extraídos dos dados da seção, eventos, What to Watch e status da lente jurídica (`src/data/sectionLayers.ts`). Cada fonte exibe sua **data de referência** (um fato, não um julgamento editorial); a interface sinaliza apenas fontes **ao vivo**. A revisão dos dados curados é trabalho de conteúdo separado (PR 2).
+A coluna "Referência" reproduz a data registrada em `sourceRefs` (`src/data/lcBondsData.ts`) e, para Panda Bonds, a data de verificação dos eventos (`src/data/pandaBondsData.ts`). **Camadas ODIN:** "M1" = 5 camadas de inteligência (IA sob contrato + revisão humana); "estruturais" = bloco recolhível sem IA com fontes e data de referência, indicadores extraídos dos dados da seção, eventos, What to Watch e status da lente jurídica (`src/data/sectionLayers.ts`). Cada fonte exibe sua **data de referência** (um fato, não um julgamento editorial); a interface sinaliza apenas fontes **ao vivo**. Valores ainda sem conferência em fonte oficial aparecem marcados como **"não verificado"** (auditoria de 01/10/2026 — ver abaixo).
 
 ## As cinco camadas de inteligência
 
@@ -104,6 +104,12 @@ O que **não** é automático: a geração (disparo manual), a revisão e a prom
 - **Regressão** — erros reais de runs anteriores viram fixtures em `contracts/consistency/fixtures/` e precisam continuar bloqueados.
 - **Registro de decisões** — `docs/adr/`, `docs/odin-intelligence-contract-v1.md`, `CHANGELOG.md`; issues rotuladas por origem da revisão (ex.: `external-ai-review`).
 
+## Auditoria das fontes públicas
+
+O ODIN usa apenas dados abertos (OSINT — Open Source Intelligence); nenhuma fonte paga. O registro `src/data/dataAudit.ts` guarda, para cada dado curado, o status (**verificado**, **corrigido**, **não verificado** ou **a substituir no PR 2c**), a URL oficial e a data da evidência. A interface lê esse registro para marcar KPIs e indicadores não verificados, e `scripts/test-data-audit.mjs` (CI) falha se o código divergir das evidências. Resumo legível: [`docs/data-audit.md`](docs/data-audit.md).
+
+A série atribuída ao Bloomberg Terminal (spreads, volatilidade, médias de petróleo) não tem metodologia registrada no repositório — referência, prazo e data de observação são desconhecidos. Ela será refeita com dados abertos e método explícito no PR 2c (por exemplo, "Spread soberano (pb)" = juro local de 10 anos − Treasury de 10 anos).
+
 ## Fontes e providers
 
 | Fonte | Uso | Acesso |
@@ -113,10 +119,12 @@ O que **não** é automático: a geração (disparo manual), a revisão e a prom
 | mempool.space | Taxas on-chain do Bitcoin | ao vivo, sem chave |
 | Open-Meteo | Temperatura e precipitação (Brasília) | ao vivo e na geração, sem chave |
 | BCB SGS 10813 | PTAX BRL/USD | ao vivo, sem chave |
+| BCB SGS 13762 | Dívida Bruta do Governo Geral (% do PIB) | curadoria manual (última observação conferida) |
+| World Gold Council (dados FMI IFS) | Reservas oficiais de ouro e % das reservas | curadoria manual a partir da série trimestral pública |
 | Yahoo Finance | Brent/WTI | ao vivo, sem chave |
 | Our World in Data / Global Carbon Project | CO₂ por consumo | snapshot diário, sem chave |
 | Google News RSS | Notícias | snapshot diário, sem chave |
-| BIS, IMF WEO, CEPAL, NDB, CIPS, TCX, Bloomberg | Séries de títulos, dívida, ouro, câmbio | curadoria manual em `src/data/*.ts` |
+| BIS, IMF WEO, CEPAL, NDB, CIPS, TCX, Bloomberg | Séries de títulos, dívida e câmbio | curadoria manual em `src/data/*.ts` (status por dado em `dataAudit.ts`) |
 | NVIDIA Earth-2 (FourCastNet NIM) | Previsão meteorológica | snapshot 2×/dia, chave em *secrets* |
 | **NVIDIA — Nemotron** | Geração das camadas ODIN (provider ativo) | API, chave em *secrets* do Actions |
 | **Huawei Cloud MaaS** (Model as a Service, via Digiti) | Provider alternativo configurado (`AI_PROVIDER=maas`) | API, chave em variável de ambiente |

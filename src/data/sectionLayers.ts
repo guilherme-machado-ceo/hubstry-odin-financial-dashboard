@@ -14,6 +14,7 @@ import {
 import { goldReserves, oilData } from "./goldOilData";
 import { PANDA_BOND_EVENTS } from "./pandaBondsData";
 import { inRegion, type Region } from "./regions";
+import { isUnverified } from "./dataAudit";
 
 export type LayerMode = "curated" | "live" | "mixed";
 
@@ -24,7 +25,9 @@ export interface LayerSource {
   /** Data de referência do dado (ISO) ou "live" para consulta ao vivo no navegador. */
   asOf: string;
 }
-export interface LayerIndicator { labelPt: string; labelEn: string; valuePt: string; valueEn: string; sourceId: string; estimated?: boolean; }
+export interface LayerIndicator { labelPt: string; labelEn: string; valuePt: string; valueEn: string; sourceId: string; estimated?: boolean;
+  /** Sem verificação em fonte oficial (ver src/data/dataAudit.ts). */
+  unverified?: boolean; }
 export interface LayerEvent { date: string; labelPt: string; labelEn: string; sourceLabel: string; estimated?: boolean; }
 export interface LayerWatch { signalPt: string; signalEn: string; whyPt: string; whyEn: string; sourceId: string; }
 export interface SectionLayerSpec {
@@ -64,6 +67,8 @@ const pt = (v: number, d = 1) => nf("pt", v, d);
 const en = (v: number, d = 1) => nf("en", v, d);
 /** Valor nos dois idiomas: `f` recebe o formatador numérico do idioma. */
 const val = (f: (n: (v: number, d?: number) => string, l: "pt" | "en") => string) => ({ valuePt: f(pt, "pt"), valueEn: f(en, "en") });
+/** Marca o indicador como não verificado conforme a auditoria (PR 2a). */
+const U = (auditId: string) => (isUnverified(auditId) ? { unverified: true as const } : {});
 const lastOf = <T,>(arr: T[]) => arr[arr.length - 1];
 const maxBy = <T,>(arr: T[], f: (x: T) => number) => arr.reduce((a, b) => (f(b) > f(a) ? b : a));
 const minBy = <T,>(arr: T[], f: (x: T) => number) => arr.reduce((a, b) => (f(b) < f(a) ? b : a));
@@ -100,9 +105,9 @@ function build_spreads(region: Region): SectionLayerSpec {
     mode: "curated",
     sources: [ref("bloomberg")],
     indicators: [
-      { labelPt: "Spread do Brasil (2025e)", labelEn: "Brazil spread (2025e)", ...val((_, l) => `${spreadBR.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true },
-      { labelPt: `Maior spread · ${spreadMax.countryPt}`, labelEn: `Widest spread · ${spreadMax.country}`, ...val((_, l) => `${spreadMax.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true },
-      { labelPt: `Menor spread · ${spreadMin.countryPt}`, labelEn: `Tightest spread · ${spreadMin.country}`, ...val((_, l) => `${spreadMin.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true },
+      { labelPt: "Spread do Brasil (2025e)", labelEn: "Brazil spread (2025e)", ...val((_, l) => `${spreadBR.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true, ...U("spreads") },
+      { labelPt: `Maior spread · ${spreadMax.countryPt}`, labelEn: `Widest spread · ${spreadMax.country}`, ...val((_, l) => `${spreadMax.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true, ...U("spreads") },
+      { labelPt: `Menor spread · ${spreadMin.countryPt}`, labelEn: `Tightest spread · ${spreadMin.country}`, ...val((_, l) => `${spreadMin.spread2025e} ${l === "pt" ? "pb" : "bps"}`), sourceId: "bloomberg", estimated: true, ...U("spreads") },
     ],
     events: [],
     watch: {
@@ -129,9 +134,9 @@ function build_volatility(region: Region): SectionLayerSpec {
     mode: "curated",
     sources: [ref("bloomberg")],
     indicators: [
-      { labelPt: "Volatilidade do BRL", labelEn: "BRL volatility", ...val((n) => `${n(volBR.volatility)}%`), sourceId: "bloomberg", estimated: true },
-      { labelPt: `Maior · ${volMax.code}`, labelEn: `Highest · ${volMax.code}`, ...val((n) => `${n(volMax.volatility)}%`), sourceId: "bloomberg", estimated: true },
-      { labelPt: `Menor · ${volMin.code}`, labelEn: `Lowest · ${volMin.code}`, ...val((n) => `${n(volMin.volatility)}%`), sourceId: "bloomberg", estimated: true },
+      { labelPt: "Volatilidade do BRL", labelEn: "BRL volatility", ...val((n) => `${n(volBR.volatility)}%`), sourceId: "bloomberg", estimated: true, ...U("volatility") },
+      { labelPt: `Maior · ${volMax.code}`, labelEn: `Highest · ${volMax.code}`, ...val((n) => `${n(volMax.volatility)}%`), sourceId: "bloomberg", estimated: true, ...U("volatility") },
+      { labelPt: `Menor · ${volMin.code}`, labelEn: `Lowest · ${volMin.code}`, ...val((n) => `${n(volMin.volatility)}%`), sourceId: "bloomberg", estimated: true, ...U("volatility") },
     ],
     events: [],
     watch: {
@@ -158,9 +163,9 @@ function build_debt(region: Region): SectionLayerSpec {
     mode: "curated",
     sources: [ref("imf-weo")],
     indicators: [
-      { labelPt: "Brasil · dívida em moeda local", labelEn: "Brazil · local-currency debt share", ...val((n) => `${n(lcShare(debtBR))}%`), sourceId: "imf-weo" },
-      { labelPt: `Maior participação · ${debtMaxLC.countryPt}`, labelEn: `Highest share · ${debtMaxLC.country}`, ...val((n) => `${n(lcShare(debtMaxLC))}%`), sourceId: "imf-weo" },
-      { labelPt: `Menor participação · ${debtMinLC.countryPt}`, labelEn: `Lowest share · ${debtMinLC.country}`, ...val((n) => `${n(lcShare(debtMinLC))}%`), sourceId: "imf-weo" },
+      { labelPt: "Brasil · dívida em moeda local", labelEn: "Brazil · local-currency debt share", ...val((n) => `${n(lcShare(debtBR))}%`), sourceId: "imf-weo", ...U("country-debt") },
+      { labelPt: `Maior participação · ${debtMaxLC.countryPt}`, labelEn: `Highest share · ${debtMaxLC.country}`, ...val((n) => `${n(lcShare(debtMaxLC))}%`), sourceId: "imf-weo", ...U("country-debt") },
+      { labelPt: `Menor participação · ${debtMinLC.countryPt}`, labelEn: `Lowest share · ${debtMinLC.country}`, ...val((n) => `${n(lcShare(debtMinLC))}%`), sourceId: "imf-weo", ...U("country-debt") },
     ],
     events: [],
     watch: {
@@ -187,9 +192,9 @@ function build_stability(region: Region): SectionLayerSpec {
     mode: "curated",
     sources: [ref("imf-weo")],
     indicators: [
-      { labelPt: "Brasil · score de estabilidade (curado)", labelEn: "Brazil · stability score (curated)", valuePt: `${stabBR.stabilityScore}/100`, valueEn: `${stabBR.stabilityScore}/100`, sourceId: "imf-weo" },
-      { labelPt: `Maior · ${stabMax.countryPt}`, labelEn: `Highest · ${stabMax.country}`, valuePt: `${stabMax.stabilityScore}/100`, valueEn: `${stabMax.stabilityScore}/100`, sourceId: "imf-weo" },
-      { labelPt: `Menor · ${stabMin.countryPt}`, labelEn: `Lowest · ${stabMin.country}`, valuePt: `${stabMin.stabilityScore}/100`, valueEn: `${stabMin.stabilityScore}/100`, sourceId: "imf-weo" },
+      { labelPt: "Brasil · score de estabilidade (curado)", labelEn: "Brazil · stability score (curated)", valuePt: `${stabBR.stabilityScore}/100`, valueEn: `${stabBR.stabilityScore}/100`, sourceId: "imf-weo", ...U("stability") },
+      { labelPt: `Maior · ${stabMax.countryPt}`, labelEn: `Highest · ${stabMax.country}`, valuePt: `${stabMax.stabilityScore}/100`, valueEn: `${stabMax.stabilityScore}/100`, sourceId: "imf-weo", ...U("stability") },
+      { labelPt: `Menor · ${stabMin.countryPt}`, labelEn: `Lowest · ${stabMin.country}`, valuePt: `${stabMin.stabilityScore}/100`, valueEn: `${stabMin.stabilityScore}/100`, sourceId: "imf-weo", ...U("stability") },
     ],
     events: [],
     watch: {
@@ -210,11 +215,13 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
     titlePt: "Visão geral · KPIs e PTAX",
     titleEn: "Overview · KPIs and PTAX",
     mode: "mixed",
-    sources: [ref("bis-debt"), ref("cips"), ref("ndb"), live("bcb-sgs-10813", "BCB SGS 10813 — PTAX", "https://api.bcb.gov.br/dados/serie/bcdata.sgs.10813")],
+    sources: [ref("bis-debt"), ref("cips"), ref("ndb"), ref("bcb-sgs-13762"), live("bcb-sgs-10813", "BCB SGS 10813 — PTAX", "https://api.bcb.gov.br/dados/serie/bcdata.sgs.10813")],
     indicators: [
-      { labelPt: "Mercado de títulos em moeda local (BRICS + LATAM)", labelEn: "Local-currency bond market (BRICS + LATAM)", valuePt: kpis.lcBondMarketTotal, valueEn: kpis.lcBondMarketTotal, sourceId: "bis-debt" },
+      { labelPt: "Mercado de títulos em moeda local (BRICS + LATAM)", labelEn: "Local-currency bond market (BRICS + LATAM)", valuePt: kpis.lcBondMarketTotal, valueEn: kpis.lcBondMarketTotal, sourceId: "bis-debt", ...U("lc-market-total") },
       { labelPt: "Throughput do CIPS", labelEn: "CIPS throughput", valuePt: kpis.cipsThroughput, valueEn: kpis.cipsThroughput, sourceId: "cips" },
-      { labelPt: "Participação de moeda local no NDB (meta)", labelEn: "NDB local-currency share (target)", valuePt: `${kpis.ndbLCShare}% (${kpis.ndbLCTarget}%)`, valueEn: `${kpis.ndbLCShare}% (${kpis.ndbLCTarget}%)`, sourceId: "ndb" },
+      { labelPt: "Meta de financiamento em moeda local do NDB (2022–2026)", labelEn: "NDB local-currency financing target (2022–2026)", valuePt: `${kpis.ndbLCTarget}%`, valueEn: `${kpis.ndbLCTarget}%`, sourceId: "ndb" },
+      { labelPt: "Participação atual em moeda local do NDB", labelEn: "NDB current local-currency share", valuePt: `${kpis.ndbLCShare}%`, valueEn: `${kpis.ndbLCShare}%`, sourceId: "ndb", ...U("ndb-lc-share-disbursed") },
+      { labelPt: `Dívida Bruta do Governo Geral do Brasil (${kpis.dividaBrutaBRDate.split(" ")[0]})`, labelEn: `Brazil General Government Gross Debt (${kpis.dividaBrutaBRDate.split(" ")[0]})`, ...val((n, l) => `${n(kpis.dividaBrutaBR)}% ${l === "pt" ? "do PIB" : "of GDP"}`), sourceId: "bcb-sgs-13762" },
     ],
     events: inflectionPoints.slice(0, 3).map((p) => ({ date: String(p.year), labelPt: `${p.eventPt}: ${p.value}`, labelEn: `${p.event}: ${p.value}`, sourceLabel: p.source, estimated: p.isEstimated })),
     watch: {
@@ -232,7 +239,7 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
     titlePt: "Brasil em foco · Panda Bonds",
     titleEn: "Brazil spotlight · Panda Bonds",
     mode: "curated",
-    sources: [...pandaSources, ref("bcb")],
+    sources: [...pandaSources, ref("gov-cn-swap")],
     indicators: [
       ...(pandaLatestIssued ? [{
         labelPt: `Última emissão registrada (${pandaLatestIssued.issuer})`,
@@ -246,7 +253,7 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
         ...val((n, l) => `${l === "pt" ? "até" : "up to"} ¥${n(pandaBrazilPlanned.amountCnyBn ?? 0)}${l === "pt" ? " bi" : " bn"}`),
         sourceId: pandaSourceId(pandaBrazilPlanned),
       }] : []),
-      ...(swapLine ? [{ labelPt: "Linha de swap PBOC↔BCB", labelEn: "PBOC↔BCB swap line", valuePt: swapLine.value, valueEn: swapLine.value, sourceId: "bcb" }] : []),
+      ...(swapLine ? [{ labelPt: "Linha de swap PBOC↔BCB", labelEn: "PBOC↔BCB swap line", valuePt: swapLine.value, valueEn: swapLine.value, sourceId: "gov-cn-swap" }] : []),
     ],
     events: pandaSorted.slice(0, 3).map((e) => ({ date: e.date, labelPt: e.titlePt, labelEn: e.titleEn, sourceLabel: e.source })),
     watch: {
@@ -266,9 +273,9 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
     mode: "curated",
     sources: [ref("bis-debt")],
     indicators: [
-      { labelPt: `Total BRICS + LATAM (${lcLast.year})`, labelEn: `BRICS + LATAM total (${lcLast.year})`, ...val((n, l) => `US$ ${n(lcLast.total / 1000)}${l === "pt" ? " tri" : "T"}`), sourceId: "bis-debt" },
-      { labelPt: `BRICS (${lcLast.year})`, labelEn: `BRICS (${lcLast.year})`, ...val((n, l) => `US$ ${n(lcLast.brics / 1000)}${l === "pt" ? " tri" : "T"}`), sourceId: "bis-debt" },
-      { labelPt: `LATAM (${lcLast.year})`, labelEn: `LATAM (${lcLast.year})`, ...val((n, l) => `US$ ${n(lcLast.latam / 1000, 2)}${l === "pt" ? " tri" : "T"}`), sourceId: "bis-debt" },
+      { labelPt: `Total BRICS + LATAM (${lcLast.year})`, labelEn: `BRICS + LATAM total (${lcLast.year})`, ...val((n, l) => `US$ ${n(lcLast.total / 1000)}${l === "pt" ? " tri" : "T"}`), sourceId: "bis-debt", ...U("lc-market-total") },
+      { labelPt: `BRICS (${lcLast.year})`, labelEn: `BRICS (${lcLast.year})`, ...val((n, l) => `US$ ${n(lcLast.brics / 1000)}${l === "pt" ? " tri" : "T"}`), sourceId: "bis-debt", ...U("lc-market-total") },
+      { labelPt: `LATAM (${lcLast.year})`, labelEn: `LATAM (${lcLast.year})`, ...val((n, l) => `US$ ${n(lcLast.latam / 1000, 2)}${l === "pt" ? " tri" : "T"}`), sourceId: "bis-debt", ...U("lc-market-total") },
     ],
     events: [],
     watch: {
@@ -290,9 +297,10 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
     mode: "curated",
     sources: [ref("tcx")],
     indicators: [
-      { labelPt: `Volume protegido no ano (${tcxLast.year})`, labelEn: `Annual hedged volume (${tcxLast.year})`, ...val((n, l) => `US$ ${n(tcxLast.annualHedged)}${l === "pt" ? " bi" : " bn"}`), sourceId: "tcx" },
-      { labelPt: `Carteira em aberto (${tcxLast.year})`, labelEn: `Outstanding portfolio (${tcxLast.year})`, ...val((n, l) => `US$ ${n(tcxLast.portfolioOutstanding)}${l === "pt" ? " bi" : " bn"}`), sourceId: "tcx" },
-      { labelPt: "Moedas cobertas", labelEn: "Currencies covered", valuePt: String(tcxLast.currencies), valueEn: String(tcxLast.currencies), sourceId: "tcx" },
+      { labelPt: `Volume protegido no ano (${tcxLast.year})`, labelEn: `Annual hedged volume (${tcxLast.year})`, ...val((n, l) => `US$ ${n(tcxLast.annualHedged, 2)}${l === "pt" ? " bi" : " bn"}`), sourceId: "tcx" },
+      { labelPt: "Volume protegido desde 2007", labelEn: "Volume hedged since 2007", ...val((n, l) => `~US$ ${n(kpis.tcxHedgedValue, 0)}${l === "pt" ? " bi" : " bn"}`), sourceId: "tcx" },
+      { labelPt: "Moedas cobertas desde 2007", labelEn: "Currencies covered since 2007", valuePt: String(kpis.tcxCurrencies), valueEn: String(kpis.tcxCurrencies), sourceId: "tcx" },
+      { labelPt: `Carteira em aberto (${tcxLast.year})`, labelEn: `Outstanding portfolio (${tcxLast.year})`, ...val((n, l) => `US$ ${n(tcxLast.portfolioOutstanding)}${l === "pt" ? " bi" : " bn"}`), sourceId: "tcx", ...U("tcx-series-other") },
     ],
     events: [],
     watch: {
@@ -312,19 +320,19 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
     titlePt: "Reservas de ouro",
     titleEn: "Gold reserves",
     mode: "curated",
-    sources: [ref("imf-weo")],
+    sources: [ref("wgc-ifs")],
     indicators: [
-      { labelPt: `China (${goldLast.year})`, labelEn: `China (${goldLast.year})`, ...val((_, l) => `${goldLast.China.toLocaleString(l === "pt" ? "pt-BR" : "en-US")} t`), sourceId: "imf-weo" },
-      { labelPt: `Rússia (${goldLast.year})`, labelEn: `Russia (${goldLast.year})`, ...val((_, l) => `${goldLast.Russia.toLocaleString(l === "pt" ? "pt-BR" : "en-US")} t`), sourceId: "imf-weo" },
-      { labelPt: `Brasil (${goldLast.year})`, labelEn: `Brazil (${goldLast.year})`, ...val((_, l) => `${goldLast.Brazil.toLocaleString(l === "pt" ? "pt-BR" : "en-US")} t`), sourceId: "imf-weo" },
+      { labelPt: `China (${goldLast.year})`, labelEn: `China (${goldLast.year})`, ...val((_, l) => `${goldLast.China.toLocaleString(l === "pt" ? "pt-BR" : "en-US")} t`), sourceId: "wgc-ifs", ...U("gold-reserves") },
+      { labelPt: `Rússia (${goldLast.year})`, labelEn: `Russia (${goldLast.year})`, ...val((_, l) => `${goldLast.Russia.toLocaleString(l === "pt" ? "pt-BR" : "en-US")} t`), sourceId: "wgc-ifs", ...U("gold-reserves") },
+      { labelPt: `Brasil (${goldLast.year})`, labelEn: `Brazil (${goldLast.year})`, ...val((_, l) => `${goldLast.Brazil.toLocaleString(l === "pt" ? "pt-BR" : "en-US")} t`), sourceId: "wgc-ifs", ...U("gold-reserves") },
     ],
     events: [],
     watch: {
-      signalPt: "Próxima atualização das estatísticas de reservas do FMI",
-      signalEn: "Next update of IMF reserve statistics",
+      signalPt: "Próxima atualização trimestral do World Gold Council (dados FMI IFS)",
+      signalEn: "Next quarterly World Gold Council update (IMF IFS data)",
       whyPt: "Confirma as compras de ouro dos bancos centrais no ano corrente.",
       whyEn: "Confirms central-bank gold purchases for the current year.",
-      sourceId: "imf-weo",
+      sourceId: "wgc-ifs",
     },
     legal: LEGAL_NA,
     scope: "global",
@@ -336,9 +344,9 @@ export const SECTION_LAYERS: SectionLayerSpec[] = [
     mode: "mixed",
     sources: [ref("bloomberg"), live("yahoo-finance", "Yahoo Finance — Brent/WTI", "https://finance.yahoo.com/")],
     indicators: [
-      { labelPt: `Brent · média ${oilLast.year}`, labelEn: `Brent · ${oilLast.year} average`, ...val((n, l) => `US$ ${n(oilLast.brent)}${l === "pt" ? "/barril" : "/bbl"}`), sourceId: "bloomberg" },
-      { labelPt: `Produção BRICS+ (${oilLast.year})`, labelEn: `BRICS+ production (${oilLast.year})`, ...val((n, l) => `${n(oilLast.bricsProduction)}${l === "pt" ? " mi barris/dia" : " mb/d"}`), sourceId: "bloomberg" },
-      { labelPt: `Petroyuan na Shanghai INE (${oilLast.year})`, labelEn: `Petroyuan on Shanghai INE (${oilLast.year})`, ...val((n, l) => `US$ ${n(oilLast.petroyuanVolume)}${l === "pt" ? " bi" : " bn"}`), sourceId: "bloomberg" },
+      { labelPt: `Brent · média ${oilLast.year}`, labelEn: `Brent · ${oilLast.year} average`, ...val((n, l) => `US$ ${n(oilLast.brent)}${l === "pt" ? "/barril" : "/bbl"}`), sourceId: "bloomberg", ...U("oil-prices") },
+      { labelPt: `Produção BRICS+ (${oilLast.year})`, labelEn: `BRICS+ production (${oilLast.year})`, ...val((n, l) => `${n(oilLast.bricsProduction)}${l === "pt" ? " mi barris/dia" : " mb/d"}`), sourceId: "bloomberg", ...U("oil-bricsplus") },
+      { labelPt: `Petroyuan na Shanghai INE (${oilLast.year})`, labelEn: `Petroyuan on Shanghai INE (${oilLast.year})`, ...val((n, l) => `US$ ${n(oilLast.petroyuanVolume)}${l === "pt" ? " bi" : " bn"}`), sourceId: "bloomberg", ...U("oil-bricsplus") },
     ],
     events: [],
     watch: {

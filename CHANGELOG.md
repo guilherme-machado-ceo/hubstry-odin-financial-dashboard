@@ -3,6 +3,50 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [PR 2a · auditoria das fontes públicas] — 2026-10-01
+
+Origem: plano aprovado por Guilherme e pela IA parceira (PR 1 → 2a → 2b → 2c →
+M3). Regra: nenhum número entra como verificado sem URL oficial e data. Só
+dados abertos (OSINT); nenhuma fonte paga.
+
+### Adicionado
+- **Registro de auditoria** `src/data/dataAudit.ts` (fonte única) e resumo
+  `docs/data-audit.md`: 21 conjuntos de dados — 7 verificados, 4 corrigidos,
+  6 não verificados, 4 a substituir no PR 2c.
+- **Marca "não verificado"** nos KPIs do topo (mercado LC, crescimento,
+  comércio BRICS em moeda local, desembolsos do NDB) e nos indicadores das
+  Camadas ODIN cujo dado não tem fonte oficial conferida.
+- Teste `scripts/test-data-audit.mjs` no CI: evidência com URL e data para
+  todo dado verificado/corrigido, valores do código iguais às evidências e
+  marcação visível na interface.
+
+### Corrigido
+- **TCX**: volume de 2025 de US$ 3,2 bi para **US$ 2,84 bi**; KPI "hedge
+  acumulado" de US$ 8,1 bi (número de carteira) para **~US$ 20 bi desde 2007**;
+  "71 moedas" passa a dizer "desde 2007" (em 2025 foram 54). Fonte:
+  comunicado de resultados de 28/05/2026.
+- **Dívida bruta do Brasil**: 80,4% (abr/2026) para **82,6% (jul/2026)**, BCB
+  SGS 13762; rótulo de "Governo Federal" para **Governo Geral**.
+- **Reservas de ouro**: série 2015–2025 refeita com o arquivo trimestral do
+  World Gold Council (dados FMI IFS, set/2026). Brasil em 2025: 270 t →
+  **172,4 t**; China 2.353 → 2.306,3; Polônia 516 → 550,2; Turquia 765 →
+  614,3 (ajuste técnico do WGC). "Ouro como % das reservas" atualizado para
+  o fim de 2025; Rússia removida (total de reservas não publicado na série).
+  Selo "est." removido do gráfico de ouro.
+- **NDB**: o marco "25% → 30%" vira "meta de 30% (2022–2026)", conferida na
+  estratégia oficial; a participação atual de 25% fica como não verificada.
+- **Fontes**: swap PBOC–BCB passa a citar o anúncio oficial (gov.cn,
+  13/05/2025); CIPS cita a divulgação oficial de 2024; `sourceRefs` com URLs
+  e datas das evidências.
+
+- **"%%" na interface**: rótulos com porcentagem (ex.: "Dívida Bruta (%% do
+  PIB)", "Ouro como %% das reservas") exibiam o escape literal; `t()` agora
+  converte para "%".
+
+### Documentado
+- A série atribuída ao **Bloomberg Terminal** não tem metodologia registrada
+  no repositório; marcada para substituição por dados abertos no PR 2c.
+
 ## [PR 1 · filtro regional e apresentação de datas] — 2026-10-01
 
 Origem: relato do Guilherme ("o filtro de regiões não muda nada") e revisão de
