@@ -123,7 +123,7 @@ for (const locale of ["pt", "en"]) {
   for (const s of m.SECTION_LAYERS) {
     const html = m.renderLayers(s.id, locale);
     const req = ["sourcesAndSignals", "noAI", "sourcesAndReferenceDate", "keyIndicators", "eventsAndMilestones", "whatToWatch", "economicLawLens", "source"];
-    if (s.indicators.some((i) => i.unverified)) req.push("unverified");
+    if (s.indicators.some((i) => i.verification === "unverified")) req.push("unverified");
     checkTerms(html, locale, `layers:${s.id}`, req);
     assert(!/Camadas ODIN|ODIN Layers|estruturais|structural ·/.test(html), `[layers:${s.id}/${locale}] cabeçalho antigo ainda presente`);
     assert(!/text-\[#FF8C00\][^>]*data-unverified/.test(html), `[layers:${s.id}/${locale}] "não verificado" ainda em laranja`);

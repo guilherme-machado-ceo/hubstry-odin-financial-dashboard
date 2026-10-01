@@ -42,6 +42,9 @@ export const GLOSSARY = {
   live: { pt: "ao vivo", en: "live", defPt: "Consultado no navegador a cada visita.", defEn: "Fetched in the browser on each visit." },
 
   // ── Estados do dado (procedência) ──
+  verified: { pt: "verificado", en: "verified", defPt: "Valor que confere com a fonte citada (coletado por código ou conferido na auditoria).", defEn: "Value that matches the cited source (collected by code or checked in the audit)." },
+  direct: { pt: "direto", en: "direct", defPt: "Valor como publicado pela fonte.", defEn: "Value as published by the source." },
+  transformed: { pt: "transformado", en: "transformed", defPt: "Valor da fonte com troca de unidade, moeda ou escala.", defEn: "Source value with a change of unit, currency or scale." },
   estimated: { pt: "estimado", en: "estimated", defPt: "Valor sem observação direta.", defEn: "Value without direct observation." },
   derived: { pt: "derivado", en: "derived", defPt: "Valor calculado a partir de dados de fonte (ex.: diferença entre duas taxas).", defEn: "Value computed from source data (e.g. the difference between two rates)." },
   unverified: { pt: "não verificado", en: "unverified", defPt: "Valor exibido por continuidade; conferência com fonte oficial pendente.", defEn: "Value shown for continuity; check against an official source pending." },

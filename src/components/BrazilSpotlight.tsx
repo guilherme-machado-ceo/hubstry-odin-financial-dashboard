@@ -115,7 +115,7 @@ export default function BrazilSpotlight({ onSourceClick, onEmbedClick }: Props) 
                   <div className="text-[9px] font-mono text-[#00FFFF] mb-1">{point.year}</div>
                   <div className="text-[11px] font-mono text-[#aaa] mb-2 group-hover:text-[#e0e0e0] transition-colors">{locale === "pt" ? point.eventPt : point.event}</div>
                   <div className="text-[16px] font-mono font-bold text-[#e0e0e0]">{point.value}</div>
-                  <button onClick={() => onSourceClick("bloomberg")} className="text-[8px] font-mono text-[#444] mt-2 hover:text-[#00FFFF] transition-colors">{point.source} →</button>
+                  {point.sourceId ? <button onClick={() => onSourceClick(point.sourceId!)} className="text-[8px] font-mono text-[#444] mt-2 hover:text-[#00FFFF] transition-colors">{point.source} →</button> : <span className="block text-[8px] font-mono text-[#444] mt-2">{point.source}</span>}
                 </div>
               ))}
             </div>

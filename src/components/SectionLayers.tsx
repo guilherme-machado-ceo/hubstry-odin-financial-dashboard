@@ -110,11 +110,12 @@ export default function SectionLayers({ id, region = "all" }: { id: string; regi
               <Heading icon={BarChart3} k="keyIndicators" locale={locale} />
               <ul className="space-y-1.5">
                 {spec.indicators.map((ind, i) => (
-                  <li key={i} className="flex items-baseline justify-between gap-3 text-[10px] font-mono">
+                  <li key={i} className="flex items-baseline justify-between gap-3 text-[10px] font-mono" data-verification={ind.verification} data-derivation={ind.derivation}
+                    title={`${term(ind.verification, locale)} · ${term(ind.derivation, locale)} — ${termDef(ind.derivation, locale)}`}>
                     <span className="text-[#888]">
                       {L(locale, ind.labelPt, ind.labelEn)}
-                      {ind.estimated && <span className="ml-1 text-[#FF8C00]">({L(locale, "est.", "est.")})</span>}
-                      {ind.unverified && <span className="ml-1 text-[#777]" data-unverified title={termDef("unverified", locale)}>(<span data-term="unverified">{term("unverified", locale)}</span>)</span>}
+                      {ind.derivation === "estimated" && <span className="ml-1 text-[#777]">(<span data-term="estimated">{term("estimated", locale)}</span>)</span>}
+                      {ind.verification === "unverified" && <span className="ml-1 text-[#777]" data-unverified title={termDef("unverified", locale)}>(<span data-term="unverified">{term("unverified", locale)}</span>)</span>}
                     </span>
                     <span className="text-[#ddd] font-bold whitespace-nowrap" title={sourceName(ind.sourceId)}>
                       {L(locale, ind.valuePt, ind.valueEn)}
@@ -131,7 +132,7 @@ export default function SectionLayers({ id, region = "all" }: { id: string; regi
                   {spec.events.map((e, i) => (
                     <li key={i} className="text-[10px] font-mono text-[#999] leading-relaxed">
                       <span className="text-[#00FFFF]">{e.date}</span> · {L(locale, e.labelPt, e.labelEn)}
-                      {e.estimated && <span className="ml-1 text-[#FF8C00]">({L(locale, "est.", "est.")})</span>}
+                      {e.estimated && <span className="ml-1 text-[#777]">(<span data-term="estimated">{term("estimated", locale)}</span>)</span>}
                       <span className="text-[#555]"> — {e.sourceLabel}</span>
                     </li>
                   ))}

@@ -7,14 +7,15 @@
 //   verified   — confere com a fonte oficial citada
 //   corrected  — estava divergente; corrigido neste PR com a fonte citada
 //   unverified — sem fonte oficial localizada/acessível; exibido com marcação
-//   replace_2c — série de fonte paga ou sem metodologia; será refeita no PR 2c
+//   retired    — série retirada da interface (PR 2c): fonte paga/sem método ou
+//                sem série aberta compatível; não recebe substituto disfarçado
 //
 // A interface lê `isUnverified()` para marcar indicadores e KPIs; o teste
 // scripts/test-data-audit.mjs confere que os valores do código batem com as
 // evidências registradas aqui.
 // ============================================================
 
-export type AuditStatus = "verified" | "corrected" | "unverified" | "replace_2c";
+export type AuditStatus = "verified" | "corrected" | "unverified" | "retired";
 
 export interface AuditEvidence {
   claim: string;
@@ -212,57 +213,103 @@ export const DATA_AUDIT: AuditEntry[] = [
     notePt: "Sem fonte por ponto; referências heterogêneas (Índia com dado de 2018). Refazer com FMI (WEO/GFS) e BIS.",
     noteEn: "No per-point source; heterogeneous references (India uses 2018 data). Rebuild from IMF (WEO/GFS) and BIS.",
   },
+  // ── Dados abertos coletados por código (PR 2c) ──────────────
   {
-    id: "oil-bricsplus",
-    datasetPt: "Produção BRICS+ e volume em petroyuan",
-    datasetEn: "BRICS+ production and petroyuan volume",
-    location: "goldOilData.ts › oilData (bricsProduction, petroyuanVolume)",
-    status: "unverified",
-    evidence: [],
-    notePt: "Sem fonte aberta identificada para petroyuan; será removido no PR 2c se não houver série aberta.",
-    noteEn: "No open source identified for petroyuan; will be removed in PR 2c if no open series exists.",
+    id: "yield-differential",
+    datasetPt: "Diferencial de juros soberanos de 10 anos vs EUA (pb)",
+    datasetEn: "10-year sovereign yield differential vs US (bps)",
+    location: "src/data/generated/open-markets.json › yieldDifferential",
+    status: "verified",
+    evidence: [
+      { claim: "OECD MEI 10-year yield, Mexico, latest month 2026-08: 9.16% vs US 4.68% → 448 bps", value: "448", publisher: "OECD Main Economic Indicators via FRED (IRLTLT01MXM156N)", url: "https://fred.stlouisfed.org/series/IRLTLT01MXM156N", publishedAt: "2026-10-01" },
+      { claim: "OECD MEI 10-year yield, India, latest month 2026-07: 6.78% vs US 4.6% → 218 bps", value: "218", publisher: "OECD Main Economic Indicators via FRED (INDIRLTLT01STM)", url: "https://fred.stlouisfed.org/series/INDIRLTLT01STM", publishedAt: "2026-10-01" },
+      { claim: "OECD MEI 10-year yield, South Africa, latest month 2026-08: 8.75% vs US 4.68% → 407 bps", value: "407", publisher: "OECD Main Economic Indicators via FRED (IRLTLT01ZAM156N)", url: "https://fred.stlouisfed.org/series/IRLTLT01ZAM156N", publishedAt: "2026-10-01" },
+      { claim: "OECD MEI 10-year yield, Chile, latest month 2026-07: 5.55% vs US 4.6% → 95 bps", value: "95", publisher: "OECD Main Economic Indicators via FRED (IRLTLT01CLM156N)", url: "https://fred.stlouisfed.org/series/IRLTLT01CLM156N", publishedAt: "2026-10-01" },
+    ],
+    notePt: "Coletado por scripts/fetch-open-markets.mjs (OCDE MEI via FRED) e derivado (país − EUA). Nova métrica com nome próprio; não substitui o spread EMBI. Brasil, China, Rússia, Colômbia e Argentina ficam em lacunas (sem série aberta compatível).",
+    noteEn: "Collected by scripts/fetch-open-markets.mjs (OECD MEI via FRED) and derived (country − US). A new metric under its own name; it does not replace the EMBI spread. Brazil, China, Russia, Colombia and Argentina are listed as gaps (no compatible open series).",
+  },
+  {
+    id: "fx-volatility",
+    datasetPt: "Volatilidade cambial anualizada (%)",
+    datasetEn: "Annualized FX volatility (%)",
+    location: "src/data/generated/open-markets.json › fxVolatility",
+    status: "verified",
+    evidence: [
+      { claim: "BRL annualized volatility 2025 from daily Brazilian Reals to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)", value: "11", publisher: "Federal Reserve H.10 via FRED", url: "https://fred.stlouisfed.org/series/DEXBZUS", publishedAt: "2026-10-01" },
+      { claim: "MXN annualized volatility 2025 from daily Mexican Pesos to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)", value: "9.5", publisher: "Federal Reserve H.10 via FRED", url: "https://fred.stlouisfed.org/series/DEXMXUS", publishedAt: "2026-10-01" },
+      { claim: "INR annualized volatility 2025 from daily Indian Rupees to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)", value: "4.6", publisher: "Federal Reserve H.10 via FRED", url: "https://fred.stlouisfed.org/series/DEXINUS", publishedAt: "2026-10-01" },
+      { claim: "CNY annualized volatility 2025 from daily Chinese Yuan Renminbi to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)", value: "2.6", publisher: "Federal Reserve H.10 via FRED", url: "https://fred.stlouisfed.org/series/DEXCHUS", publishedAt: "2026-10-01" },
+      { claim: "ZAR annualized volatility 2025 from daily South African Rand to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)", value: "10.1", publisher: "Federal Reserve H.10 via FRED", url: "https://fred.stlouisfed.org/series/DEXSFUS", publishedAt: "2026-10-01" },
+      { claim: "COP annualized volatility 2025 from daily Tasa Representativa del Mercado (TRM), COP por US$", value: "11.7", publisher: "Banco de la Rep\u00fablica \u2014 TRM (datos.gov.co)", url: "https://www.datos.gov.co/d/32sa-8pi3", publishedAt: "2026-10-01" },
+    ],
+    notePt: "Derivada do câmbio diário público (desvio-padrão dos retornos logarítmicos × √252). ARS, RUB, TRY e IDR ficam em lacunas.",
+    noteEn: "Derived from public daily FX (std. dev. of log returns × √252). ARS, RUB, TRY and IDR are listed as gaps.",
+  },
+  {
+    id: "oil-eia",
+    datasetPt: "Médias anuais de Brent e WTI",
+    datasetEn: "Brent and WTI annual averages",
+    location: "src/data/generated/open-markets.json › oil",
+    status: "verified",
+    evidence: [
+      { claim: "BRENT annual average 2025 from EIA daily spot", value: "69.14", publisher: "U.S. EIA via FRED (DCOILBRENTEU)", url: "https://fred.stlouisfed.org/series/DCOILBRENTEU", publishedAt: "2026-10-01" },
+      { claim: "WTI annual average 2025 from EIA daily spot", value: "65.39", publisher: "U.S. EIA via FRED (DCOILWTICO)", url: "https://fred.stlouisfed.org/series/DCOILWTICO", publishedAt: "2026-10-01" },
+    ],
+    notePt: "Médias dos preços spot diários da EIA (via FRED), calculadas pelo ODIN.",
+    noteEn: "Averages of EIA daily spot prices (via FRED), computed by ODIN.",
   },
 
-  // ── A substituir no PR 2c ───────────────────────────────────
+  // ── Retirados da interface (PR 2c) ──────────────────────────
   {
     id: "spreads",
-    datasetPt: "Spreads soberanos",
-    datasetEn: "Sovereign spreads",
-    location: "lcBondsData.ts › spreadsData",
-    status: "replace_2c",
+    datasetPt: "Spreads soberanos atribuídos ao Bloomberg",
+    datasetEn: "Sovereign spreads attributed to Bloomberg",
+    location: "removido (lcBondsData.ts › spreadsData)",
+    status: "retired",
     evidence: [],
-    notePt: "Fonte declarada: Bloomberg Terminal (pago), sem metodologia registrada (referência, prazo e data não documentados). Será refeito como \"Spread soberano (pb)\" = juro local 10 anos − Treasury 10 anos (OCDE/FRED).",
-    noteEn: "Declared source: Bloomberg Terminal (paid), with no recorded methodology (benchmark, tenor and date undocumented). Will be rebuilt as \"Sovereign spread (bps)\" = local 10y yield − 10y Treasury (OECD/FRED).",
+    notePt: "Fonte paga e sem metodologia registrada; os valores misturavam definições (ex.: Argentina 5.800 pb, típico de spread em dólar). Sem equivalente aberto da mesma definição: a série saiu. Em seu lugar entra uma métrica diferente, com nome próprio: diferencial de juros soberanos de 10 anos (OCDE).",
+    noteEn: "Paid source with no recorded methodology; values mixed definitions (e.g. Argentina 5,800 bps, typical of a dollar spread). No open equivalent with the same definition: the series was removed. A different metric under its own name replaces it: 10-year sovereign yield differential (OECD).",
   },
   {
     id: "volatility",
-    datasetPt: "Volatilidade cambial",
-    datasetEn: "FX volatility",
-    location: "lcBondsData.ts › volatilityData, volatilityDetails",
-    status: "replace_2c",
+    datasetPt: "Volatilidade cambial \"2025e\" atribuída ao Bloomberg",
+    datasetEn: "\"2025e\" FX volatility attributed to Bloomberg",
+    location: "removido (lcBondsData.ts › volatilityData, volatilityDetails, volatilityRanking)",
+    status: "retired",
     evidence: [],
-    notePt: "Sem metodologia registrada. Será calculada a partir de câmbio diário público (BCB, FRED H.10).",
-    noteEn: "No recorded methodology. Will be computed from public daily FX (BCB, FRED H.10).",
+    notePt: "Estimativas sem método. Substituída pela volatilidade calculada do câmbio diário público (mesma grandeza, método explícito).",
+    noteEn: "Estimates without a method. Replaced by volatility computed from public daily FX (same quantity, explicit method).",
   },
   {
     id: "stability",
     datasetPt: "Score de estabilidade",
     datasetEn: "Stability score",
-    location: "lcBondsData.ts › stabilityScores",
-    status: "replace_2c",
+    location: "removido (lcBondsData.ts › stabilityScores; StabilityScatter.tsx; Camadas; filtro regional)",
+    status: "retired",
     evidence: [],
-    notePt: "Número curado sem fórmula. Sai da interface principal no PR 2c até existir um índice ODIN reproduzível.",
-    noteEn: "Curated number with no formula. Leaves the main UI in PR 2c until a reproducible ODIN index exists.",
+    notePt: "Número curado sem fórmula reproduzível. Removido da interface, das camadas, do filtro regional e dos testes até existir um índice ODIN com fórmula, componentes, pesos e fontes publicados.",
+    noteEn: "Curated number with no reproducible formula. Removed from the UI, layers, regional filter and tests until an ODIN index with a published formula, components, weights and sources exists.",
+  },
+  {
+    id: "oil-bricsplus",
+    datasetPt: "Produção BRICS+ e volume em petroyuan",
+    datasetEn: "BRICS+ production and petroyuan volume",
+    location: "removido (goldOilData.ts › oilData)",
+    status: "retired",
+    evidence: [],
+    notePt: "Sem série aberta compatível e sem chave de API: saiu do gráfico.",
+    noteEn: "No compatible open series without an API key: removed from the chart.",
   },
   {
     id: "oil-prices",
-    datasetPt: "Médias anuais de Brent e WTI",
-    datasetEn: "Brent and WTI annual averages",
-    location: "goldOilData.ts › oilData (brent, wti)",
-    status: "replace_2c",
+    datasetPt: "Médias de Brent e WTI atribuídas ao Bloomberg",
+    datasetEn: "Brent and WTI averages attributed to Bloomberg",
+    location: "removido (goldOilData.ts › oilData)",
+    status: "retired",
     evidence: [],
-    notePt: "Atribuídas à Bloomberg. Serão substituídas pela série aberta da EIA.",
-    noteEn: "Attributed to Bloomberg. Will be replaced by the open EIA series.",
+    notePt: "Substituídas pelas médias da EIA (registro oil-eia). Ex.: Brent 2025 era 74,5; pela EIA, 69,14.",
+    noteEn: "Replaced by EIA averages (entry oil-eia). E.g. Brent 2025 was 74.5; per the EIA, 69.14.",
   },
 ];
 
@@ -275,5 +322,5 @@ export function auditEntry(id: string): AuditEntry | undefined {
 /** Verdadeiro para dados sem verificação oficial ou com substituição pendente. */
 export function isUnverified(id: string): boolean {
   const s = byId.get(id)?.status;
-  return s === "unverified" || s === "replace_2c";
+  return s === "unverified";
 }

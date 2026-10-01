@@ -3,6 +3,41 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [PR 2c · dados abertos, procedência em dois eixos e retiradas] — 2026-10-01
+
+Origem: plano aprovado por Guilherme e pela IA parceira. Regras: só dados
+abertos; sem equivalente metodologicamente compatível, a série sai ou fica
+como não verificada — nunca é renomeada para parecer equivalente.
+
+### Adicionado
+- **Coleta de dados abertos** `scripts/fetch-open-markets.mjs` + workflow
+  `open-markets.yml` (semanal e manual, sem chave). Gera
+  `src/data/generated/open-markets.json` com método, verificação, derivação,
+  URL e datas de cada série. Coleta de 2026-10-01.
+- **Diferencial de juros soberanos de 10 anos vs EUA (pb)**, OCDE MEI: México +448 pb (2026-08), Índia +218 pb (2026-07), África do Sul +407 pb (2026-08), Chile +95 pb (2026-07).
+  Δ12m e tendência pela regra |Δ| < 25 pb = estável. Lacunas declaradas:
+  Brasil, China, Rússia, Colômbia, Argentina.
+- **Volatilidade cambial anualizada** calculada do câmbio diário (Fed H.10;
+  TRM): 2025 — BRL 11%, MXN 9.5%, INR 4.6%, CNY 2.6%, ZAR 10.1%, COP 11.7%. Lacunas: ARS, RUB, TRY, IDR.
+- **Petróleo**: médias anuais de Brent e WTI (EIA). Brent 2025 = US$
+  69.14 (era 74,5 na série antiga).
+- **Procedência em dois eixos obrigatória** em todo indicador das camadas:
+  `verification` (verified | unverified) e `derivation` (direct |
+  transformed | derived | estimated), com atributos `data-*` e *tooltip*.
+  Glossário ganha "verificado", "direto" e "transformado".
+- Teste `scripts/test-open-markets.mjs` no CI.
+
+### Removido
+- **Score de estabilidade**: gráfico, camada, entrada do filtro regional,
+  exports, tipos, textos e testes.
+- **Série Bloomberg** (spreads, volatilidade "2025e", médias de petróleo) e o
+  `sourceRef` correspondente; **produção BRICS+ e petroyuan** do gráfico de
+  petróleo. Todos registrados como "retirado" em `dataAudit.ts`.
+
+### Alterado
+- Botões de fonte dos pontos de inflexão apontam para a fonte de cada ponto
+  (antes, todos abriam "Bloomberg").
+
 ## [PR 2b · Briefing ODIN e linguagem de produto] — 2026-10-01
 
 Origem: plano aprovado por Guilherme e pela IA parceira, com duas salvaguardas:

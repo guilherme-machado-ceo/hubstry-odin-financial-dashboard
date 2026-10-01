@@ -1,6 +1,8 @@
-# Auditoria das fontes públicas (PR 2a)
+# Auditoria das fontes públicas
 
-Verificação em 2026-10-01. Fonte única: `src/data/dataAudit.ts` (este arquivo é um resumo). Regra: nenhum valor é marcado como verificado sem URL oficial e data. Só dados abertos; nenhuma fonte paga.
+PR 2a (01/10/2026) e PR 2c (dados abertos). Fonte única: `src/data/dataAudit.ts` (este arquivo é um resumo gerado a partir dele). Regra: nenhum valor é marcado como verificado sem URL oficial e data. Só dados abertos; nenhuma fonte paga. Série sem equivalente aberto metodologicamente compatível não recebe substituto com o mesmo nome: sai da interface ou fica como não verificada.
+
+**Procedência em dois eixos** (todo indicador das camadas "Fontes e sinais"): verificação = verificado | não verificado; derivação = direto | transformado | derivado | estimado.
 
 ## Corrigido (4)
 
@@ -11,7 +13,7 @@ Verificação em 2026-10-01. Fonte única: `src/data/dataAudit.ts` (este arquivo
 | Dívida Bruta do Governo Geral do Brasil (% do PIB) | `lcBondsData.ts › kpis.dividaBrutaBR; countryDebtData[Brazil].debtToGDP` | 80.4 (04/2026) | [Banco Central do Brasil — SGS 13762](https://api.bcb.gov.br/dados/serie/bcdata.sgs.13762/dados/ultimos/6?formato=json) (2026-10-01) | Atualizado para jul/2026 (82,6%). O rótulo dizia "Governo Federal"; a série é do Governo Geral. O valor de abr/2026 na própria série é 80,10 (revisado). |
 | Reservas de ouro (2015–2025) e ouro como % das reservas (2025) | `goldOilData.ts › goldReserves, goldShare` | 2025: China 2353, Russia 2333, India 901, Brazil 270, Turkey 765, Poland 516 | [World Gold Council — Quarterly time series on world official gold reserves (IMF IFS data), updated Sep 2026](https://www.gold.org/goldhub/data/gold-reserves-by-country) (2026-09-30) | Série inteira (fim de cada ano, 2015–2025) refeita com uma única fonte. A maior divergência era o Brasil (270 t no repositório vs. 172,4 t). A Turquia segue o ajuste técnico documentado pelo WGC (https://www.gold.org/download/file/16208/Central-bank-stats-methodology-technical-adjustments.pdf), por isso difere de números divulgados localmente. A Rússia saiu da tabela de % das reservas porque o WGC não publica o total russo. |
 
-## Verificado (7)
+## Verificado (10)
 
 | Dado | Onde | Evidência | Nota |
 |---|---|---|---|
@@ -22,8 +24,11 @@ Verificação em 2026-10-01. Fonte única: `src/data/dataAudit.ts` (este arquivo
 | Moedas cobertas pelo TCX desde 2007 | `lcBondsData.ts › kpis.tcxCurrencies` | [TCX — 2025 Annual Results press release](https://www.tcxfund.com/wp-content/uploads/2026/05/PR-TCX-announces-strong-2025-annual-results.pdf) (2026-05-28) | 71 é o total acumulado desde 2007, não o número de moedas de 2025 (54). |
 | Preços CBAM e marcos do regime definitivo | `public/data/sources/cbam-carbon.json` | [European Commission — Taxation and Customs Union](https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en) (2026-07-06) | Governado pelo pipeline de evidências (proveniência SHA-256). Revisão prevista em 2026-10-05. |
 | Eventos de Panda Bonds | `pandaBondsData.ts › PANDA_BOND_EVENTS` | [pandaBondsData.ts (per-event sources)](https://github.com/guilherme-machado-ceo/hubstry-odin-financial-dashboard/blob/main/src/data/pandaBondsData.ts) (2026-09-30) | Cada evento já tem URL e data de verificação próprias. |
+| Diferencial de juros soberanos de 10 anos vs EUA (pb) | `src/data/generated/open-markets.json › yieldDifferential` | [OECD Main Economic Indicators via FRED (IRLTLT01MXM156N)](https://fred.stlouisfed.org/series/IRLTLT01MXM156N) (2026-10-01)<br>[OECD Main Economic Indicators via FRED (INDIRLTLT01STM)](https://fred.stlouisfed.org/series/INDIRLTLT01STM) (2026-10-01)<br>[OECD Main Economic Indicators via FRED (IRLTLT01ZAM156N)](https://fred.stlouisfed.org/series/IRLTLT01ZAM156N) (2026-10-01)<br>[OECD Main Economic Indicators via FRED (IRLTLT01CLM156N)](https://fred.stlouisfed.org/series/IRLTLT01CLM156N) (2026-10-01) | Coletado por scripts/fetch-open-markets.mjs (OCDE MEI via FRED) e derivado (país − EUA). Nova métrica com nome próprio; não substitui o spread EMBI. Brasil, China, Rússia, Colômbia e Argentina ficam em lacunas (sem série aberta compatível). |
+| Volatilidade cambial anualizada (%) | `src/data/generated/open-markets.json › fxVolatility` | [Federal Reserve H.10 via FRED](https://fred.stlouisfed.org/series/DEXBZUS) (2026-10-01)<br>[Federal Reserve H.10 via FRED](https://fred.stlouisfed.org/series/DEXMXUS) (2026-10-01)<br>[Federal Reserve H.10 via FRED](https://fred.stlouisfed.org/series/DEXINUS) (2026-10-01)<br>[Federal Reserve H.10 via FRED](https://fred.stlouisfed.org/series/DEXCHUS) (2026-10-01)<br>[Federal Reserve H.10 via FRED](https://fred.stlouisfed.org/series/DEXSFUS) (2026-10-01)<br>[Banco de la República — TRM (datos.gov.co)](https://www.datos.gov.co/d/32sa-8pi3) (2026-10-01) | Derivada do câmbio diário público (desvio-padrão dos retornos logarítmicos × √252). ARS, RUB, TRY e IDR ficam em lacunas. |
+| Médias anuais de Brent e WTI | `src/data/generated/open-markets.json › oil` | [U.S. EIA via FRED (DCOILBRENTEU)](https://fred.stlouisfed.org/series/DCOILBRENTEU) (2026-10-01)<br>[U.S. EIA via FRED (DCOILWTICO)](https://fred.stlouisfed.org/series/DCOILWTICO) (2026-10-01) | Médias dos preços spot diários da EIA (via FRED), calculadas pelo ODIN. |
 
-## Não verificado (6)
+## Não verificado (5)
 
 | Dado | Onde | Evidência | Nota |
 |---|---|---|---|
@@ -32,14 +37,14 @@ Verificação em 2026-10-01. Fonte única: `src/data/dataAudit.ts` (este arquivo
 | Participação atual (25%) e desembolsos em moeda local do NDB (~US$ 12 bi) | `lcBondsData.ts › kpis.ndbLCShare, ndbLCDisbursed` | — | Os 25% aparecem apenas em imprensa secundária; os ~US$ 12 bi não têm fonte. Conferir no relatório anual do NDB. |
 | TCX: carteira em aberto, moedas por ano e anos não verificados | `lcBondsData.ts › tcxHedgingData (portfolioOutstanding, currencies)` | — | O TCX não divulga carteira em aberto nos comunicados anuais; a série de moedas mistura contagem anual e acumulada. |
 | Composição da dívida por moeda e dívida/PIB (exceto Brasil) | `lcBondsData.ts › countryDebtData` | — | Sem fonte por ponto; referências heterogêneas (Índia com dado de 2018). Refazer com FMI (WEO/GFS) e BIS. |
-| Produção BRICS+ e volume em petroyuan | `goldOilData.ts › oilData (bricsProduction, petroyuanVolume)` | — | Sem fonte aberta identificada para petroyuan; será removido no PR 2c se não houver série aberta. |
 
-## A substituir (PR 2c) (4)
+## Retirado da interface (PR 2c) (5)
 
 | Dado | Onde | Evidência | Nota |
 |---|---|---|---|
-| Spreads soberanos | `lcBondsData.ts › spreadsData` | — | Fonte declarada: Bloomberg Terminal (pago), sem metodologia registrada (referência, prazo e data não documentados). Será refeito como "Spread soberano (pb)" = juro local 10 anos − Treasury 10 anos (OCDE/FRED). |
-| Volatilidade cambial | `lcBondsData.ts › volatilityData, volatilityDetails` | — | Sem metodologia registrada. Será calculada a partir de câmbio diário público (BCB, FRED H.10). |
-| Score de estabilidade | `lcBondsData.ts › stabilityScores` | — | Número curado sem fórmula. Sai da interface principal no PR 2c até existir um índice ODIN reproduzível. |
-| Médias anuais de Brent e WTI | `goldOilData.ts › oilData (brent, wti)` | — | Atribuídas à Bloomberg. Serão substituídas pela série aberta da EIA. |
+| Spreads soberanos atribuídos ao Bloomberg | `removido (lcBondsData.ts › spreadsData)` | — | Fonte paga e sem metodologia registrada; os valores misturavam definições (ex.: Argentina 5.800 pb, típico de spread em dólar). Sem equivalente aberto da mesma definição: a série saiu. Em seu lugar entra uma métrica diferente, com nome próprio: diferencial de juros soberanos de 10 anos (OCDE). |
+| Volatilidade cambial "2025e" atribuída ao Bloomberg | `removido (lcBondsData.ts › volatilityData, volatilityDetails, volatilityRanking)` | — | Estimativas sem método. Substituída pela volatilidade calculada do câmbio diário público (mesma grandeza, método explícito). |
+| Score de estabilidade | `removido (lcBondsData.ts › stabilityScores; StabilityScatter.tsx; Camadas; filtro regional)` | — | Número curado sem fórmula reproduzível. Removido da interface, das camadas, do filtro regional e dos testes até existir um índice ODIN com fórmula, componentes, pesos e fontes publicados. |
+| Produção BRICS+ e volume em petroyuan | `removido (goldOilData.ts › oilData)` | — | Sem série aberta compatível e sem chave de API: saiu do gráfico. |
+| Médias de Brent e WTI atribuídas ao Bloomberg | `removido (goldOilData.ts › oilData)` | — | Substituídas pelas médias da EIA (registro oil-eia). Ex.: Brent 2025 era 74,5; pela EIA, 69,14. |
 
