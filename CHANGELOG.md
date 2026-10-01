@@ -3,6 +3,33 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [M2 · camadas estruturais] — 2026-10-01
+
+Meta do M2: camadas ODIN nas 10 seções de dados sem ODIN Insight, **sem IA**.
+M1 aceito em produção por Guilherme em 01/10/2026.
+
+### Adicionado
+- `src/data/sectionLayers.ts` — registro das camadas estruturais de Hero/PTAX,
+  Brasil + Panda Bonds, Tamanho do mercado, Spreads, Volatilidade, TCX,
+  Composição da dívida, Estabilidade, Ouro e Petróleo: fontes e data de
+  referência, frescor (curado > 180 dias = desatualizado; APIs ao vivo
+  marcadas), 2 a 3 indicadores **extraídos dos mesmos módulos de dados que a
+  seção exibe** (nada digitado), eventos, 1 What to Watch ligado a uma fonte da
+  seção e status da lente de Direito Econômico ("não aplicável nesta edição").
+  Valores bilíngues (formatação pt-BR/en-US); estimativas marcadas.
+- `src/components/SectionLayers.tsx` — bloco recolhível "Camadas ODIN ·
+  estruturais · sem IA", fechado por padrão, com selo quando há dado
+  desatualizado. Montado no `App.tsx` abaixo de cada seção; componentes das
+  seções intocados. Earth-2 fora do escopo.
+- `scripts/test-section-layers.mjs` — empacota registro e componente com
+  esbuild e **renderiza** os 10 blocos em PT e EN (react-dom/server): fontes,
+  datas, indicadores, What to Watch, lente jurídica, bloco fechado, nenhum
+  `undefined`/`NaN`, App montando cada bloco. No CI de PR (com `npm ci`).
+
+### Corrigido
+- README: Panda Bonds tem data registrada por evento (verificação set/2026);
+  a célula "sem data registrada" do #38 estava errada.
+
 ## [docs · README M1] — 2026-09-30
 
 ### Alterado

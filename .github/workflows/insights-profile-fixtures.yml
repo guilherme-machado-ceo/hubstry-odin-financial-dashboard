@@ -29,3 +29,7 @@ jobs:
         run: node scripts/test-contract-render.mjs
       - name: M1 layers (5 camadas, retry de contrato, snapshot)
         run: node scripts/test-m1-layers.mjs
+      - name: Install dependencies (render test das camadas M2)
+        run: npm ci --no-audit --no-fund
+      - name: Section layers M2 (10 seções × 5 camadas, render PT/EN)
+        run: node scripts/test-section-layers.mjs
