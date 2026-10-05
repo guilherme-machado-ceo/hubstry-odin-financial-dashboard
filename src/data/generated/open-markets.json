@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "methodVersion": "1.0.0",
-  "retrievedAt": "2026-10-01T21:58:32.759Z",
+  "retrievedAt": "2026-10-05T15:14:04.580Z",
   "series": {
     "IRLTLT01USM156N": {
       "sourceId": "fred",
@@ -88,8 +88,8 @@
       "title": "Tasa Representativa del Mercado (TRM), COP por US$",
       "url": "https://www.datos.gov.co/d/32sa-8pi3",
       "firstDate": "2014-12-02",
-      "lastDate": "2026-10-02",
-      "n": 2803
+      "lastDate": "2026-10-03",
+      "n": 2804
     },
     "DCOILBRENTEU": {
       "sourceId": "fred",
@@ -420,11 +420,11 @@
         },
         "ytd": {
           "from": "2026-01-03",
-          "to": "2026-10-02",
-          "n": 177,
+          "to": "2026-10-03",
+          "n": 178,
           "vol": 12.9
         },
-        "lastDate": "2026-10-02"
+        "lastDate": "2026-10-03"
       }
     ],
     "gaps": [
