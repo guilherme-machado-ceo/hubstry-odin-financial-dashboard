@@ -3,6 +3,29 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [AIFS-1 · previsão por IA do ECMWF, sem GPU] — 2026-10-07
+
+O endpoint hospedado do FourCastNet (NVIDIA Earth-2) passou a aceitar só
+amostras de demonstração (`input_id` 0–3), sem estado inicial próprio; o
+workflow Earth-2 nunca concluiu no CI e foi desabilitado manualmente. Este
+passo adiciona uma fonte substituta que não exige GPU. **O site não muda
+ainda**: o arquivo novo não é lido pela interface; a troca na tela é o passo
+seguinte. Nenhum arquivo do Earth-2 foi alterado ou removido.
+
+### Adicionado
+- `scripts/forecast/fetch_aifs.py`: baixa o ciclo mais recente do ECMWF AIFS
+  Single (dado aberto, CC BY 4.0, uso comercial com atribuição) — 2t, 10u,
+  10v, msl de 6 em 6 h até 15 dias — e extrai as mesmas 8 cidades, no mesmo
+  formato de `earth2-forecast.json`, gravando `public/data/aifs-forecast.json`.
+- `scripts/forecast/aifs_core.py` + `validate_forecast.py`: gate
+  determinístico (completude, horário válido, faixas físicas, saltos em 6 h,
+  piso tropical, frescor do ciclo). Se bloquear, nada é gravado.
+- `scripts/forecast/test_aifs.py`: 17 testes offline, inclusive leitura de um
+  GRIB sintético ponta a ponta.
+- `.github/workflows/aifs-forecast.yml`: no PR roda testes + previsão real +
+  gate e publica o JSON como artefato (sem gravar); por disparo manual no
+  `main`, grava o snapshot. Sem agendamento nesta etapa.
+
 ## [M3 passo 2 · gerador e prompt Founder/CEO (contrato v1.1)] — 2026-10-01
 
 Aprovado por Guilherme e pela IA parceira. **Sem chamada ao Nemotron**: o
