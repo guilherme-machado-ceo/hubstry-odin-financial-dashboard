@@ -15,6 +15,11 @@
 # Uso: python3 scripts/forecast/fetch_aifs.py
 # Env: AIFS_HORIZON_HOURS (padrao 360 = 15 dias),
 #      AIFS_SOURCES (padrao "aws,ecmwf"), ODIN_DATA_DIR
+#
+# Politica de rede (fail-fast + fallback): no maximo 2 tentativas por
+# chamada, 30 s de espera entre elas, ignorando o Retry-After do servidor.
+# Esgotou -> a fonte inteira e abandonada e a proxima e tentada do zero.
+# (O padrao da biblioteca e 500 tentativas x 120 s: travava o workflow.)
 # ============================================================
 from __future__ import annotations
 
@@ -33,22 +38,36 @@ HORIZON_HOURS = int(os.environ.get("AIFS_HORIZON_HOURS", "360"))
 SOURCES = [s.strip() for s in os.environ.get("AIFS_SOURCES", "aws,ecmwf").split(",") if s.strip()]
 OUT_DIR = Path(os.environ.get("ODIN_DATA_DIR", "public/data"))
 OUT_FILE = OUT_DIR / "aifs-forecast.json"
+RETRY_ATTEMPTS = 2   # tentativas por chamada HTTP (inclui a primeira)
+RETRY_WAIT_S = 30    # espera entre tentativas, em segundos
 
 
 def log(msg: str) -> None:
     print(f"[aifs] {msg}", flush=True)
 
 
+def make_client(source: str):
+    """Cliente com retry curto: falha rapido para cair na fonte seguinte."""
+    from ecmwf.opendata import Client
+
+    return Client(
+        source=source, model="aifs-single",
+        maximum_retries=RETRY_ATTEMPTS, retry_after=RETRY_WAIT_S,
+        use_server_retry_after=False,
+    )
+
+
 def download(target: Path) -> datetime:
     """Baixa o ciclo AIFS mais recente que ja tenha o horizonte completo.
     Tenta as fontes em ordem (espelho AWS primeiro; portal ECMWF como reserva)."""
-    from ecmwf.opendata import Client
-
     steps = list(range(0, HORIZON_HOURS + 1, core.LEAD_STEP_HOURS))
     last_err: Exception | None = None
     for source in SOURCES:
+        # Descarta sobra de uma fonte anterior: a biblioteca retomaria o
+        # arquivo parcial, misturando bytes de duas fontes no mesmo GRIB.
+        target.unlink(missing_ok=True)
         try:
-            client = Client(source=source, model="aifs-single")
+            client = make_client(source)
             # Ciclo mais recente em que o ULTIMO passo ja foi publicado
             run = client.latest(type="fc", stream="oper", step=HORIZON_HOURS, param="2t")
             log(f"fonte={source} ciclo={run.isoformat()} passos={len(steps)} campos={PARAMS}")
@@ -62,6 +81,7 @@ def download(target: Path) -> datetime:
         except Exception as err:  # fonte fora do ar ou ciclo incompleto
             last_err = err
             log(f"fonte={source} falhou ({type(err).__name__}: {err}) — tentando a proxima")
+    target.unlink(missing_ok=True)
     raise RuntimeError(f"nenhuma fonte AIFS disponivel: {last_err}")
 
 
