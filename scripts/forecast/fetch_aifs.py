@@ -122,9 +122,14 @@ def main() -> int:
     OUT_FILE.write_text(json.dumps(payload, ensure_ascii=False) + "\n")
     log(f"OK {OUT_FILE} — ciclo {payload['initTime']}, {len(payload['data']['cities'])} cidades, "
         f"{HORIZON_HOURS}h de horizonte, gate PASS")
+    resumo = []
     for c in payload["data"]["cities"]:
         temps = [p["t2mC"] for p in c["forecast"]]
         log(f"  {c['city']:<13} {min(temps):6.1f} a {max(temps):5.1f} °C  risco={c['riskScore']} ({c['type']})")
+        resumo.append(f"{c['cityPt']} {min(temps):.0f}–{max(temps):.0f}°C")
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        # Aviso visivel na tela do PR/run, para conferencia humana de plausibilidade
+        print(f"::notice title=AIFS {payload['initTime']}::" + " · ".join(resumo), flush=True)
     return 0
 
 
