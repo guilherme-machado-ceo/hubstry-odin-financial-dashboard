@@ -50,7 +50,7 @@ O projeto é *docs-as-code*: decisões (ADRs — Architecture Decision Records),
 | Reservas de ouro | curado estático | World Gold Council (dados FMI IFS) | set/2026 (dados Q4 2025) | fontes e sinais |
 | Vetor petróleo | dados abertos coletados por código + API ao vivo no navegador | EIA via FRED; Yahoo Finance | diária · ao vivo | fontes e sinais |
 | Vetor climático | API ao vivo no navegador | Open-Meteo | ao vivo | **M1** |
-| Previsão Earth-2 | snapshot 2×/dia | NVIDIA Earth-2 (FourCastNet) | 2×/dia | fora do escopo |
+| Previsão por IA | snapshot validado por gate | ECMWF AIFS (dado aberto, CC BY 4.0) | por disparo do workflow | fora do escopo |
 | Precificação de carbono | fonte curada versionada + snapshot | Comissão Europeia (CBAM); OWID; Banco Mundial | jul/2026 | **M1** |
 | Blockchain e RWA | snapshot diário + API ao vivo | DefiLlama; mempool.space | diária | **M1** |
 
@@ -141,7 +141,7 @@ O ODIN usa apenas dados abertos (OSINT — Open Source Intelligence); nenhuma fo
 | Google News RSS | Notícias | snapshot diário, sem chave |
 | OCDE MEI, Fed H.10, EIA (via FRED); Banco de la República (TRM) | Diferencial de juros 10a, volatilidade cambial, petróleo | coleta semanal por código, sem chave |
 | BIS, IMF WEO, CEPAL, NDB, CIPS, TCX | Séries de títulos e dívida | curadoria manual em `src/data/*.ts` (status por dado em `dataAudit.ts`) |
-| NVIDIA Earth-2 (FourCastNet NIM) | Previsão meteorológica | snapshot 2×/dia, chave em *secrets* |
+| ECMWF AIFS — Open Data | Previsão meteorológica por IA (substituiu NVIDIA Earth-2/FourCastNet, cujo endpoint hospedado deixou de aceitar estado inicial próprio) | snapshot validado por gate, sem chave |
 | **NVIDIA — Nemotron** | Geração das camadas ODIN (provider ativo) | API, chave em *secrets* do Actions |
 | **Huawei Cloud MaaS** (Model as a Service, via Digiti) | Provider alternativo configurado (`AI_PROVIDER=maas`) | API, chave em variável de ambiente |
 

@@ -112,7 +112,7 @@ export default function App() {
 
       {/* ── 14. CLIMATE VECTOR: Temperature Anomalies + Risk Scores ── */}
       <RevealSection><ClimateVectorChart onSourceClick={handleSourceClick} onEmbedClick={handleEmbedClick} /></RevealSection>
-      {/* ── 14b. EARTH-2 FORECAST: NVIDIA FourCastNet 10-day forecast ── */}
+      {/* ── 14b. AI FORECAST: ECMWF AIFS open data (substituiu o snapshot Earth-2) ── */}
       <RevealSection><Earth2ForecastSection onSourceClick={handleSourceClick} /></RevealSection>
 
       {/* ── 15. CARBON PRICING & CBAM: EU ETS, CBAM certificates, embedded CO2 ── */}

@@ -3,6 +3,31 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [AIFS-2 · seção de previsão passa a exibir o ECMWF AIFS] — 2026-10-07
+
+Escopo restrito à apresentação da previsão. Nemotron, Insights, demais seções
+e os arquivos/workflows do Earth-2 não foram alterados.
+
+### Alterado
+- **Seção de previsão** (`Earth2ForecastSection.tsx`, mesmo componente e mesmo
+  contrato de dados): passa a ler `public/data/aifs-forecast.json`. Título,
+  selo e descrição citam o ECMWF AIFS; horizonte em dias calculado do dado
+  (15 dias) em vez de "10 dias" fixo; horário do ciclo formatado em UTC de
+  fato; sai a afirmação "atualizada 2x/dia".
+- **Retirada do snapshot Earth-2 de 29/09 da tela**: o site deixa de ler
+  `earth2-forecast.json` (o arquivo permanece no repositório, sem uso).
+- **README**: as duas linhas da tabela de fontes que citavam o Earth-2.
+
+### Adicionado
+- **Atribuição ECMWF** (CC BY 4.0) abaixo da seção, lida do próprio snapshot,
+  e fonte `ecmwf-aifs` no painel de fontes (o antigo `nvidia-earth2` nunca
+  esteve registrado, então o clique não abria nada).
+- **Rótulo da fonte corrigido**: a linha reaproveitava o texto da seção vizinha
+  ("Open-Meteo / NASA GISS") antes do nome da fonte; agora diz só "Fonte: ECMWF
+  AIFS — Open Data (CC BY 4.0)".
+- **Aviso de defasagem**: se o ciclo tiver mais de 36 h, a seção mostra a data
+  do ciclo e "atualização pendente".
+
 ## [AIFS-1 · previsão por IA do ECMWF, sem GPU] — 2026-10-07
 
 O endpoint hospedado do FourCastNet (NVIDIA Earth-2) passou a aceitar só
