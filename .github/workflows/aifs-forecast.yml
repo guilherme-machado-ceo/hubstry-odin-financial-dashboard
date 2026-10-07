@@ -5,13 +5,23 @@ name: ODIN AIFS Forecast
 # Sem GPU e sem chave: o ECMWF roda o modelo; aqui so baixamos 4 campos e
 # extraimos 8 cidades em CPU.
 #
-# Sprint AIFS-1 (sem agendamento ainda):
-#   - pull_request: roda testes + previsao real + gate, publica o JSON como
+# Gatilhos:
+#   - schedule (main): 2x/dia, grava o snapshot no repositorio.
+#   - workflow_dispatch (main): idem, sob demanda.
+#   - pull_request: testes + previsao real + gate; publica o JSON como
 #     artefato para conferencia. NAO grava nada no repositorio.
-#   - workflow_dispatch (main): mesmo fluxo e grava o snapshot no repositorio.
-# O site ainda NAO le este arquivo (troca de fonte na tela = PR seguinte).
+# Se qualquer etapa falhar, nada e gravado: o site mantem o ultimo snapshot
+# valido e, apos 36 h, exibe o aviso de defasagem.
 
 on:
+  schedule:
+    # Cron do GitHub e SEMPRE em UTC (Brasilia = UTC-3).
+    # 08:23 UTC (05:23 BRT) -> ciclo AIFS 00Z ja publicado
+    # 20:23 UTC (17:23 BRT) -> ciclo AIFS 12Z ja publicado
+    # Minuto :23 evita a hora cheia (fila do GitHub) e nao colide com
+    # 06:17 (ODIN Data Snapshot) nem 06:41 seg (ODIN Open Markets).
+    - cron: "23 8 * * *"
+    - cron: "23 20 * * *"
   pull_request:
     paths:
       - "scripts/forecast/**"
@@ -20,6 +30,12 @@ on:
 
 permissions:
   contents: read
+
+# Nunca duas execucoes que gravam ao mesmo tempo (agendada x manual):
+# a segunda espera a primeira terminar, nenhuma e cancelada.
+concurrency:
+  group: aifs-forecast-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
+  cancel-in-progress: false
 
 jobs:
   aifs:
@@ -48,8 +64,8 @@ jobs:
           name: aifs-forecast
           path: public/data/aifs-forecast.json
           retention-days: 7
-      - name: Commit snapshot (somente disparo manual no main)
-        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+      - name: Commit snapshot (agendado ou manual, somente no main)
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         run: |
           git config user.name "odin-data-bot"
           git config user.email "odin-data-bot@users.noreply.github.com"
@@ -59,4 +75,8 @@ jobs:
             exit 0
           fi
           git commit -m "chore(data): snapshot ecmwf aifs [skip ci]"
-          git push
+          # Traz o que outro robo tenha gravado no main durante a execucao.
+          # Se o rebase ou o push forem recusados, o passo falha e o main
+          # remoto fica intacto (nada e sobrescrito; a proxima execucao repoe).
+          git pull --rebase origin main
+          git push origin HEAD:main
