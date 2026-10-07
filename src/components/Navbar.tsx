@@ -21,7 +21,7 @@ export default function Navbar() {
             title="Hubstry Deep Tech"
             className="flex items-center bg-white rounded px-2 py-1 hover:opacity-90 transition-opacity"
           >
-            <img src="/brand/hubstry-logo.png" alt="Hubstry Deep Tech" className="h-3.5 w-auto" />
+            <img src={`${import.meta.env.BASE_URL}brand/hubstry-logo.png`} alt="Hubstry Deep Tech" className="h-3.5 w-auto" />
           </a>
           <div className="flex flex-col">
             <span className="text-[11px] font-mono font-bold tracking-[0.2em] text-[#e0e0e0]">{t("nav.title")}</span>
