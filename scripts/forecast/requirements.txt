@@ -1,2 +1,6 @@
-ecmwf-opendata>=0.3.34
-eccodes>=2.38
+# Versoes exatas, as mesmas validadas no CI em 2026-10-07 (#46-#48).
+# Atualizar so em PR proprio, com o CI do AIFS verde.
+ecmwf-opendata==0.3.34
+multiurl==0.3.9        # executa as tentativas de rede (politica do #48)
+eccodes==2.49.0
+eccodeslib==2.49.0.30  # biblioteca binaria usada pelo eccodes
