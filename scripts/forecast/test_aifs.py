@@ -199,5 +199,105 @@ class TestExtractFromGrib(unittest.TestCase):
                 fetch_aifs.extract(grib, INIT)
 
 
+class _FakeClient:
+    """Cliente falso: registra chamadas; comportamento por fonte."""
+
+    def __init__(self, source, calls, behaviour):
+        self.source, self.calls, self.behaviour = source, calls, behaviour
+
+    def latest(self, **kw):
+        self.calls.append((self.source, "latest"))
+        if self.behaviour == "down":
+            raise ConnectionError(f"{self.source} 503 Slow Down")
+        return datetime(2026, 10, 7, 12)
+
+    def retrieve(self, target, **kw):
+        self.calls.append((self.source, "retrieve"))
+        path = Path(target)
+        if self.behaviour == "partial":
+            path.write_bytes(b"PARTIAL-AWS")
+            raise ConnectionError(f"{self.source} caiu no meio do download")
+        # Fonte boa: nao pode encontrar sobra da fonte anterior
+        assert not path.exists(), "arquivo parcial da fonte anterior nao foi descartado"
+        path.write_bytes(b"GRIB-ECMWF")
+
+
+class TestFailFastFallback(unittest.TestCase):
+    """Politica de rede do PR-C: 2 tentativas x 30 s por fonte, depois fallback."""
+
+    def setUp(self):
+        import fetch_aifs
+        self.mod = fetch_aifs
+        self.calls: list = []
+        self._orig = (fetch_aifs.make_client, fetch_aifs.SOURCES, fetch_aifs.OUT_FILE)
+
+    def tearDown(self):
+        self.mod.make_client, self.mod.SOURCES, self.mod.OUT_FILE = self._orig
+
+    def _fake(self, behaviours: dict):
+        self.mod.make_client = lambda src: _FakeClient(src, self.calls, behaviours[src])
+
+    def test_client_policy(self):
+        """Cliente real configurado com retry curto e sem obedecer Retry-After."""
+        try:
+            client = self.mod.make_client("aws")
+        except ImportError:
+            self.skipTest("ecmwf-opendata nao instalado")
+        self.assertEqual(client.maximum_retries, 2)
+        self.assertEqual(client.retry_after, 30)
+        self.assertFalse(client.use_server_retry_after)
+
+    def test_library_stops_after_two_attempts(self):
+        """AWS congestionada: a biblioteca real tenta 2x, espera 30 s 1x (simulado),
+        ignora o Retry-After do servidor e devolve o erro para o fallback."""
+        try:
+            import multiurl.retry as retry
+            client = self.mod.make_client("aws")
+        except ImportError:
+            self.skipTest("ecmwf-opendata nao instalado")
+
+        class Resp:
+            status_code, reason, headers = 503, "Slow Down", {"retry-after": "999"}
+
+        attempts, sleeps = [], []
+        orig_sleep = retry.time.sleep
+        retry.time.sleep = sleeps.append  # nada de esperar de verdade
+        try:
+            resp = client._robust(lambda url, **kw: attempts.append(url) or Resp())("https://x/y")
+        finally:
+            retry.time.sleep = orig_sleep
+        self.assertEqual(len(attempts), 2)
+        self.assertEqual(sleeps, [30])
+        self.assertEqual(resp.status_code, 503)  # erro volta ao chamador -> proxima fonte
+
+    def test_fallback_reached_and_partial_discarded(self):
+        self.mod.SOURCES = ["aws", "ecmwf"]
+        self._fake({"aws": "partial", "ecmwf": "ok"})
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "aifs.grib2"
+            init = self.mod.download(target)
+            self.assertEqual(target.read_bytes(), b"GRIB-ECMWF")
+        self.assertEqual(init, datetime(2026, 10, 7, 12, tzinfo=timezone.utc))
+        self.assertEqual([c[0] for c in self.calls], ["aws", "aws", "ecmwf", "ecmwf"])
+
+    def test_aws_down_goes_straight_to_ecmwf(self):
+        self.mod.SOURCES = ["aws", "ecmwf"]
+        self._fake({"aws": "down", "ecmwf": "ok"})
+        with tempfile.TemporaryDirectory() as tmp:
+            self.mod.download(Path(tmp) / "aifs.grib2")
+        self.assertEqual(self.calls, [("aws", "latest"), ("ecmwf", "latest"), ("ecmwf", "retrieve")])
+
+    def test_all_sources_fail_production_file_untouched(self):
+        self.mod.SOURCES = ["aws", "ecmwf"]
+        self._fake({"aws": "partial", "ecmwf": "down"})
+        with tempfile.TemporaryDirectory() as tmp:
+            prod = Path(tmp) / "aifs-forecast.json"
+            prod.write_text('{"versao": "anterior"}')
+            self.mod.OUT_FILE = prod
+            with self.assertRaises(RuntimeError):
+                self.mod.main()
+            self.assertEqual(prod.read_text(), '{"versao": "anterior"}')
+
+
 if __name__ == "__main__":
     unittest.main()
