@@ -31,7 +31,7 @@ export default function Footer({ onSourceClick }: Props) {
               rel="noopener noreferrer"
               className="inline-flex items-center bg-white rounded px-2 py-1 mt-3 hover:opacity-90 transition-opacity"
             >
-              <img src="/brand/hubstry-logo.png" alt="Hubstry Deep Tech" className="h-3 w-auto" />
+              <img src={`${import.meta.env.BASE_URL}brand/hubstry-logo.png`} alt="Hubstry Deep Tech" className="h-3 w-auto" />
             </a>
           </div>
 

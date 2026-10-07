@@ -29,7 +29,7 @@ export default function NewsTicker() {
   const locale = getLocale();
 
   useEffect(() => {
-    fetch("/data/news.json")
+    fetch(`${import.meta.env.BASE_URL}data/news.json`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
