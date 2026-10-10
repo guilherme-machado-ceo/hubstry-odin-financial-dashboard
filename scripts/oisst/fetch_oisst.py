@@ -142,6 +142,7 @@ def read_anomaly(nc_bytes: bytes, name: str) -> tuple[dict, dict]:
         "variableUnits": vattrs.get("units"),
         "productVersion": gattrs.get("product_version") or gattrs.get("version") or gattrs.get("id"),
         "climatologyAttributes": clim or None,
+        "climatologyNote": core.climatology_note(clim or None),
     }
     return stats, meta
 
@@ -198,7 +199,7 @@ def main() -> int:
     log(f"OK {OUT_FILE} — {payload['latestDate']}: {last['anomC']:+.2f} °C "
         f"({'preliminar' if last['preliminary'] else 'definitivo'}); versão {src['productVersion']}; "
         f"variável '{src['variable']}' ({src['variableLongName']}, {src['variableUnits']})")
-    log(f"climatologia declarada no arquivo: {src['climatologyAttributes']}")
+    log(f"climatologia: {src['climatologyNote']}")
     if os.environ.get("GITHUB_ACTIONS") == "true":
         vals = [p["anomC"] for p in payload["series"]]
         print(f"::notice title=Niño 3.4 OISST {payload['latestDate']}::"

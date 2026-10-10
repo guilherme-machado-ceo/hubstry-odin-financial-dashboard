@@ -21,7 +21,8 @@ LAT = np.arange(-89.875, 90, 0.25)          # 720 centros, como o OISST
 LON = np.arange(0.125, 360, 0.25)           # 1440 centros, 0-360
 TODAY = date(2026, 10, 10)
 META = {"variableLongName": "Daily sea surface temperature anomalies", "variableUnits": "Celsius",
-        "productVersion": "Version v02r01", "climatologyAttributes": None, "consistentMetadata": True}
+        "productVersion": "Version v02r01", "climatologyAttributes": None,
+        "climatologyNote": core.climatology_note(None), "consistentMetadata": True}
 
 
 def make_nc(field2d: np.ndarray, lon=LON, version="Version v02r01", long_name="Daily sea surface temperature anomalies") -> bytes:
@@ -95,6 +96,7 @@ class TestReadNetCDF(unittest.TestCase):
         self.assertAlmostEqual(stats["value"], 1.23, places=6)
         self.assertEqual(meta["productVersion"], "Version v02r01")
         self.assertEqual(meta["variableUnits"], "Celsius")
+        self.assertIn("não declara", meta["climatologyNote"])  # fixture sem atributo de climatologia
 
 
 class TestGate(unittest.TestCase):
@@ -129,6 +131,14 @@ class TestGate(unittest.TestCase):
 
     def test_mixed_metadata(self):
         self.blocks(self.payload(meta={**META, "consistentMetadata": False}), "divergem")
+
+    def test_missing_climatology_note(self):
+        p = self.payload(); p["source"]["climatologyNote"] = ""
+        self.blocks(p, "climatologia")
+
+    def test_climatology_note_variants(self):
+        self.assertIn("não declara", core.climatology_note(None))
+        self.assertIn("declarada no arquivo", core.climatology_note({"climatology": "1991-2020"}))
 
     def test_missing_disclaimer(self):
         p = self.payload(); p["disclaimer"] = "x"

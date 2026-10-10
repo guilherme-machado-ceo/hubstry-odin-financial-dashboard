@@ -51,6 +51,21 @@ DISCLAIMER = (
 )
 INDICATOR = "nino34_oisst_daily_anomaly"
 
+CLIMATOLOGY_UNDECLARED = (
+    "O arquivo OISST não declara o período de referência (climatologia) da "
+    "variável 'anom'. O valor é usado como fornecido, sem recálculo. Uma "
+    "comparação semanal com a série da NOAA/CPC (base 1991–2020) roda como "
+    "diagnóstico não bloqueante; o período de referência não é confirmado pela fonte."
+)
+
+
+def climatology_note(declared: dict | None) -> str:
+    """Documenta a climatologia: declarada no arquivo ou explicitamente nao declarada."""
+    if declared:
+        pairs = "; ".join(f"{k}={v}" for k, v in sorted(declared.items()))
+        return f"Climatologia declarada no arquivo OISST: {pairs}. O valor é usado como fornecido, sem recálculo."
+    return CLIMATOLOGY_UNDECLARED
+
 
 def normalize_lon(lon: np.ndarray) -> np.ndarray:
     """Qualquer convencao de longitude -> 0-360."""
@@ -134,6 +149,8 @@ def validate(payload: dict, today: date | None = None) -> list[str]:
         errors.append("metadados da anomalia divergem entre arquivos (não misturar referências)")
     if not src.get("productVersion"):
         errors.append("versão do produto não registrada")
+    if not src.get("climatologyNote"):
+        errors.append("documentação da climatologia da anomalia ausente")
 
     series = payload["series"]
     window = payload["windowDays"]
