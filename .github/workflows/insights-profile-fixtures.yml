@@ -47,3 +47,5 @@ jobs:
         run: node scripts/test-editorial-corrections.mjs
       - name: Insight expiry lock (v2 vencido, legado stale, timer seguro)
         run: node scripts/test-insight-review.mjs
+      - name: Security baseline (S1 shell injection, S2 least privilege — determinístico)
+        run: node scripts/test-security-baseline.mjs
