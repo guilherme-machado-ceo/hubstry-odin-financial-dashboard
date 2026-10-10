@@ -62,6 +62,22 @@
       "value": [
         "claim-3"
       ]
+    },
+    {
+      "section": "carbon",
+      "path": "stakeholderImplications[2].textPt",
+      "kind": "wording",
+      "reason": "Com apenas três preços trimestrais não há medida de volatilidade; descrever a diferença observada entre Q2 e Q3 de 2026.",
+      "expected": "Investidores com exposição a exportadores brasileiros de bens CBAM-cobertos podem considerar a volatilidade do preço do CBAM como fator de risco indireto nas cadeias de suprimento.",
+      "value": "Investidores com exposição a exportadores brasileiros de bens cobertos pelo CBAM podem considerar a diferença observada entre os preços do CBAM no Q2 e Q3 de 2026 ao avaliar riscos indiretos nas cadeias de suprimento."
+    },
+    {
+      "section": "carbon",
+      "path": "stakeholderImplications[2].textEn",
+      "kind": "wording",
+      "reason": "Mesma correção do textPt, em inglês.",
+      "expected": "Investors with exposure to Brazilian exporters of CBAM-covered goods may consider CBAM price volatility as an indirect risk factor in supply chains.",
+      "value": "Investors exposed to Brazilian exporters of CBAM-covered goods may consider the observed difference between Q2 and Q3 2026 CBAM prices when assessing indirect supply-chain risks."
     }
   ]
 }

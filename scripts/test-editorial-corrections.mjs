@@ -40,9 +40,10 @@ assert(carbon?.claims.find((c) => c.id === "claim-3").textPt.includes("emissões
 assert(JSON.stringify(carbon?.decisionLens.implications.map((i) => i.claimRefs)) === JSON.stringify([["claim-0", "claim-3"], ["claim-3"]]), "claimRefs da lente corrigidos");
 assert(!/evolu/i.test(carbon?.decisionLens.implications[1].textPt ?? "x") && !/evolution/i.test(carbon?.decisionLens.implications[1].textEn ?? "x"), "segunda implicação sem 'evolução'");
 const ec = carbon?.editorialCorrection;
-assert(ec?.changes.length === 6 && ec.reviewer && ec.artifactSha256 === canonicalHash(shadow) && ec.manifest === `editorial-corrections/${RUN}.json`, "editorialCorrection com revisor, hash e manifesto");
+assert(ec?.changes.length === 8 && ec.reviewer && ec.artifactSha256 === canonicalHash(shadow) && ec.manifest === `editorial-corrections/${RUN}.json`, "editorialCorrection com revisor, hash e manifesto");
 assert(ec?.changes.every((c) => "from" in c && "to" in c && c.reason && c.kind), "cada mudança registra de/para, motivo e classificação");
-assert(!checkEditorialCorrection(carbon).length && structuralCorrectionCount(carbon) === 6, "classificação coerente com o contrato (6 estruturais)");
+assert(!checkEditorialCorrection(carbon).length && structuralCorrectionCount(carbon) === 6 && ec?.changes.filter((c) => c.kind === "wording").length === 2, "classificação coerente com o contrato (6 estruturais, 2 de redação)");
+assert(!/volatil/i.test(carbon?.stakeholderImplications[2].textPt ?? "x") && !/volatil/i.test(carbon?.stakeholderImplications[2].textEn ?? "x"), "implicação para investidores sem 'volatilidade'");
 assert(!corrected.data.sections.blockchain.editorialCorrection && !corrected.data.sections.climate.editorialCorrection, "seções sem mudança não recebem registro");
 assert(JSON.stringify(shadow.data.sections.carbon.decisionLens.implications[0].claimRefs) === JSON.stringify(["claim-0", "claim-1"]), "o artefato original não é alterado em memória");
 for (const [id, entry] of Object.entries(corrected?.data.sections ?? {})) {
@@ -82,7 +83,7 @@ const promoteEnv = { ODIN_PROMOTE_APPROVED: "true", ODIN_REVIEWER: "pipeline-tes
   const p = node(dir, ["scripts/promote-insights.mjs", "corrected.json", "out.json", "report.json"], promoteEnv);
   assert(p.code === 0 && /PROMOTED/.test(p.out), `promoção do #35 corrigido deveria passar:\n${p.out.slice(-2000)}`);
   const out = p.code === 0 ? JSON.parse(await readFile(path.join(dir, "out.json"), "utf8")) : { data: { sections: { carbon: {} } } };
-  assert(out.runId === RUN && out.data.sections.carbon.editorialCorrection?.changes.length === 6, "artefato promovido carrega editorialCorrection");
+  assert(out.runId === RUN && out.data.sections.carbon.editorialCorrection?.changes.length === 8, "artefato promovido carrega editorialCorrection");
   assert(out.data.sections.carbon.reviewStatus === "approved" && out.data.sections.carbon.reviewSource?.generationRunId === RUN, "promovido mantém o vínculo com o run gerado");
 }
 // Correção humana que introduz tendência em snapshot: aplica (é redação), mas a promoção bloqueia.
