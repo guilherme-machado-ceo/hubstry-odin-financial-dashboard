@@ -61,7 +61,9 @@ CLIMATOLOGY_UNDECLARED = (
 
 
 CPC_REFERENCE_PERIOD = "1991–2020"
-_SENTENCE_SPLIT = re.compile(r"(?<=\.)\s+|;|\n")  # ponto so encerra frase se seguido de espaco
+# Fim de frase: ponto + espaco, ou ponto colado a maiuscula ("submitted.Climatology",
+# como no arquivo real). "OI.v2" fica intacto (minuscula depois do ponto).
+_SENTENCE_SPLIT = re.compile(r"(?<=\.)\s+|(?<=[a-z0-9)\]])\.(?=[A-Z])|;|\n")
 _PERIOD = re.compile(r"(1[89]\d{2}|20\d{2})\s*[-–]\s*(1[89]\d{2}|20\d{2})")
 
 

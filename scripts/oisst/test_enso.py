@@ -119,6 +119,15 @@ class TestReadNetCDF(unittest.TestCase):
         self.assertIn("referências são distintas", meta["climatologyNote"])  # CPC usa 1991–2020
         self.assertNotIn("não declara", meta["climatologyNote"])
 
+    def test_climatology_real_glued_sentence(self):
+        """Regressao com o trecho real do arquivo: ponto sem espaco antes da frase."""
+        real = ("Huang, B., C. Liu, V. Banzon, E. Freeman, G. Graham, B. Hankins, T. Smith, and H.-M. Zhang, "
+                "(2020) Improvements of the Daily Optimum Interpolation Sea Surface Temperature (DOISST) "
+                "Version v02r01, submitted.Climatology is based on 1971-2000 OI.v2 SST")
+        found = core.extract_climatology({"global:references": real})
+        self.assertEqual(found["statement"], "Climatology is based on 1971-2000 OI.v2 SST")
+        self.assertEqual(found["period"], "1971–2000")
+
 
 class TestGate(unittest.TestCase):
     def payload(self, pts=None, meta=None):
