@@ -90,3 +90,35 @@ export const FALLBACK_OWID: OwidSeries[] = [
   { code: "USA", country: "Estados Unidos", points: [[2021, 15.36], [2022, 15.74], [2023, 15.81]] },
   { code: "OWID_EU27", country: "União Europeia (27)", points: [[2021, 7.1], [2022, 7.22], [2023, 7.33]] },
 ];
+
+/** Selects the last cert with a finite numeric price and a valid publication date. */
+export function selectLastPublished(prices: CbamCertPrice[]): CbamCertPrice | undefined {
+  return prices.filter(
+    (c) =>
+      c.priceEur !== null &&
+      isFinite(c.priceEur!) &&
+      c.published !== null &&
+      !isNaN(Date.parse(c.published!))
+  ).at(-1);
+}
+
+/** Formats a publication date (YYYY-MM-DD calendar date) in a locale-appropriate, unambiguous form.
+ *  Publication dates have no time component; UTC is used to prevent negative-offset timezone shifts. */
+export function formatBadgeDate(iso: string, locale: string): string {
+  try {
+    // A bare YYYY-MM-DD is parsed as UTC midnight; keep UTC to display the intended calendar day.
+    return new Date(iso).toLocaleDateString(
+      locale === "pt" ? "pt-BR" : "en-US",
+      locale === "pt"
+        ? { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" }
+        : { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }
+    );
+  } catch {
+    return iso;
+  }
+}
+
+/** Formats a certificate price as a locale-appropriate string (€82,32 in PT, €82.32 in EN). */
+export function formatBadgePrice(price: number, locale: string): string {
+  return "€" + price.toFixed(2).replace(".", locale === "pt" ? "," : ".");
+}

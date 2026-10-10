@@ -11,13 +11,28 @@ import ExportButton from "./ExportButton";
 import InsightBox from "./InsightBox";
 import { Share2, Landmark, Globe2, Scale, CalendarClock } from "lucide-react";
 import { fetchSnapshot, formatUpdatedAt } from "@/lib/api";
-import { CBAM_CERT_PRICES, CBAM_TIMELINE, CBAM_SECTORS, CARBON_INSTRUMENTS, FALLBACK_OWID } from "@/data/carbonData";
-import type { OwidSeries } from "@/data/carbonData";
+import { CBAM_CERT_PRICES, CBAM_TIMELINE, CBAM_SECTORS, CARBON_INSTRUMENTS, FALLBACK_OWID, selectLastPublished, formatBadgeDate, formatBadgePrice } from "@/data/carbonData";
+import type { CbamCertPrice, OwidSeries } from "@/data/carbonData";
 
 interface Props { onSourceClick: (id: string) => void; onEmbedClick: (id: string) => void; }
 
 const OWID_COLORS: Record<string, string> = { BRA: "#00FFFF", CHN: "#FF4444", IND: "#FF8C00", USA: "#4488FF", OWID_EU27: "#00FF88" };
 const STATUS_COLORS: Record<string, string> = { done: "#00FF88", next: "#FF8C00", future: "#555" };
+
+/** Badge do dado oficial CBAM — exportado para testes de renderização. */
+export function CarbonBadge({ currentCert, updatedAt }: { currentCert: CbamCertPrice | undefined; updatedAt: string | null }) {
+  const locale = getLocale();
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[9px] font-mono text-[#00FFFF] border border-[#00FFFF]/30 px-1.5 py-0.5">
+      <Landmark size={10} />
+      {t("carbon.badgeOfficialLabel")}
+      {currentCert
+        ? <> · {currentCert.quarter} · {t("carbon.badgeOfficialPublished")}: {formatBadgeDate(currentCert.published!, locale)} · {formatBadgePrice(currentCert.priceEur!, locale)}</>
+        : " · —"}
+      {updatedAt && <span className="text-[#00FFFF]/60"> · {t("carbon.badgeSnapshot")} {formatUpdatedAt(updatedAt, locale)}</span>}
+    </span>
+  );
+}
 
 export default function CarbonPricingSection({ onSourceClick, onEmbedClick }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
@@ -41,7 +56,7 @@ export default function CarbonPricingSection({ onSourceClick, onEmbedClick }: Pr
     return row;
   });
 
-  const currentCert = CBAM_CERT_PRICES.filter((c) => c.priceEur !== null).at(-1);
+  const currentCert = selectLastPublished(CBAM_CERT_PRICES);
   const certChart = CBAM_CERT_PRICES.filter((c) => c.priceEur !== null);
   const instruments = [...CARBON_INSTRUMENTS].sort((a, b) => b.valueUsd - a.valueUsd);
   const jsonData = { cbamCertPrices: CBAM_CERT_PRICES, instruments: CARBON_INSTRUMENTS, owidConsumptionCo2: owid };
@@ -52,11 +67,7 @@ export default function CarbonPricingSection({ onSourceClick, onEmbedClick }: Pr
         <div className="flex items-start justify-between mb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex items-center gap-1.5 text-[9px] font-mono text-[#00FFFF] border border-[#00FFFF]/30 px-1.5 py-0.5">
-                <Landmark size={10} />
-                {t("carbon.badgeOfficial")}
-                {updatedAt && <span className="text-[#00FFFF]/60">· {t("carbon.badgeSnapshot")} {formatUpdatedAt(updatedAt, locale)}</span>}
-              </span>
+              <CarbonBadge currentCert={currentCert} updatedAt={updatedAt} />
             </div>
             <h2 className="text-xl font-bold text-[#e0e0e0] tracking-tight">{t("carbon.title")}</h2>
             <p className="text-[11px] font-mono text-[#555] mt-1 max-w-2xl leading-relaxed">{t("carbon.subtitle")}</p>

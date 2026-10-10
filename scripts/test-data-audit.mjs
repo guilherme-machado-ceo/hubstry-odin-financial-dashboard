@@ -90,8 +90,8 @@ for (const id of ["yield-differential", "fx-volatility", "oil-eia"]) assert(m.au
 for (const locale of ["pt", "en"]) {
   const hero = m.renderHero(locale);
   for (const id of ["lc-market-total", "brics-trade-lc", "ndb-lc-share-disbursed"]) {
-    assert(m.isUnverified(id), `[${id}] deveria estar não verificado`);
-    assert(hero.includes(`data-unverified="${id}"`), `[${locale}] KPI ${id} sem marca de não verificado`);
+    assert(m.isUnverified(id), `[${id}] deve continuar registrado como unverified na auditoria`);
+    assert(!hero.includes(`data-unverified="${id}"`), `[${locale}] KPI ${id} não deve aparecer no Hero (card removido)`);
   }
   assert(!/desatualizado|outdated/i.test(hero), `[${locale}] hero não deve exibir "desatualizado"`);
   assert(!hero.includes("%%"), `[${locale}] hero exibe "%%" literal`);

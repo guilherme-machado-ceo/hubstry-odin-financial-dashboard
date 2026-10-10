@@ -100,9 +100,9 @@ export const DATA_AUDIT: AuditEntry[] = [
     datasetEn: "CBAM prices and definitive-regime milestones",
     location: "public/data/sources/cbam-carbon.json",
     status: "verified",
-    evidence: [{ claim: "Official quarterly CBAM certificate prices and timeline", value: "Q1 75.36 / Q2 75.28", publisher: "European Commission — Taxation and Customs Union", url: "https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en", publishedAt: "2026-07-06" }],
-    notePt: "Governado pelo pipeline de evidências (proveniência SHA-256). Revisão prevista em 2026-10-05.",
-    noteEn: "Governed by the evidence pipeline (SHA-256 provenance). Review due 2026-10-05.",
+    evidence: [{ claim: "Official quarterly CBAM certificate prices and timeline", value: "Q1 75.36 / Q2 75.28 / Q3 82.32", publisher: "European Commission — Taxation and Customs Union", url: "https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en", publishedAt: "2026-10-05" }],
+    notePt: "Governado pelo pipeline de evidências (proveniência SHA-256).",
+    noteEn: "Governed by the evidence pipeline (SHA-256 provenance).",
   },
   {
     id: "panda-events",
