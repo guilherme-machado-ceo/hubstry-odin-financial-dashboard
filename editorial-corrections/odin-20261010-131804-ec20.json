@@ -1,0 +1,67 @@
+{
+  "runId": "odin-20261010-131804-ec20",
+  "artifactSha256": "sha256:a4105eaa9fd2355dfe021f28e97d08c2f84f5a4cdfb6378f52696ad8552ac218",
+  "reviewer": "Guilherme Gonçalves Machado",
+  "reviewedAt": "2026-10-10",
+  "note": "Revisão humana do shadow #35 (prompt 4.2.0). Original preservado em shadow-samples/samples/odin-20261010-131804-ec20/.",
+  "changes": [
+    {
+      "section": "carbon",
+      "path": "claims[id=claim-3].textPt",
+      "kind": "structural",
+      "reason": "Explicitar que os dados pedidos são de emissões embutidas por instalação, solicitados por importadores da UE (material do run: 'the authorized EU importer is legally responsible for declaring embedded emissions'); sem isso a lente sobre emissões ficava sem claim de sustentação.",
+      "expected": "A obrigação formal do CBAM recai sobre o declarante autorizado da UE; exportadores brasileiros podem enfrentar pedidos indiretos de dados verificáveis de instalação para bens cobertos.",
+      "value": "A obrigação formal do CBAM recai sobre o declarante autorizado da UE; exportadores brasileiros de bens cobertos podem receber de importadores da UE pedidos de dados verificáveis de emissões embutidas por instalação."
+    },
+    {
+      "section": "carbon",
+      "path": "claims[id=claim-3].textEn",
+      "kind": "structural",
+      "reason": "Mesma correção do textPt, em inglês.",
+      "expected": "The formal CBAM obligation lies with the EU authorized declarant; Brazilian exporters may face indirect requests for verifiable installation-level data for covered goods.",
+      "value": "The formal CBAM obligation lies with the EU authorized declarant; Brazilian exporters of covered goods may receive requests from EU importers for verifiable installation-level embedded-emissions data."
+    },
+    {
+      "section": "carbon",
+      "path": "decisionLens.implications[0].claimRefs",
+      "kind": "structural",
+      "reason": "A implicação usa o preço (claim-0) e trata de monitoramento de emissões (claim-3); claim-1 (comparação Q2/Q3) não é usado.",
+      "expected": [
+        "claim-0",
+        "claim-1"
+      ],
+      "value": [
+        "claim-0",
+        "claim-3"
+      ]
+    },
+    {
+      "section": "carbon",
+      "path": "decisionLens.implications[1].textPt",
+      "kind": "structural",
+      "reason": "Remove 'evolução' sem série que a sustente, corrige a direção (o exportador recebe o pedido do importador da UE, não dos seus fornecedores) e restringe o público a exportadores de bens cobertos e fornecedores dessas cadeias.",
+      "expected": "Empresas que exportam bens para a UE podem acompanhar a evolução de pedidos de dados de emissões verificáveis de seus fornecedores.",
+      "value": "Exportadores brasileiros de bens cobertos pelo CBAM, e fornecedores dessas cadeias, podem receber de importadores da UE pedidos de dados verificáveis de emissões embutidas por instalação."
+    },
+    {
+      "section": "carbon",
+      "path": "decisionLens.implications[1].textEn",
+      "kind": "structural",
+      "reason": "Mesma correção do textPt, em inglês.",
+      "expected": "Companies exporting goods to the EU may track the evolution of requests for verifiable emissions data from their suppliers.",
+      "value": "Brazilian exporters of CBAM-covered goods, and suppliers in those chains, may receive requests from EU importers for verifiable installation-level embedded-emissions data."
+    },
+    {
+      "section": "carbon",
+      "path": "decisionLens.implications[1].claimRefs",
+      "kind": "structural",
+      "reason": "A implicação corrigida é sustentada pelo claim-3 (pedidos de dados de emissões embutidas); claim-2 trata do regime definitivo e do prazo da declaração.",
+      "expected": [
+        "claim-2"
+      ],
+      "value": [
+        "claim-3"
+      ]
+    }
+  ]
+}

@@ -43,3 +43,5 @@ jobs:
         run: node scripts/test-open-markets.mjs
       - name: Pipeline v1.1 hermético (gerador → gate → promoção → Briefing, sem rede e sem custo)
         run: node scripts/test-pipeline-v11.mjs
+      - name: Correção editorial humana (manifesto por runId, promoção real, paridade nova tentativa ⊆ gate)
+        run: node scripts/test-editorial-corrections.mjs

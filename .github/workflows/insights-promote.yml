@@ -63,6 +63,19 @@ jobs:
           mkdir -p "public/data/evidence/${run_id}"
           cp -R "${evidence_src}/." "public/data/evidence/${run_id}/"
           echo "ODIN_RUN_ID=${run_id}" >> "$GITHUB_ENV"
+          # Correção editorial humana (opcional): manifesto versionado por runId,
+          # revisado por PR. Aplica-se só ao artefato para o qual foi declarado
+          # (runId + hash + valor original de cada campo); se for recusado, o
+          # passo falha e nada é promovido. O artefato corrigido passa pelo
+          # gate completo abaixo.
+          manifest="editorial-corrections/${run_id}.json"
+          if [ -f "$manifest" ]; then
+            node scripts/apply-editorial-corrections.mjs "$shadow_file" "$manifest" /tmp/odin-shadow-corrected.json
+            shadow_file=/tmp/odin-shadow-corrected.json
+            echo "Correção editorial aplicada: ${manifest}" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Sem manifesto de correção editorial para ${run_id}." >> "$GITHUB_STEP_SUMMARY"
+          fi
           node scripts/promote-insights.mjs \
             "$shadow_file" \
             public/data/insights.v2.json \
