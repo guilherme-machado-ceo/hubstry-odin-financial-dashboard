@@ -137,7 +137,7 @@ async function contexts() {
   const stable = stableSrc.data, rwa = rwaSrc.data;
 
   const climateEnd = new Date(Date.now()-5*864e5).toISOString().slice(0,10);
-  const climateStart = new Date(Date.now()-370*864e5).toISOString().slice(0,10);
+  const climateStart = new Date(Date.now()-369*864e5).toISOString().slice(0,10);
   const weatherUrl = `https://archive-api.open-meteo.com/v1/archive?latitude=-15.8&longitude=-47.9&start_date=${climateStart}&end_date=${climateEnd}&daily=temperature_2m_mean,precipitation_sum&timezone=auto`;
   const weatherRes = await fetch(weatherUrl,{signal:AbortSignal.timeout(30000)});
   if (!weatherRes.ok) throw new Error(`Open-Meteo HTTP ${weatherRes.status}`);
