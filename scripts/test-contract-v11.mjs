@@ -8,7 +8,7 @@
 // 5. Gate e promoção aceitam 1.0 e 1.1 e aplicam as regras v1.1.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { classifyRecommendation, checkContractV11, checkDecisionLens, structuralCorrectionCount, formatContractError, validateModelOutputV11 } from "./contract-v11.mjs";
+import { classifyRecommendation, checkContractV11, checkDecisionLens, structuralCorrectionCount, formatContractError, validateModelOutputV11, checkEditorialCorrection } from "./contract-v11.mjs";
 import { validateInsightEntry, SUPPORTED_CONTRACT_VERSIONS } from "./insights-schema.mjs";
 import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
 
@@ -143,13 +143,27 @@ for (const [rule, mutate] of cases) {
   assert(structuralCorrectionCount(e) === 1, "mudança estrutural deve ser contada");
 }
 
-// ── 4. Compatibilidade v1.0 ─────────────────────────────────────────────────
+// ── 4. Publicado e compatibilidade v1.0 ─────────────────────────────────────
+// O artefato publicado pode estar em qualquer versão suportada (v1.1 desde a
+// promoção do shadow #35). Aqui só se valida o que não depende de evidência:
+// versão, schema e o registro de correção editorial. As regras v1.1 completas
+// são testadas acima (seção 2/3) com fixture e evidência próprias da seção —
+// o gate e a promoção as aplicam ao artefato real com a evidência do run.
 const pub = (await load("public/data/insights.v2.json")).data.sections;
 for (const [id, entry] of Object.entries(pub)) {
-  assert(entry.intelligenceContractVersion === "1.0", `${id}: publicado deveria seguir v1.0`);
+  assert(SUPPORTED_CONTRACT_VERSIONS.has(entry.intelligenceContractVersion), `${id}: versão publicada não suportada: ${entry.intelligenceContractVersion}`);
   const errs = validateInsightEntry(entry, id);
-  assert(!errs.length, `${id}: M1 publicado (v1.0) deixou de validar: ${errs.join("; ")}`);
+  assert(!errs.length, `${id}: publicado (v${entry.intelligenceContractVersion}) deixou de validar: ${errs.join("; ")}`);
+  if (entry.editorialCorrection) {
+    const ec = checkEditorialCorrection(entry);
+    assert(!ec.length, `${id}: editorialCorrection publicado inválido: ${ec.map(formatContractError).join("; ")}`);
+  }
 }
+// Retrocompatibilidade real: uma seção publicada v1.0 continua válida.
+const v10 = await load("contracts/sections/carbon/fixtures/regression-published.json");
+assert(v10.intelligenceContractVersion === "1.0", "fixture de regressão deveria ser v1.0");
+const v10Errs = validateInsightEntry(v10, v10.sectionId);
+assert(!v10Errs.length, `fixture publicada v1.0 deixou de validar: ${v10Errs.join("; ")}`);
 
 // ── 5. Gate e promoção ──────────────────────────────────────────────────────
 for (const f of ["scripts/validate-insights-shadow.mjs", "scripts/promote-insights.mjs"]) {
@@ -160,6 +174,6 @@ for (const f of ["scripts/validate-insights-shadow.mjs", "scripts/promote-insigh
 const doc = await readFile(path.join(root, "docs/odin-intelligence-contract-v1.1.md"), "utf8");
 for (const term of ["SOURCE", "DATA", "(EVENT)", "CLAIM", "CONTEXT", "INTERPRETATION", "DECISION LENS", "verification", "derivation", "signalEn", "whyItMattersEn", "structural"]) assert(doc.includes(term), `documento v1.1 sem "${term}"`);
 
-console.log(`contrato v1.1: ${rec.contextual.length} contextuais, ${rec.legal_description.length} obrigações legais ancoradas, ${rec.recommendation.length} recomendações · ${cases.length} mutações · ${Object.keys(pub).length} seções v1.0 compatíveis`);
+console.log(`contrato v1.1: ${rec.contextual.length} contextuais, ${rec.legal_description.length} obrigações legais ancoradas, ${rec.recommendation.length} recomendações · ${cases.length} mutações · ${Object.keys(pub).length} seções publicadas válidas + fixture v1.0`);
 if (failures) { console.error(`${failures} falha(s)`); process.exit(1); }
 console.log("OK — Data & Intelligence Contract v1.1 coerente e retrocompatível.");
