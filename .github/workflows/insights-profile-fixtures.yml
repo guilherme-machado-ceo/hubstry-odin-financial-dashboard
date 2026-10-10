@@ -45,3 +45,5 @@ jobs:
         run: node scripts/test-pipeline-v11.mjs
       - name: Correção editorial humana (manifesto por runId, promoção real, paridade nova tentativa ⊆ gate)
         run: node scripts/test-editorial-corrections.mjs
+      - name: Insight expiry lock (v2 vencido, legado stale, timer seguro)
+        run: node scripts/test-insight-review.mjs
