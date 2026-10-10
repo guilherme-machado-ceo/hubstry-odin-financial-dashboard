@@ -20,6 +20,7 @@ import {
 import { t, getLocale } from "@/i18n";
 import { fetchSnapshot, formatUpdatedAt } from "@/lib/api";
 import { term } from "@/data/glossary";
+import { reviewState, nextCheckDelay, shouldSchedule } from "@/data/insightReview";
 
 type Audience = "government" | "corporate" | "investors" | "startups";
 type ClaimKind = "fact" | "interpretation" | "hypothesis";
@@ -125,6 +126,13 @@ interface Props {
   section: string;
 }
 
+export interface PresentationProps {
+  entry: V2InsightEntry | null;
+  legacy: LegacyInsightEntry | null;
+  updatedAt: string | null;
+  nowMs: number;
+}
+
 const audienceLabels: Record<Audience, { pt: string; en: string }> = {
   government: { pt: "Governo / políticas públicas", en: "Government / policy" },
   corporate: { pt: "Corporativo / estratégia", en: "Corporate / strategy" },
@@ -159,6 +167,20 @@ function formatDataOf(iso: string, locale: string): string {
   }
 }
 
+function formatReviewDate(iso: string, locale: string): string {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString(
+      locale === "pt" ? "pt-BR" : "en-US",
+      locale === "pt"
+        ? { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" }
+        : { month: "2-digit", day: "2-digit", timeZone: "America/Sao_Paulo" }
+    );
+  } catch {
+    return iso;
+  }
+}
+
 function localize(locale: string, pt?: string, en?: string): string {
   return locale === "pt" ? pt ?? "" : en ?? pt ?? "";
 }
@@ -174,46 +196,24 @@ function levelLabel(level: string | undefined, locale: string): string {
   return labels[level]?.[locale === "pt" ? "pt" : "en"] ?? level;
 }
 
-export default function InsightBox({ section }: Props) {
-  const [entry, setEntry] = useState<V2InsightEntry | null>(null);
-  const [legacy, setLegacy] = useState<LegacyInsightEntry | null>(null);
-  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+export function InsightBoxPresentation({ entry, legacy, updatedAt, nowMs }: PresentationProps) {
   const locale = getLocale();
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      const v2 = await fetchSnapshot<V2Data>("insights.v2.json", { sections: {} });
-      const v2Entry = v2.data?.sections?.[section];
-
-      if (v2Entry && !cancelled && (v2Entry.pt || v2Entry.en)) {
-        setEntry(v2Entry);
-        setUpdatedAt(v2.updatedAt ?? v2Entry.generatedAt ?? null);
-        return;
-      }
-
-      const old = await fetchSnapshot<LegacyData>("insights.json", { sections: {} });
-      const oldEntry = old.data.sections?.[section];
-
-      if (!cancelled && oldEntry && (oldEntry.pt || oldEntry.en)) {
-        setLegacy(oldEntry);
-        setUpdatedAt(old.updatedAt ?? oldEntry.generatedAt ?? null);
-      }
-    }
-
-    load().catch(() => {
-      // Sem insights publicados: a seção permanece sem o componente.
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [section]);
 
   if (!entry && !legacy) return null;
 
+  // ── Legacy path ──────────────────────────────────────────────
   if (!entry && legacy) {
+    if (legacy.freshness === "stale") {
+      return (
+        <div className="mb-6 border border-[#FF8C00]/20 bg-[#FF8C00]/5 p-4">
+          <div className="flex items-center gap-1.5 text-[8px] font-mono text-[#FF8C00]">
+            <AlertTriangle size={10} />
+            {t("insight.underReviewGeneric")}
+          </div>
+        </div>
+      );
+    }
+
     const text = locale === "pt" ? legacy.pt : legacy.en;
     if (!text) return null;
     const preserved = legacy.generationStatus?.startsWith("preserved") ?? false;
@@ -246,12 +246,6 @@ export default function InsightBox({ section }: Props) {
             </span>
           )}
         </div>
-        {legacy.freshness === "stale" && (
-          <div className="mt-2 flex items-center gap-1.5 text-[8px] font-mono text-[#FF8C00]">
-            <AlertTriangle size={10} />
-            {t("insight.stale")}
-          </div>
-        )}
         {preserved && (
           <div className="mt-2 flex items-center gap-1.5 text-[8px] font-mono text-[#777]">
             <History size={10} />
@@ -264,6 +258,35 @@ export default function InsightBox({ section }: Props) {
 
   if (!entry) return null;
 
+  // ── v2 path: expiry and stale checks ─────────────────────────
+  const { expired } = reviewState(entry.nextReviewAt, nowMs);
+  const isStale = entry.freshness === "stale";
+
+  // Expired takes precedence: always show dated warning.
+  if (expired) {
+    return (
+      <div className="mb-6 border border-[#FF8C00]/20 bg-[#FF8C00]/5 p-4">
+        <div className="flex items-center gap-1.5 text-[8px] font-mono text-[#FF8C00]">
+          <AlertTriangle size={10} />
+          {t("insight.underReviewSince")} {formatReviewDate(entry.nextReviewAt!, locale)}
+        </div>
+      </div>
+    );
+  }
+
+  // Stale but not yet expired: generic warning, hide analytical content.
+  if (isStale) {
+    return (
+      <div className="mb-6 border border-[#FF8C00]/20 bg-[#FF8C00]/5 p-4">
+        <div className="flex items-center gap-1.5 text-[8px] font-mono text-[#FF8C00]">
+          <AlertTriangle size={10} />
+          {t("insight.underReviewGeneric")}
+        </div>
+      </div>
+    );
+  }
+
+  // ── v2 full render (unchanged from original) ──────────────────
   const text = localize(locale, entry.pt, entry.en);
   if (!text) return null;
 
@@ -504,12 +527,6 @@ export default function InsightBox({ section }: Props) {
           )}
         </div>
 
-        {entry.freshness === "stale" && (
-          <div className="mt-2 flex items-center gap-1.5 text-[8px] font-mono text-[#FF8C00]">
-            <AlertTriangle size={10} />
-            {t("insight.stale")}
-          </div>
-        )}
         {preserved && (
           <div className="mt-2 flex items-center gap-1.5 text-[8px] font-mono text-[#777]">
             <History size={10} />
@@ -518,5 +535,62 @@ export default function InsightBox({ section }: Props) {
         )}
       </div>
     </details>
+  );
+}
+
+export default function InsightBox({ section }: Props) {
+  const [entry, setEntry] = useState<V2InsightEntry | null>(null);
+  const [legacy, setLegacy] = useState<LegacyInsightEntry | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const v2 = await fetchSnapshot<V2Data>("insights.v2.json", { sections: {} });
+      const v2Entry = v2.data?.sections?.[section];
+
+      if (v2Entry && !cancelled && (v2Entry.pt || v2Entry.en)) {
+        setEntry(v2Entry);
+        setUpdatedAt(v2.updatedAt ?? v2Entry.generatedAt ?? null);
+        return;
+      }
+
+      const old = await fetchSnapshot<LegacyData>("insights.json", { sections: {} });
+      const oldEntry = old.data.sections?.[section];
+
+      if (!cancelled && oldEntry && (oldEntry.pt || oldEntry.en)) {
+        setLegacy(oldEntry);
+        setUpdatedAt(old.updatedAt ?? oldEntry.generatedAt ?? null);
+      }
+    }
+
+    load().catch(() => {
+      // Sem insights publicados: a seção permanece sem o componente.
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [section]);
+
+  // Schedule a re-render at expiry. Each tick uses nextCheckDelay (≤ 24 h).
+  // Only schedules when nextReviewAt is valid and in the future.
+  useEffect(() => {
+    if (!shouldSchedule(entry?.nextReviewAt, now)) return;
+    const { msUntilExpiry } = reviewState(entry!.nextReviewAt!, now);
+    const delay = nextCheckDelay(msUntilExpiry!);
+    const id = setTimeout(() => setNow(Date.now()), delay);
+    return () => clearTimeout(id);
+  }, [entry?.nextReviewAt, now]);
+
+  return (
+    <InsightBoxPresentation
+      entry={entry}
+      legacy={legacy}
+      updatedAt={updatedAt}
+      nowMs={now}
+    />
   );
 }
