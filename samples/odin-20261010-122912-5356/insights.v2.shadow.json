@@ -1,0 +1,537 @@
+{
+  "schemaVersion": "2.0",
+  "intelligenceContractVersion": "1.1",
+  "status": "shadow",
+  "runId": "odin-20261010-122912-5356",
+  "generatedAt": "2026-10-10T12:30:02.777Z",
+  "provider": "nvidia",
+  "model": "nvidia/nemotron-3-super-120b-a12b",
+  "promptVersion": "4.0.0",
+  "data": {
+    "sections": {
+      "carbon": {
+        "schemaVersion": "2.0",
+        "intelligenceContractVersion": "1.1",
+        "sectionId": "carbon",
+        "status": "shadow",
+        "pt": "O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e, acima do Q2 2026 (75,28 €/tCO2e). O regime definitivo está em vigor desde 2026-01-01, com a primeira declaração anual devida até 2027-09-30. O importador autorizado na UE é legalmente responsável por declarar as emissões embutidas, enquanto exportadores brasileiros podem receber pedidos indiretos de dados verificáveis no nível da instalação.",
+        "en": "The CBAM price in Q3 2026 was 82.32 €/tCO2e, above Q2 2026 (75.28 €/tCO2e). The definitive regime has been in force since 2026-01-01, with the first annual declaration due by 2027-09-30. The authorized EU importer is legally responsible for declaring embedded emissions, while Brazilian exporters may face indirect requests for verifiable installation-level data.",
+        "thesis": {
+          "pt": "O preço do CBAM aumentou entre Q2 e Q3 2026, e o regime definitivo impõe obrigações de declaração aos importadores da UE, com possíveis impactos indiretos sobre exportadores brasileiros.",
+          "en": "The CBAM price rose between Q2 and Q3 2026, and the definitive regime imposes declaration obligations on EU importers, with possible indirect impacts on Brazilian exporters."
+        },
+        "economicLaw": {
+          "relevance": "high",
+          "pt": "Regulation (EU) 2023/956, conforme alterado pela 2025 CBAM simplification amendment, estabelece a responsabilidade legal do importador autorizado da UE para declarar emissões embutidas no regime definitivo do CBAM.",
+          "en": "Regulation (EU) 2023/956, as amended by the 2025 CBAM simplification amendment, establishes the legal responsibility of the authorized EU importer to declare embedded emissions under the definitive CBAM regime.",
+          "norms": [
+            "Regulation (EU) 2023/956",
+            "2025 CBAM simplification amendment"
+          ],
+          "institutions": [
+            "European Commission"
+          ],
+          "sourceRefs": [
+            "source-carbon-ec"
+          ]
+        },
+        "stakeholderImplications": [
+          {
+            "audience": "government",
+            "textPt": "Autoridades podem monitorar a evolução do preço do CBAM e a adesão ao regime definitivo para avaliar a arrecadação e a cobertura setorial.",
+            "textEn": "Authorities may monitor the evolution of the CBAM price and adherence to the definitive regime to assess revenue and sectoral coverage."
+          },
+          {
+            "audience": "corporate",
+            "textPt": "Empresas com operações na UE que importam bens cobertos devem garantir a declaração precisa das emissões embutidas conforme o regime definitivo.",
+            "textEn": "Companies with EU operations importing covered goods must ensure accurate declaration of embedded emissions under the definitive regime."
+          },
+          {
+            "audience": "investors",
+            "textPt": "Investidores podem avaliar a exposição de empresas a variações no preço do CBAM e aos requisitos de dados de emissões para bens importados.",
+            "textEn": "Investors may assess company exposure to CBAM price fluctuations and emissions data requirements for imported goods."
+          },
+          {
+            "audience": "startups",
+            "textPt": "Startups com exportações para a UE podem precisar acompanhar os requisitos de dados de emissões para atender a pedidos indiretos de importadores.",
+            "textEn": "Startups with EU exports may need to track emissions data requirements to meet indirect requests from importers."
+          }
+        ],
+        "whatToWatch": [
+          {
+            "signalPt": "Preço do CBAM",
+            "signalEn": "CBAM price",
+            "whyItMattersPt": "O preço do CBAM indica o custo do carbono para bens importados e afeta a competitividade relativa.",
+            "whyItMattersEn": "The CBAM price indicates the carbon cost for imported goods and affects relative competitiveness.",
+            "sourceId": "source-carbon-ec",
+            "expectedDate": null
+          }
+        ],
+        "decisionLens": {
+          "lens": "founder_ceo",
+          "implications": [
+            {
+              "textPt": "Startups com exportações para a UE podem precisar acompanhar os requisitos de dados de emissões para evitar interrupções no comércio.",
+              "textEn": "Startups with EU exports may need to track emissions data requirements to avoid trade disruptions.",
+              "claimRefs": [
+                "claim-0"
+              ]
+            }
+          ]
+        },
+        "claims": [
+          {
+            "id": "claim-0",
+            "kind": "fact",
+            "textPt": "O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e, acima do Q2 2026 (75,28 €/tCO2e).",
+            "textEn": "The CBAM price in Q3 2026 was 82.32 €/tCO2e, above Q2 2026 (75.28 €/tCO2e).",
+            "evidenceRefs": [
+              "source-carbon-ec"
+            ],
+            "eventRefs": [],
+            "confidence": {
+              "data": "high",
+              "interpretation": "high"
+            }
+          },
+          {
+            "id": "claim-1",
+            "kind": "fact",
+            "textPt": "O regime definitivo do CBAM está em vigor desde 2026-01-01 e a primeira declaração anual é devida até 2027-09-30.",
+            "textEn": "The definitive CBAM regime has been in force since 2026-01-01 and the first annual declaration is due by 2027-09-30.",
+            "evidenceRefs": [
+              "source-carbon-ec"
+            ],
+            "eventRefs": [
+              "evt-cbam-definitive-start",
+              "evt-cbam-first-annual-declaration"
+            ],
+            "confidence": {
+              "data": "high",
+              "interpretation": "high"
+            }
+          },
+          {
+            "id": "claim-2",
+            "kind": "fact",
+            "textPt": "Pelo Regulamento (UE) 2023/956, o importador autorizado na UE é legalmente responsável por declarar as emissões embutidas no regime definitivo do CBAM.",
+            "textEn": "Under Regulation (EU) 2023/956, the authorized EU importer is legally responsible for declaring embedded emissions under the definitive CBAM regime.",
+            "evidenceRefs": [
+              "source-carbon-ec"
+            ],
+            "eventRefs": [],
+            "confidence": {
+              "data": "high",
+              "interpretation": "high"
+            }
+          }
+        ],
+        "events": [
+          {
+            "id": "evt-cbam-definitive-start",
+            "date": "2026-01-01",
+            "labelPt": "Início do regime definitivo do CBAM",
+            "labelEn": "Start of the definitive CBAM regime",
+            "dataRefs": [
+              "source-carbon-ec"
+            ]
+          },
+          {
+            "id": "evt-cbam-first-annual-declaration",
+            "date": "2027-09-30",
+            "labelPt": "Prazo da primeira declaração anual do CBAM",
+            "labelEn": "Deadline of the first annual CBAM declaration",
+            "dataRefs": [
+              "source-carbon-ec"
+            ]
+          }
+        ],
+        "provenance": [
+          {
+            "sourceId": "source-carbon-ec",
+            "sourceUrl": "https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en",
+            "asOf": "2026-10-05",
+            "dataPath": "public/data/evidence/odin-20261010-122912-5356/cbam-carbon.json",
+            "metricId": "cbam-price-latest",
+            "hash": "sha256:583165a6632d42b2e454cb537cbfbb9e5aa918fdae48eeec53e9ae8b210f3f67",
+            "verification": "verified",
+            "derivation": "direct"
+          }
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        },
+        "limitations": "A análise não inclui efeitos diretos sobre emissões nacionais ou per capita, nem projeções de receita do CBAM além dos dados de preço e prazos declarados no contexto.",
+        "provider": "nvidia",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
+        "promptVersion": "4.0.0",
+        "generatedAt": "2026-10-10T12:29:42.914Z",
+        "validAsOf": "2026-10-05",
+        "nextReviewAt": "2027-01-06T03:00:00Z",
+        "runId": "odin-20261010-122912-5356",
+        "reviewStatus": "unreviewed",
+        "usage": {
+          "prompt": 5867,
+          "completion": 3125,
+          "total": 8992,
+          "latencyMs": 18582
+        },
+        "sectionProfile": "carbon",
+        "profileVersion": "1.0.0",
+        "layers": {
+          "sources": [
+            {
+              "id": "source-carbon-ec",
+              "sourceUrl": "https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en",
+              "asOf": "2026-10-05",
+              "hash": "sha256:583165a6632d42b2e454cb537cbfbb9e5aa918fdae48eeec53e9ae8b210f3f67"
+            }
+          ],
+          "events": [
+            {
+              "id": "cbam-definitive-start",
+              "type": "regulatory_milestone",
+              "date": "2026-01-01",
+              "sourceRefs": [
+                "source-carbon-ec"
+              ]
+            },
+            {
+              "id": "cbam-first-annual-declaration",
+              "type": "regulatory_milestone",
+              "date": "2027-09-30",
+              "sourceRefs": [
+                "source-carbon-ec"
+              ]
+            }
+          ],
+          "indicators": [
+            {
+              "id": "indicator-cbam-price-latest",
+              "metricId": "cbam-price-latest",
+              "sourceRefs": [
+                "source-carbon-ec"
+              ]
+            },
+            {
+              "id": "indicator-cbam-price-latest-vs-previous",
+              "metricId": "cbam-price-latest-vs-previous",
+              "value": 82.32,
+              "reference": 75.28,
+              "unit": "€/tCO2e",
+              "direction": "above",
+              "sourceRefs": [
+                "source-carbon-ec"
+              ]
+            }
+          ],
+          "intelligence": [
+            {
+              "id": "claim-0",
+              "kind": "fact",
+              "evidenceRefs": [
+                "source-carbon-ec"
+              ]
+            },
+            {
+              "id": "claim-1",
+              "kind": "fact",
+              "evidenceRefs": [
+                "source-carbon-ec"
+              ]
+            },
+            {
+              "id": "claim-2",
+              "kind": "fact",
+              "evidenceRefs": [
+                "source-carbon-ec"
+              ]
+            }
+          ]
+        }
+      },
+      "blockchain": {
+        "schemaVersion": "2.0",
+        "intelligenceContractVersion": "1.1",
+        "sectionId": "blockchain",
+        "status": "shadow",
+        "pt": "A capitalização de mercado de stablecoins totaliza US$ 283,8 bilhões, com Tether representando US$ 184,1 bilhões. O TVL de protocolos RWA mostra valores parciais: Invesco USTB (US$ 597,7 milhões), Ethena USDtb (US$ 470,3 milhões) e Re (US$ 405,5 milhões). Os preços de BTC, ETH, SOL e BNB são capturados em snapshot único. Não há série temporal disponível para estabelecer variações ao longo do tempo.",
+        "en": "Stablecoin market capitalization totals US$ 283.8 billion, with Tether at US$ 184.1 billion. RWA protocol TVL shows partial values: Invesco USTB (US$ 597.7 million), Ethena USDtb (US$ 470.3 million) and Re (US$ 405.5 million). BTC, ETH, SOL and BNB prices are captured in a single snapshot. No time series is available to establish temporal variation.",
+        "thesis": {
+          "pt": "A capitalização de mercado de stablecoins e o TVL de protocolos RWA refletem alocação atual de ativos digitais em um snapshot sem série temporal.",
+          "en": "Stablecoin market capitalization and RWA protocol TVL reflect current digital asset allocation in a snapshot without time series."
+        },
+        "economicLaw": {
+          "relevance": "not_material",
+          "pt": "Não foi identificada incidência material de Direito Econômico no conjunto de evidências analisado.",
+          "en": "No material Economic Law incidence was identified in the analyzed evidence set.",
+          "norms": [],
+          "institutions": [],
+          "sourceRefs": []
+        },
+        "stakeholderImplications": [
+          {
+            "audience": "government",
+            "textPt": "Autoridades podem observar a concentração de stablecoins em poucos emissores como indicador de risco sistêmico em ativos digitais.",
+            "textEn": "Authorities may observe the concentration of stablecoins among few issuers as a systemic risk indicator in digital assets."
+          },
+          {
+            "audience": "corporate",
+            "textPt": "Empresas com exposição a criptoativos podem acompanhar a evolução do TVL de RWA como sinal de integração entre finanças tradicionais e digitais.",
+            "textEn": "Companies exposed to cryptoassets may track the evolution of RWA TVL as a signal of integration between traditional and digital finance."
+          },
+          {
+            "audience": "investors",
+            "textPt": "Investidores podem usar a participação de Tether no mercado de stablecoins como variável de concentração ao avaliar exposição a ativos digitais.",
+            "textEn": "Investors may use Tether's share in the stablecoin market as a concentration variable when assessing exposure to digital assets."
+          },
+          {
+            "audience": "startups",
+            "textPt": "Startups de blockchain podem considerar o TVL de protocolos RWA como referência para desenvolvimento de produtos vinculados a ativos do mundo real.",
+            "textEn": "Blockchain startups may consider RWA protocol TVL as a reference for developing products linked to real-world assets."
+          }
+        ],
+        "whatToWatch": [
+          {
+            "signalPt": "Próxima atualização da DefiLlama da capitalização de mercado de stablecoins",
+            "signalEn": "Next DefiLlama update of stablecoin market capitalization",
+            "whyItMattersPt": "Permitirá a primeira comparação temporal da capitalização de mercado de stablecoins a partir deste snapshot.",
+            "whyItMattersEn": "Will enable the first temporal comparison of stablecoin market capitalization from this snapshot.",
+            "sourceId": "source-defillama-stablecoins",
+            "expectedDate": null
+          }
+        ],
+        "decisionLens": {
+          "lens": "founder_ceo",
+          "implications": [
+            {
+              "textPt": "Fundadores podem avaliar a adoção de stablecoins como meio de pagamento em mercados com volatilidade cambial elevada.",
+              "textEn": "Founders may assess stablecoin adoption as a payment method in markets with high currency volatility.",
+              "claimRefs": [
+                "claim-0"
+              ]
+            },
+            {
+              "textPt": "Equipes podem monitorar o crescimento do TVL de RWA como sinal de demanda por tokenização de ativos tradicionais.",
+              "textEn": "Teams may monitor RWA TVL growth as a signal of demand for traditional asset tokenization.",
+              "claimRefs": [
+                "claim-1"
+              ]
+            }
+          ]
+        },
+        "claims": [
+          {
+            "id": "claim-0",
+            "kind": "fact",
+            "textPt": "A capitalização de mercado de stablecoins é de US$ 283,8 bilhões, com Tether representando US$ 184,1 bilhões.",
+            "textEn": "Stablecoin market capitalization is US$ 283.8 billion, with Tether representing US$ 184.1 billion.",
+            "evidenceRefs": [
+              "source-defillama-stablecoins"
+            ],
+            "eventRefs": [],
+            "confidence": {
+              "data": "high",
+              "interpretation": "high"
+            }
+          },
+          {
+            "id": "claim-1",
+            "kind": "fact",
+            "textPt": "O TVL de protocolos RWA inclui Invesco USTB (US$ 597,7 milhões), Ethena USDtb (US$ 470,3 milhões) e Re (US$ 405,5 milhões).",
+            "textEn": "RWA protocol TVL includes Invesco USTB (US$ 597.7 million), Ethena USDtb (US$ 470.3 million) and Re (US$ 405.5 million).",
+            "evidenceRefs": [
+              "source-defillama-rwa"
+            ],
+            "eventRefs": [],
+            "confidence": {
+              "data": "high",
+              "interpretation": "high"
+            }
+          },
+          {
+            "id": "claim-2",
+            "kind": "fact",
+            "textPt": "Os preços de BTC, ETH, SOL e BNB são capturados em snapshot único sem série temporal disponível.",
+            "textEn": "BTC, ETH, SOL and BNB prices are captured in a single snapshot with no time series available.",
+            "evidenceRefs": [
+              "source-defillama-coins"
+            ],
+            "eventRefs": [],
+            "confidence": {
+              "data": "high",
+              "interpretation": "high"
+            }
+          }
+        ],
+        "provenance": [
+          {
+            "sourceId": "source-defillama-stablecoins",
+            "sourceUrl": "https://defillama.com/stablecoins",
+            "asOf": "2026-10-10T12:26:25.048Z",
+            "dataPath": "public/data/evidence/odin-20261010-122912-5356/stablecoins.json",
+            "metricId": "stablecoin-total-mcap",
+            "hash": "sha256:a313a8ce34dec42141648ffd7bc993b4a3d775ce0dca9bb9269b5449d2303d83",
+            "verification": "verified",
+            "derivation": "direct"
+          },
+          {
+            "sourceId": "source-defillama-rwa",
+            "sourceUrl": "https://defillama.com/protocols",
+            "asOf": "2026-10-10T12:26:25.548Z",
+            "dataPath": "public/data/evidence/odin-20261010-122912-5356/rwa-protocols.json",
+            "metricId": "rwa-tvl-sample",
+            "hash": "sha256:c06a3759e877bfbc94c6066bb154fd81541be274742cda4671e0cc6238a26615",
+            "verification": "verified",
+            "derivation": "direct"
+          },
+          {
+            "sourceId": "source-defillama-coins",
+            "sourceUrl": "https://defillama.com/",
+            "asOf": "2026-10-10T12:26:24.946Z",
+            "dataPath": "public/data/evidence/odin-20261010-122912-5356/crypto-market.json",
+            "metricId": "asset-prices",
+            "hash": "sha256:dc35e5ad5c0aaf94f6d2a8963078088b5b0889f5008e91656bea3c3d119ea9d2",
+            "verification": "verified",
+            "derivation": "direct"
+          }
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        },
+        "limitations": "Os dados são de um único instante (snapshot); não há série temporal para estabelecer tendências ou variações ao longo do tempo. O TVL de RWA representa uma amostra parcial de protocolos, não o setor total.",
+        "provider": "nvidia",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
+        "promptVersion": "4.0.0",
+        "generatedAt": "2026-10-10T12:29:53.741Z",
+        "validAsOf": "2026-10-10T12:26:25.048Z",
+        "nextReviewAt": "2026-10-17T12:29:13.099Z",
+        "runId": "odin-20261010-122912-5356",
+        "reviewStatus": "unreviewed",
+        "usage": {
+          "prompt": 2085,
+          "completion": 1481,
+          "total": 3566,
+          "latencyMs": 10825
+        }
+      },
+      "climate": {
+        "schemaVersion": "2.0",
+        "intelligenceContractVersion": "1.1",
+        "sectionId": "climate",
+        "status": "shadow",
+        "pt": "A temperatura média em Brasília foi de 22,4°C no período de 2025-10-05 a 2026-10-05, acima da referência de 21,4°C. A precipitação total foi de 1361 mm, abaixo da referência de 1550 mm.",
+        "en": "The mean temperature in Brasília was 22.4°C from 2025-10-05 to 2026-10-05, above the 21.4°C reference. Total precipitation was 1361 mm, below the 1550 mm reference.",
+        "thesis": {
+          "pt": "Brasília apresentou temperatura acima da referência e precipitação abaixo da referência no período agregado.",
+          "en": "Brasília showed temperature above reference and precipitation below reference in the aggregated period."
+        },
+        "economicLaw": {
+          "relevance": "not_material",
+          "pt": "Não foi identificada incidência material de Direito Econômico no conjunto de evidências analisado.",
+          "en": "No material Economic Law incidence was identified in the analyzed evidence set.",
+          "norms": [],
+          "institutions": [],
+          "sourceRefs": []
+        },
+        "stakeholderImplications": [
+          {
+            "audience": "government",
+            "textPt": "Autoridades podem acompanhar dados climáticos locais para avaliar possíveis efeitos em recursos hídricos regionais.",
+            "textEn": "Authorities may track local climate data to assess potential effects on regional water resources."
+          },
+          {
+            "audience": "corporate",
+            "textPt": "Empresas com operações em Brasília podem observar variações climáticas para planejar resiliência operacional.",
+            "textEn": "Companies with operations in Brasília may observe climate variations to plan operational resilience."
+          }
+        ],
+        "whatToWatch": [
+          {
+            "signalPt": "Temperatura média diária e precipitação diária em Brasília",
+            "signalEn": "Daily mean temperature and daily precipitation in Brasília",
+            "whyItMattersPt": "Mudanças nesse vetor climático podem sinalizar condições que afetam demanda energética e uso de água local.",
+            "whyItMattersEn": "Changes in this climate vector may signal conditions affecting local energy demand and water use.",
+            "sourceId": "source-open-meteo-brasilia",
+            "expectedDate": null
+          }
+        ],
+        "decisionLens": {
+          "lens": "founder_ceo",
+          "implications": [
+            {
+              "textPt": "Startups com sede em Brasília podem considerar a variabilidade climática ao planejar consumo de energia e água.",
+              "textEn": "Startups headquartered in Brasília may consider climate variability when planning energy and water consumption.",
+              "claimRefs": [
+                "claim-1"
+              ]
+            }
+          ]
+        },
+        "claims": [
+          {
+            "id": "claim-1",
+            "kind": "fact",
+            "textPt": "A temperatura média em Brasília foi de 22,4°C no período de 2025-10-05 a 2026-10-05, acima da referência de 21,4°C.",
+            "textEn": "The mean temperature in Brasília was 22.4°C from 2025-10-05 to 2026-10-05, above the 21.4°C reference.",
+            "evidenceRefs": [
+              "source-open-meteo-brasilia"
+            ],
+            "eventRefs": [],
+            "confidence": {
+              "data": "high",
+              "interpretation": "high"
+            }
+          },
+          {
+            "id": "claim-2",
+            "kind": "fact",
+            "textPt": "A precipitação total em Brasília foi de 1361 mm no período de 2025-10-05 a 2026-10-05, abaixo da referência de 1550 mm.",
+            "textEn": "Total precipitation in Brasília was 1361 mm from 2025-10-05 to 2026-10-05, below the 1550 mm reference.",
+            "evidenceRefs": [
+              "source-open-meteo-brasilia"
+            ],
+            "eventRefs": [],
+            "confidence": {
+              "data": "high",
+              "interpretation": "high"
+            }
+          }
+        ],
+        "provenance": [
+          {
+            "sourceId": "source-open-meteo-brasilia",
+            "sourceUrl": "https://archive-api.open-meteo.com/v1/archive?latitude=-15.8&longitude=-47.9&start_date=2025-10-05&end_date=2026-10-05&daily=temperature_2m_mean,precipitation_sum&timezone=auto",
+            "asOf": "2026-10-05",
+            "dataPath": "public/data/evidence/odin-20261010-122912-5356/open-meteo-brasilia.json",
+            "metricId": "brasilia-12m-temp-precip",
+            "hash": "sha256:c4ce04e8d3bdc6e9657bf7bb9791449e10c6f260f5573b69c68995790d1f15fa",
+            "verification": "verified",
+            "derivation": "derived"
+          }
+        ],
+        "confidence": {
+          "data": "high",
+          "interpretation": "high"
+        },
+        "limitations": "Os dados são específicos de Brasília e não representam condições de regiões produtoras, bacias hidrográficas ou mercados de commodities.",
+        "provider": "nvidia",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
+        "promptVersion": "4.0.0",
+        "generatedAt": "2026-10-10T12:30:02.777Z",
+        "validAsOf": "2026-10-05",
+        "nextReviewAt": "2026-10-17T12:29:13.099Z",
+        "runId": "odin-20261010-122912-5356",
+        "reviewStatus": "unreviewed",
+        "usage": {
+          "prompt": 4250,
+          "completion": 1113,
+          "total": 5363,
+          "latencyMs": 1464
+        }
+      }
+    }
+  }
+}
