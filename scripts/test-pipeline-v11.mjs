@@ -71,6 +71,9 @@ const ui = await import(pathToFileURL(path.join(bundleDir, "bundle.mjs")).href);
   assert(shadow.data.sections.carbon.events?.length === 2, "[ok] carbon deveria ter os 2 eventos regulatórios montados pelo código");
   assert(!shadow.data.sections.blockchain.events, "[ok] blockchain (snapshot) não deve ter eventos");
   assert(shadow.data.sections.climate.provenance[0].derivation === "derived", "[ok] clima é agregado da série diária: derivation=derived");
+  // Janela inclusiva de 365 observações diárias (início e fim entram na consulta ao Open-Meteo).
+  const meteo = await readJson(dir, shadow.data.sections.climate.provenance[0].dataPath);
+  assert(meteo.daily?.time?.length === 365, `[ok] janela do clima deveria ter 365 dias, tem ${meteo.daily?.time?.length}`);
   const report = await readJson(dir, "public/data/generationReport.json");
   assert(report.validation?.contractV11Valid === true, "[ok] generationReport sem contractV11Valid=true");
   const p = run(dir, "scripts/promote-insights.mjs", { ODIN_PROMOTE_APPROVED: "true", ODIN_REVIEWER: "pipeline-test", ODIN_SHADOW_RUN_ID: "0" }, ["public/data/insights.v2.shadow.json", "public/data/insights.v2.promoted.json"]);
