@@ -8,7 +8,7 @@
 // 5. Gate e promoção aceitam 1.0 e 1.1 e aplicam as regras v1.1.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { classifyRecommendation, checkContractV11, checkDecisionLens, structuralCorrectionCount, formatContractError } from "./contract-v11.mjs";
+import { classifyRecommendation, checkContractV11, checkDecisionLens, structuralCorrectionCount, formatContractError, validateModelOutputV11 } from "./contract-v11.mjs";
 import { validateInsightEntry, SUPPORTED_CONTRACT_VERSIONS } from "./insights-schema.mjs";
 import { checkEvidenceConsistency, formatConsistencyError } from "./evidence-consistency.mjs";
 
@@ -84,6 +84,39 @@ for (const [rule, mutate] of cases) {
   e.decisionLens.implications[0] = { textPt: "Exportadores podem precisar acompanhar pedidos de dados de instalação, devido à estrutura de responsabilidade do CBAM.", textEn: "Exporters may need to track installation data requests, due to the CBAM responsibility structure.", claimRefs: ["claim-c"] };
   const errs = checkDecisionLens(e, base.evidence);
   assert(!errs.some((x) => x.rule === "lens_new_causality"), "causalidade presente no claim citado não deve bloquear");
+}
+// lens_claim_coverage: casos reais dos shadows #34 e #32 (métrica usada sem o claim que a sustenta).
+{
+  const c = (id, textPt, textEn) => ({ id, kind: "fact", textPt, textEn, evidenceRefs: ["source-carbon-ec"], confidence: { data: "high", interpretation: "medium" } });
+  const lensCase = (claims, imp) => ({ claims, decisionLens: { lens: "founder_ceo", implications: [imp] } });
+  const cov = (e, ev = base.evidence) => checkDecisionLens(e, ev).filter((x) => x.rule === "lens_claim_coverage");
+  const realCases = [
+    ["#34 blockchain (TVL → claim de stablecoins)", lensCase([
+      c("claim-0", "A capitalização de mercado de stablecoins totaliza US$ 283,8 bilhões, com Tether representando US$ 184,1 bilhões.", "Stablecoin market capitalization totals US$ 283.8 billion, with Tether at US$ 184.1 billion."),
+      c("claim-1", "O TVL de protocolos RWA inclui Invesco USTB (US$ 597,7 milhões), Ethena USDtb (US$ 470,3 milhões) e Re (US$ 405,5 milhões).", "RWA protocol TVL includes Invesco USTB (US$ 597.7 million), Ethena USDtb (US$ 470.3 million) and Re (US$ 405.5 million)."),
+    ], { textPt: "Startups com modelos de RWA podem usar o TVL atual de protocolos como referência para alocação inicial de capital.", textEn: "Startups with RWA models may use current protocol TVL as a reference for initial capital allocation.", claimRefs: ["claim-0"] }), ["claim-1"], "TVL"],
+    ["#34 clima (precipitação sem o claim de precipitação)", lensCase([
+      c("claim-1", "A temperatura média em Brasília foi de 22,4°C no período de 2025-10-06 a 2026-10-05.", "Mean temperature in Brasília was 22.4°C from 2025-10-06 to 2026-10-05."),
+      c("claim-2", "A precipitação total em Brasília foi de 1361 mm no período de 2025-10-06 a 2026-10-05.", "Total precipitation in Brasília was 1361 mm from 2025-10-06 to 2026-10-05."),
+    ], { textPt: "Startups com sede em Brasília podem usar os valores atuais de temperatura e precipitação para planejar resiliência climática local.", textEn: "Brasília-based startups may use current temperature and precipitation values to plan local climate resilience.", claimRefs: ["claim-1"] }), ["claim-1", "claim-2"], "precipitação"],
+    ["#32 carbono (emissões → só claim de preço)", lensCase([
+      c("claim-0", "O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e, acima do Q2 2026 (75,28 €/tCO2e).", "The CBAM price in Q3 2026 was 82.32 €/tCO2e, above Q2 2026 (75.28 €/tCO2e)."),
+      c("claim-2", "Pelo Regulamento (UE) 2023/956, o importador autorizado na UE é legalmente responsável por declarar as emissões embutidas no regime definitivo do CBAM.", "Under Regulation (EU) 2023/956, the authorized EU importer is legally responsible for declaring embedded emissions in the definitive CBAM regime."),
+    ], { textPt: "Startups com exportações para a UE podem precisar acompanhar os requisitos de dados de emissões.", textEn: "Startups exporting to the EU may need to track emissions data requirements.", claimRefs: ["claim-0"] }), ["claim-0", "claim-2"], "emissões"],
+  ];
+  for (const [name, e, fixedRefs, group] of realCases) {
+    const errs = cov(e);
+    assert(errs.length && errs.every((x) => x.detail.includes(group)), `${name}: deveria bloquear por ${group}: ${errs.map(formatContractError).join(" | ")}`);
+    // Mesma regra no gate final (checkContractV11) e na validação da nova tentativa automática.
+    assert(v11(e).some((x) => x.rule === "lens_claim_coverage"), `${name}: gate final deveria acusar`);
+    assert(validateModelOutputV11(e, "carbon", { provenance: base.entry.provenance, evidence: base.evidence }).some((x) => x.startsWith("[lens_claim_coverage]")), `${name}: validação da nova tentativa deveria acusar`);
+    const fixed = structuredClone(e); fixed.decisionLens.implications[0].claimRefs = fixedRefs;
+    assert(!cov(fixed).length, `${name}: com claimRefs ${fixedRefs.join(", ")} deveria passar`);
+  }
+  // Termo de público, não métrica: "clientes importadores" não exige claim de importador.
+  assert(!cov(base.entry).length, "base v1.1 (founders com clientes importadores) não deve acusar lens_claim_coverage");
+  // Métrica ausente de todos os claims não é tratada aqui (não há claim a citar).
+  assert(!cov(lensCase([c("claim-1", "O preço do CBAM foi de 82,32 €/tCO2e.", "The CBAM price was 82.32 €/tCO2e.")], { textPt: "Exportadores podem acompanhar a precipitação regional.", textEn: "Exporters may track regional precipitation.", claimRefs: ["claim-1"] })).length, "métrica sem claim correspondente não aciona a regra");
 }
 // Métrica de aceite do M3: mudanças estruturais pós-revisão.
 {

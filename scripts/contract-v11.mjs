@@ -200,6 +200,24 @@ export function legalContext(entry, evidence) {
 const CAUSAL = ["porque", "devido a", "devido ao", "devido a", "por causa", "causa*", "causou", "provoc*", "leva a", "levou a", "levara", "resulta* em", "resultou", "impulsion*", "decorre*", "em razao de", "gracas a", "por conta de", "because", "due to", "caus*", "leads to", "led to", "lead to", "results in", "resulted in", "drives", "driven by", "owing to", "thanks to", "as a result"];
 const hasCausal = (text) => CAUSAL.find((c) => hasTerm(text, c));
 
+// Métricas de domínio que só podem aparecer numa implicação da lente se um
+// claim CITADO as sustentar. Não é comparação de palavras: cada grupo reúne
+// sinônimos PT/EN de uma mesma métrica, e só vale quando algum claim da seção
+// a contém (casos reais: shadow #34 blockchain/clima, #32 carbono). Entidades
+// que descrevem público (importador, stablecoins, BTC) ficam de fora: "founders
+// com clientes importadores" descreve a quem se aplica, não usa um dado.
+export const METRIC_TERMS = {
+  "TVL": ["tvl", "total value locked", "valor total bloqueado"],
+  "capitalização de mercado": ["market cap", "market capitalization", "capitalizacao de mercado", "capitalizacao"],
+  "temperatura": ["temperatura*", "temperature*"],
+  "precipitação": ["precipitac*", "precipitation*", "chuva*", "rainfall"],
+  "emissões": ["emisso*", "emissao", "emission*"],
+  "preço": ["preco*", "price*"],
+  "declaração anual": ["declarac*", "declaration*"],
+  "regime definitivo": ["regime definitivo", "periodo definitivo", "definitive regime", "definitive period"],
+};
+const groupsIn = (text) => Object.entries(METRIC_TERMS).filter(([, terms]) => terms.some((t) => hasTerm(text, t))).map(([g]) => g);
+
 export function checkDecisionLens(entry, evidence) {
   const errors = [];
   const lens = entry.decisionLens;
@@ -225,6 +243,13 @@ export function checkDecisionLens(entry, evidence) {
     for (const r of refs) if (!claims.has(r)) errors.push(err("lens_claim_ref", at, `claimRef ${r} inexistente`));
     const cited = refs.map((r) => claims.get(r)).filter(Boolean);
     const citedText = cited.map((c) => `${c.textPt ?? ""} ${c.textEn ?? ""}`).join(" ");
+    // lens_claim_coverage: cada métrica usada pela implicação precisa de um claim citado que a contenha.
+    const citedGroups = new Set(groupsIn(citedText));
+    for (const g of groupsIn(`${imp.textPt} ${imp.textEn}`)) {
+      if (citedGroups.has(g)) continue;
+      const carriers = [...claims.values()].filter((c) => groupsIn(`${c.textPt ?? ""} ${c.textEn ?? ""}`).includes(g)).map((c) => c.id);
+      if (carriers.length) errors.push(err("lens_claim_coverage", at, `usa ${g}, que está em ${carriers.join(", ")}, mas claimRefs cita só ${refs.join(", ") || "nada"}: inclua o claim que sustenta esse dado`));
+    }
     const okNums = new Set([...matNums, ...extractNumbers(citedText).flatMap((x) => x.candidates)]);
     const okDates = new Set([...matDates, ...extractDates(citedText).dates]);
     for (const [lang, text] of [["pt", imp.textPt], ["en", imp.textEn]]) {
