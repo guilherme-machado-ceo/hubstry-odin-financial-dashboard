@@ -36,6 +36,9 @@ jobs:
         run: python3 scripts/oisst/fetch_oisst.py
       - name: Gate independente sobre o arquivo gerado
         run: python3 scripts/oisst/validate_enso.py public/data/enso-oisst.json
+      - name: Diagnostico vs serie semanal NOAA/CPC (nao bloqueia)
+        continue-on-error: true
+        run: python3 scripts/oisst/diag_cpc.py public/data/enso-oisst.json
       - name: Publicar JSON para conferencia (artefato; nada vai para o main)
         uses: actions/upload-artifact@v4
         with:
