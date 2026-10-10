@@ -101,6 +101,9 @@ interface V2InsightEntry {
   generationStatus?: string;
   freshness?: string;
   dataAsOf?: string;
+  reviewStatus?: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
 }
 
 interface LegacyInsightEntry {
@@ -161,6 +164,19 @@ function formatDataOf(iso: string, locale: string): string {
             timeZoneName: "short",
           }
         : { day: "2-digit", month: "2-digit", year: "numeric" }
+    );
+  } catch {
+    return iso;
+  }
+}
+
+function formatReviewedAt(iso: string, locale: string): string {
+  try {
+    return new Date(iso).toLocaleDateString(
+      locale === "pt" ? "pt-BR" : "en-US",
+      locale === "pt"
+        ? { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" }
+        : { month: "short", day: "numeric", timeZone: "America/Sao_Paulo" }
     );
   } catch {
     return iso;
@@ -286,7 +302,7 @@ export function InsightBoxPresentation({ entry, legacy, updatedAt, nowMs }: Pres
     );
   }
 
-  // ── v2 full render (unchanged from original) ──────────────────
+  // ── v2 full render ────────────────────────────────────────────
   const text = localize(locale, entry.pt, entry.en);
   if (!text) return null;
 
@@ -299,15 +315,25 @@ export function InsightBoxPresentation({ entry, legacy, updatedAt, nowMs }: Pres
   const validAsOf = entry.validAsOf;
   const preserved = entry.status?.startsWith("preserved") ?? false;
 
+  const isHumanReviewed =
+    entry.reviewStatus === "approved" &&
+    !!entry.reviewedAt && !isNaN(Date.parse(entry.reviewedAt)) &&
+    !!entry.reviewedBy;
+
   return (
     <details className="mb-6 group border border-[#00FFFF]/20 bg-[#00FFFF]/5">
       <summary className="list-none cursor-pointer select-none px-4 py-3 flex items-center justify-between gap-3 hover:bg-[#00FFFF]/5 transition-colors">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-wrap">
           <Sparkles size={12} className="text-[#00FFFF] shrink-0" />
           <span className="text-[9px] font-mono uppercase tracking-widest text-[#00FFFF]">
             ODIN Insight
           </span>
           <span className="text-[8px] font-mono text-[#444]">· v{entry.promptVersion ?? "3.0"}</span>
+          {isHumanReviewed && (
+            <span className="text-[8px] font-mono text-[#00FF88]" data-human-reviewed="true">
+              {t("insight.humanReviewedOn")} {formatReviewedAt(entry.reviewedAt!, locale)}
+            </span>
+          )}
         </div>
         <ChevronDown
           size={13}

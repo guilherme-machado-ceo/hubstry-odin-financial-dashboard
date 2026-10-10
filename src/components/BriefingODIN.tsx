@@ -7,8 +7,10 @@
 // ============================================================
 import { useEffect, useState } from "react";
 import { Compass, ArrowDown } from "lucide-react";
-import { getLocale, subscribe } from "@/i18n";
+import { t, getLocale, subscribe } from "@/i18n";
 import { fetchSnapshot } from "@/lib/api";
+
+const DEMO_HREF = "mailto:guilhermemachado.ceo@hubstry.dev?subject=ODIN%20%E2%80%94%20demonstra%C3%A7%C3%A3o%2Fpiloto";
 import { buildBriefing, type BriefingItem, type M1Entry } from "@/data/briefing";
 import { term } from "@/data/glossary";
 
@@ -81,6 +83,15 @@ export function BriefingView({ items, locale, updatedAt }: { items: BriefingItem
               </article>
             );
           })}
+        </div>
+        <div className="mt-4 text-right">
+          <a
+            href={DEMO_HREF}
+            className="text-[9px] font-mono text-[#00FFFF]/60 hover:text-[#00FFFF] transition-colors"
+            data-demo-link
+          >
+            {t("footer.demoLink")}
+          </a>
         </div>
       </div>
     </section>

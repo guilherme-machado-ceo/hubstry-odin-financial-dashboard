@@ -193,5 +193,55 @@ const legacyStale = {
     "shouldSchedule(inválido) deve retornar false");
 }
 
+// ── 18–23. Badge de revisão humana ───────────────────────────────────────────
+// Usa "2026-10-15T12:00:00Z" → 2026-10-15T09:00-03:00 em SP → dia 15, mês 10
+// PT: "15/10"   EN: "Oct 15, 2026"  (dia ≠ mês, formatos claramente distintos)
+const REVIEWED_AT = "2026-10-15T12:00:00Z";
+const entryApproved = {
+  pt: "Contexto estratégico PT.", en: "Strategic context EN.",
+  nextReviewAt: FUTURE,
+  reviewStatus: "approved", reviewedAt: REVIEWED_AT, reviewedBy: "analyst-1",
+};
+{
+  // 18. PT: badge presente e data "15/10"
+  const html = render({ entry: entryApproved, legacy: null, updatedAt: null, nowMs: NOW }, "pt");
+  assert(html.includes('data-human-reviewed="true"'),
+    "badge PT: data-human-reviewed deve estar presente");
+  assert(html.includes("15/10"),
+    "badge PT: data deve ser 15/10");
+
+  // 19. EN: badge presente e data legível com mês abreviado
+  const htmlEn = render({ entry: entryApproved, legacy: null, updatedAt: null, nowMs: NOW }, "en");
+  assert(htmlEn.includes('data-human-reviewed="true"'),
+    "badge EN: data-human-reviewed deve estar presente");
+  assert(htmlEn.includes("Oct") && htmlEn.includes("15"),
+    "badge EN: data deve conter mês abreviado e dia 15");
+
+  // 20. reviewedAt ausente → sem badge
+  const noDate = { ...entryApproved, reviewedAt: undefined };
+  const htmlNoDate = render({ entry: noDate, legacy: null, updatedAt: null, nowMs: NOW }, "pt");
+  assert(!htmlNoDate.includes('data-human-reviewed'),
+    "sem reviewedAt: badge não deve aparecer");
+
+  // 21. reviewedAt inválido → sem badge
+  const badDate = { ...entryApproved, reviewedAt: "not-a-date" };
+  const htmlBad = render({ entry: badDate, legacy: null, updatedAt: null, nowMs: NOW }, "pt");
+  assert(!htmlBad.includes('data-human-reviewed'),
+    "reviewedAt inválido: badge não deve aparecer");
+
+  // 22. reviewedBy vazio → sem badge
+  const noBy = { ...entryApproved, reviewedBy: "" };
+  const htmlNoBy = render({ entry: noBy, legacy: null, updatedAt: null, nowMs: NOW }, "pt");
+  assert(!htmlNoBy.includes('data-human-reviewed'),
+    "reviewedBy vazio: badge não deve aparecer");
+
+  // 23. Caminho legado → sem badge, badge de legado preservado
+  const htmlLegacy = render({ entry: null, legacy: legacyFresh, updatedAt: null, nowMs: NOW }, "pt");
+  assert(!htmlLegacy.includes('data-human-reviewed'),
+    "caminho legado: data-human-reviewed não deve aparecer");
+  assert(htmlLegacy.includes("IA assistida"),
+    "caminho legado: badge original deve ser preservado");
+}
+
 if (failures) { console.error(`insight-review: ${failures} falha(s)`); process.exit(1); }
-console.log("ODIN insight-review: PASS — 17 casos testados");
+console.log("ODIN insight-review: PASS — 23 casos testados");

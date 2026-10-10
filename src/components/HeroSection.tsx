@@ -1,22 +1,12 @@
 import { useEffect, useState } from "react";
 import { kpis, inflectionPoints } from "@/data/lcBondsData";
 import { t, getLocale, subscribe } from "@/i18n";
-import { TrendingUp, Activity, Globe, Shield, Layers, Radio } from "lucide-react";
+import { Shield, Layers, Radio } from "lucide-react";
 import EstBadge from "./EstBadge";
 import PtaxLive from "./PtaxLive";
 import { REGION_FILTERED_SECTIONS, type Region } from "@/data/regions";
-import { isUnverified, DATA_AUDIT_VERIFIED_AT } from "@/data/dataAudit";
+import { DATA_AUDIT_VERIFIED_AT } from "@/data/dataAudit";
 import { term, termDef } from "@/data/glossary";
-
-/** Marca de auditoria (PR 2a): valor ainda sem conferência em fonte oficial. */
-function Unverified({ auditId, locale }: { auditId: string; locale: string }) {
-  if (!isUnverified(auditId)) return null;
-  return (
-    <span className="text-[7px] font-mono uppercase tracking-wider text-[#777]" data-unverified={auditId} title={termDef("unverified", locale)}>
-      <span data-term="unverified">{term("unverified", locale)}</span>
-    </span>
-  );
-}
 
 interface Props {
   regionFilter: Region;
@@ -99,67 +89,11 @@ export default function HeroSection({ regionFilter, onRegionChange }: Props) {
           )}
         </div>
 
-        {/* KPIs Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-px bg-[#1a1a1a] border border-[#1a1a1a]">
+        {/* KPIs Grid — exibe apenas KPIs com fonte verificada */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-[#1a1a1a] border border-[#1a1a1a]">
           {/* LIVE BRL/USD */}
-          <div className="bg-[#0a0a0a] p-3 lg:col-span-2 flex flex-col">
+          <div className="bg-[#0a0a0a] p-3 flex flex-col">
             <PtaxLive />
-          </div>
-
-          {/* LC Market Total */}
-          <div className="bg-[#0a0a0a] p-3 flex flex-col">
-            <div className="flex items-center gap-2 mb-1">
-              <Globe size={10} className="text-[#333]" />
-              <span className="text-[9px] font-mono uppercase tracking-widest text-[#555]">
-                {t("hero.kpiMarket")}
-              </span>
-            </div>
-            <span className="text-lg font-mono font-bold text-[#e0e0e0]">
-              {kpis.lcBondMarketTotal}
-            </span>
-            <Unverified auditId="lc-market-total" locale={locale} />
-          </div>
-
-          {/* Growth */}
-          <div className="bg-[#0a0a0a] p-3 flex flex-col">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp size={10} className="text-[#FF8C00]" />
-              <span className="text-[9px] font-mono uppercase tracking-widest text-[#555]">
-                {t("hero.kpiGrowth")}
-              </span>
-            </div>
-            <span className="text-lg font-mono font-bold text-[#FF8C00]">
-              +{kpis.lcBondGrowthPct}%
-            </span>
-            <Unverified auditId="lc-market-total" locale={locale} />
-          </div>
-
-          {/* BRICS LC Trade */}
-          <div className="bg-[#0a0a0a] p-3 flex flex-col">
-            <div className="flex items-center gap-2 mb-1">
-              <Activity size={10} className="text-[#333]" />
-              <span className="text-[9px] font-mono uppercase tracking-widest text-[#555]">
-                {t("hero.kpiTrade")}
-              </span>
-            </div>
-            <span className="text-lg font-mono font-bold text-[#e0e0e0]">
-              {kpis.bricsTradeLCShare}%
-            </span>
-            <Unverified auditId="brics-trade-lc" locale={locale} />
-          </div>
-
-          {/* NDB */}
-          <div className="bg-[#0a0a0a] p-3 flex flex-col">
-            <div className="flex items-center gap-2 mb-1">
-              <Layers size={10} className="text-[#333]" />
-              <span className="text-[9px] font-mono uppercase tracking-widest text-[#555]">
-                {t("hero.kpiNDB")}
-              </span>
-            </div>
-            <span className="text-lg font-mono font-bold text-[#e0e0e0]">
-              {kpis.ndbLCDisbursed}
-            </span>
-            <Unverified auditId="ndb-lc-share-disbursed" locale={locale} />
           </div>
 
           {/* TCX */}

@@ -41,7 +41,18 @@ export default function CarbonPricingSection({ onSourceClick, onEmbedClick }: Pr
     return row;
   });
 
-  const currentCert = CBAM_CERT_PRICES.filter((c) => c.priceEur !== null).at(-1);
+  const currentCert = CBAM_CERT_PRICES.filter((c) => c.priceEur !== null && c.published !== null).at(-1);
+
+  function formatBadgeDate(iso: string): string {
+    try {
+      return new Date(iso).toLocaleDateString(
+        locale === "pt" ? "pt-BR" : "en-US",
+        locale === "pt"
+          ? { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "America/Sao_Paulo" }
+          : { month: "short", day: "numeric", year: "numeric", timeZone: "America/Sao_Paulo" }
+      );
+    } catch { return iso; }
+  }
   const certChart = CBAM_CERT_PRICES.filter((c) => c.priceEur !== null);
   const instruments = [...CARBON_INSTRUMENTS].sort((a, b) => b.valueUsd - a.valueUsd);
   const jsonData = { cbamCertPrices: CBAM_CERT_PRICES, instruments: CARBON_INSTRUMENTS, owidConsumptionCo2: owid };
@@ -54,8 +65,11 @@ export default function CarbonPricingSection({ onSourceClick, onEmbedClick }: Pr
             <div className="flex items-center gap-2 mb-1">
               <span className="inline-flex items-center gap-1.5 text-[9px] font-mono text-[#00FFFF] border border-[#00FFFF]/30 px-1.5 py-0.5">
                 <Landmark size={10} />
-                {t("carbon.badgeOfficial")}
-                {updatedAt && <span className="text-[#00FFFF]/60">· {t("carbon.badgeSnapshot")} {formatUpdatedAt(updatedAt, locale)}</span>}
+                {t("carbon.badgeOfficialLabel")}
+                {currentCert
+                  ? <> · {currentCert.quarter} · {t("carbon.badgeOfficialPublished")}: {formatBadgeDate(currentCert.published!)}</>
+                  : " · —"}
+                {updatedAt && <span className="text-[#00FFFF]/60"> · {t("carbon.badgeSnapshot")} {formatUpdatedAt(updatedAt, locale)}</span>}
               </span>
             </div>
             <h2 className="text-xl font-bold text-[#e0e0e0] tracking-tight">{t("carbon.title")}</h2>
