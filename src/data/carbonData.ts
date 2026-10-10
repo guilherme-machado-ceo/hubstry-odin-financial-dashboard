@@ -2,7 +2,7 @@
 // CARBON DATA — Precificação de carbono e CBAM
 // Conteúdo curado de fontes primárias (ver sourceRefs):
 //   - Comissão Europeia (TAXUD): preços oficiais trimestrais do
-//     certificado CBAM e marcos regulatórios (verificado em 2026-07)
+//     certificado CBAM e marcos regulatórios (verificado em 2026-10)
 //   - World Bank Carbon Pricing Dashboard: instrumentos globais
 //     (valores aproximados — verificar fonte antes de publicar)
 // Dados dinâmicos (CO2 por consumo) chegam via snapshot OWID em
@@ -20,7 +20,7 @@ export interface CbamCertPrice {
 export const CBAM_CERT_PRICES: CbamCertPrice[] = [
   { quarter: "Q1 2026", published: "2026-04-07", priceEur: 75.36 },
   { quarter: "Q2 2026", published: "2026-07-06", priceEur: 75.28 },
-  { quarter: "Q3 2026", published: "2026-10-05", priceEur: null },
+  { quarter: "Q3 2026", published: "2026-10-05", priceEur: 82.32 },
   { quarter: "Q4 2026", published: "2027-01-04", priceEur: null },
 ];
 
@@ -40,8 +40,8 @@ export const CBAM_TIMELINE: CbamMilestone[] = [
   { date: "2026-01", labelPt: "REGIME DEFINITIVO: custos passam a incidir sobre importações nos 6 setores", labelEn: "DEFINITIVE REGIME: costs start applying to imports in the 6 covered sectors", status: "done" },
   { date: "2026-04", labelPt: "1º preço trimestral do certificado publicado (Q1 2026: €75,36/tCO₂e)", labelEn: "First quarterly certificate price published (Q1 2026: €75.36/tCO₂e)", status: "done" },
   { date: "2026-07", labelPt: "Preço Q2 2026 publicado (€75,28/tCO₂e)", labelEn: "Q2 2026 price published (€75.28/tCO₂e)", status: "done" },
-  { date: "2026-10", labelPt: "Publicação do preço Q3 2026", labelEn: "Q3 2026 price publication", status: "next" },
-  { date: "2027-01", labelPt: "Preço Q4 2026; a partir de 2027 o preço passa a ser semanal", labelEn: "Q4 2026 price; from 2027 onwards pricing becomes weekly", status: "future" },
+  { date: "2026-10", labelPt: "Preço Q3 2026 publicado (€82,32/tCO₂e)", labelEn: "Q3 2026 price published (€82.32/tCO₂e)", status: "done" },
+  { date: "2027-01", labelPt: "Preço Q4 2026; a partir de 2027 o preço passa a ser semanal", labelEn: "Q4 2026 price; from 2027 onwards pricing becomes weekly", status: "next" },
   { date: "2027-02", labelPt: "Início das vendas de certificados na plataforma central comum", labelEn: "Certificate sales start on the common central platform", status: "future" },
   { date: "2027-09", labelPt: "1ª declaração anual + entrega (surrender) dos certificados referentes a 2026", labelEn: "First annual declaration + certificate surrender for 2026 imports", status: "future" },
   { date: "2027+", labelPt: "Obrigação trimestral de manter certificados ≥ 50% das emissões embutidas acumuladas", labelEn: "Quarterly obligation to hold certificates ≥ 50% of accumulated embedded emissions", status: "future" },
