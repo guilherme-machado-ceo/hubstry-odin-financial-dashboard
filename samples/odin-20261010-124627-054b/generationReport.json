@@ -1,0 +1,365 @@
+{
+  "runId": "odin-20261010-124627-054b",
+  "provider": "nvidia",
+  "model": "nvidia/nemotron-3-super-120b-a12b",
+  "schemaVersion": "2.0",
+  "intelligenceContractVersion": "1.1",
+  "promptVersion": "4.0.0",
+  "decision": "shadow_generated",
+  "sections": [
+    {
+      "sectionId": "carbon",
+      "status": "shadow",
+      "latencyMs": 13616,
+      "totalTokens": 9252,
+      "evidence": {
+        "material": "Section: carbon\nValid as of: 2026-10-05\nNext review: 2027-01-06T03:00:00Z\nForma temporal: three_points\nReferências jurídicas disponíveis: Regulation (EU) 2023/956 (norm); 2025 CBAM simplification amendment (norm); European Commission (institution)\nProvenance permitida para esta seção (use estes sourceId literalmente em evidenceRefs e whatToWatch.sourceId):\nsource-carbon-ec | https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en | publica: preço do CBAM, marcos regulatórios, orientações e atos de execução do CBAM | dado: verified, direct\nEventos disponíveis (opcional em claims[].eventRefs): evt-cbam-definitive-start | 2026-01-01 | Start of the definitive CBAM regime; evt-cbam-first-annual-declaration | 2027-09-30 | Deadline of the first annual CBAM declaration\nContext:\nCarbon pricing/CBAM (Regulation (EU) 2023/956, as amended by the 2025 CBAM simplification amendment). Q3 2026 price: 82.32 €/tCO2e; Q2 2026: 75.28 €/tCO2e; the Q3 2026 price is above the Q2 2026 price. Six sectors. De minimis: 50 t/year annual aggregate per importer for covered goods. Definitive period in force since 2026-01-01. First annual CBAM declaration (covering 2026 imports) due by 2027-09-30; this is a declaration deadline, not the start of the definitive regime. In the definitive regime the authorized EU importer is legally responsible for declaring embedded emissions; Brazilian exporters may face indirect requests for verifiable installation-level data. Effects on costs/competitiveness are possibilities. Do not use national per-capita emissions. Source: source-carbon-ec.",
+        "keyDates": [
+          {
+            "id": "cbam-definitive-start",
+            "date": "2026-01-01",
+            "subjectTerms": [
+              "regime definitivo",
+              "período definitivo",
+              "fase definitiva",
+              "definitive regime",
+              "definitive cbam regime",
+              "definitive cbam period",
+              "definitive period",
+              "definitive phase"
+            ],
+            "eventTerms": [
+              "começa",
+              "começou",
+              "inicia",
+              "iniciou",
+              "início",
+              "em vigor",
+              "vigente",
+              "vigora",
+              "desde",
+              "starts",
+              "started",
+              "begins",
+              "began",
+              "start of",
+              "applies",
+              "applied",
+              "in force",
+              "since"
+            ]
+          },
+          {
+            "id": "cbam-first-annual-declaration",
+            "date": "2027-09-30",
+            "subjectTerms": [
+              "primeira declaração",
+              "declaração anual",
+              "first declaration",
+              "annual declaration",
+              "first annual"
+            ],
+            "eventTerms": [
+              "até",
+              "prazo",
+              "devida",
+              "vence",
+              "due",
+              "deadline",
+              "by "
+            ]
+          }
+        ],
+        "legalRefs": [
+          {
+            "id": "eu-reg-2023-956",
+            "kind": "norm",
+            "labels": [
+              "Regulation (EU) 2023/956",
+              "Regulamento (UE) 2023/956",
+              "2023/956"
+            ]
+          },
+          {
+            "id": "cbam-2025-simplification",
+            "kind": "norm",
+            "labels": [
+              "2025 CBAM simplification amendment",
+              "CBAM simplification",
+              "simplification amendment",
+              "simplificação do CBAM",
+              "alteração de 2025",
+              "2025 amendment",
+              "emenda de 2025"
+            ]
+          },
+          {
+            "id": "european-commission",
+            "kind": "institution",
+            "labels": [
+              "European Commission",
+              "Comissão Europeia",
+              "DG TAXUD",
+              "Directorate-General for Taxation and Customs Union",
+              "Direção-Geral da Fiscalidade e da União Aduaneira"
+            ]
+          }
+        ],
+        "temporalShape": "three_points",
+        "comparisons": [
+          {
+            "id": "cbam-price-latest-vs-previous",
+            "observed": 82.32,
+            "reference": 75.28,
+            "unit": "€/tCO2e",
+            "direction": "above"
+          }
+        ],
+        "materialSha256": "sha256:dd2bfe81369c17d62d2673e869a51a1f8733bd81c8666e42bc2990748bc0accb"
+      }
+    },
+    {
+      "sectionId": "blockchain",
+      "status": "shadow",
+      "latencyMs": 17643,
+      "totalTokens": 8266,
+      "evidence": {
+        "material": "Section: blockchain\nValid as of: 2026-10-10T12:26:25.048Z\nNext review: 2026-10-17T12:46:28.269Z\nForma temporal: snapshot\nReferências jurídicas disponíveis: nenhuma\nProvenance permitida para esta seção (use estes sourceId literalmente em evidenceRefs e whatToWatch.sourceId):\nsource-defillama-stablecoins | https://defillama.com/stablecoins | publica: capitalização de mercado de stablecoins, por ativo e total | dado: verified, direct\nsource-defillama-rwa | https://defillama.com/protocols | publica: TVL de protocolos de ativos do mundo real (RWA) | dado: verified, direct\nsource-defillama-coins | https://defillama.com/ | publica: preços de BTC, ETH, SOL, BNB, USDT e USDC | dado: verified, direct\nEventos disponíveis (opcional em claims[].eventRefs): nenhum\nContext:\nDigital assets. Stablecoin market capitalization: US$ 283.8 bilhões; Tether: US$ 184.1 bilhões. This is market capitalization, not international payment volume. RWA sample: Invesco USTB: US$ 597.7 milhões TVL; Ethena USDtb: US$ 470.3 milhões TVL; Re: US$ 405.5 milhões TVL; partial sample of individual protocols, not a sector total. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Temporal shape: single-day snapshot; no time series is available in this dataset, so variation over time cannot be established yet. Suggested What to Watch: the next DefiLlama update of stablecoin market capitalization, which will allow the first temporal comparison. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.",
+        "keyDates": [],
+        "comparisons": [],
+        "legalRefs": [],
+        "temporalShape": "snapshot",
+        "materialSha256": "sha256:1f9127683ec0a8022656ad017ad4da69136459bcb136981014900f65b8b7c135"
+      }
+    },
+    {
+      "sectionId": "climate",
+      "status": "shadow",
+      "latencyMs": 17693,
+      "totalTokens": 8708,
+      "evidence": {
+        "material": "Section: climate\nValid as of: 2026-10-05\nNext review: 2026-10-17T12:46:28.269Z\nForma temporal: window_aggregate\nReferências jurídicas disponíveis: nenhuma\nProvenance permitida para esta seção (use estes sourceId literalmente em evidenceRefs e whatToWatch.sourceId):\nsource-open-meteo-brasilia | https://archive-api.open-meteo.com/v1/archive?latitude=-15.8&longitude=-47.9&start_date=2025-10-06&end_date=2026-10-05&daily=temperature_2m_mean,precipitation_sum&timezone=auto | publica: temperatura média diária e precipitação diária em Brasília | dado: verified, derived\nEventos disponíveis (opcional em claims[].eventRefs): nenhum\nContext:\nClimate vector for Brasília. Rolling 12-month window 2025-10-06 to 2026-10-05; mean temperature 22.4°C (above the 21.4°C reference); precipitation 1361 mm (below the 1550 mm reference). The reference benchmarks (21.4°C and 1550 mm) are dashboard references, not an official climatology. A single city cannot establish impacts on producing regions, commodities or energy. Any transmission to commodities, hydrology, energy or FX must be a hypothesis and should be monitored against producing regions and relevant river basins. Source: source-open-meteo-brasilia.",
+        "keyDates": [],
+        "legalRefs": [],
+        "temporalShape": "window_aggregate",
+        "comparisons": [
+          {
+            "id": "climate-temp-vs-reference",
+            "observed": 22.4,
+            "reference": 21.4,
+            "unit": "°C",
+            "direction": "above"
+          },
+          {
+            "id": "climate-precip-vs-reference",
+            "observed": 1361,
+            "reference": 1550,
+            "unit": "mm",
+            "direction": "below"
+          }
+        ],
+        "materialSha256": "sha256:6a732d45ed7762a286d5c31d6ba9b67a6b12f03614fec82d59161ea2975bfc9a"
+      }
+    }
+  ],
+  "providerEvents": [
+    {
+      "provider": "nvidia",
+      "phase": "generation",
+      "attempt": 1,
+      "latencyMs": 13616,
+      "decision": "success",
+      "sectionId": "carbon",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "decision": "retry",
+      "schemaErrors": [
+        "[recommendation_language] stakeholderImplications[0].pt: R1_deontic (\"precisar apoiar\") — \"Autoridades brasileiras podem precisar apoiar exportadores na obtenção de dados de emissões verificáveis para atender a pedidos indiretos de importadores da UE.\"",
+        "[recommendation_language] stakeholderImplications[0].en: R1_deontic (\"need to assist\") — \"Brazilian authorities may need to assist exporters in obtaining verifiable emissions data to meet indirect requests from EU importers.\"",
+        "[recommendation_language] stakeholderImplications[1].pt: R1_deontic (\"precisar investir\") — \"Empresas brasileiras exportadoras de bens cobertos pelo CBAM podem precisar investir em sistemas de monitoramento de emissões para responder a solicitações de d\"",
+        "[recommendation_language] stakeholderImplications[1].en: R1_deontic (\"need to invest\") — \"Brazilian corporate exporters of CBAM-covered goods may need to invest in emissions monitoring systems to respond to data requests from EU importers.\"",
+        "[recommendation_language] stakeholderImplications[2].pt: R1_deontic (\"devem monitorar\") — \"Investidores devem monitorar a evolução do preço do CBAM e a capacidade das empresas de mitigar riscos de custos associados ao mecanismo.\"",
+        "[recommendation_language] stakeholderImplications[2].en: R1_deontic (\"should monitor\") — \"Investors should monitor the evolution of the CBAM price and companies' capacity to mitigate cost risks associated with the mechanism.\""
+      ],
+      "sectionId": "carbon",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "attempt": 1,
+      "latencyMs": 19223,
+      "decision": "success",
+      "sectionId": "carbon",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "decision": "fixed",
+      "remainingErrors": [],
+      "sectionId": "carbon",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "generation",
+      "attempt": 1,
+      "latencyMs": 17643,
+      "decision": "success",
+      "sectionId": "blockchain",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "decision": "retry",
+      "schemaErrors": [
+        "[recommendation_language] decisionLens.implications[0].pt: R1_deontic (\"devem monitorar\") — \"Startups com modelos baseados em stablecoins devem monitorar a dominância de Tether para avaliar riscos de concentração.\"",
+        "[recommendation_language] decisionLens.implications[0].en: R1_deontic (\"should monitor\") — \"Startups with stablecoin-based models should monitor Tether's dominance to assess concentration risks.\""
+      ],
+      "sectionId": "blockchain",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "attempt": 1,
+      "latencyMs": 11584,
+      "decision": "success",
+      "sectionId": "blockchain",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "decision": "fixed",
+      "remainingErrors": [],
+      "sectionId": "blockchain",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "generation",
+      "attempt": 1,
+      "latencyMs": 17693,
+      "decision": "success",
+      "sectionId": "climate",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "decision": "retry",
+      "schemaErrors": [
+        "[recommendation_language] stakeholderImplications[3].pt: R1_deontic (\"precisar validar\") — \"Startups focadas em soluções climáticas podem precisar validar se os padrões observados em Brasília representam oportunidades ou limitações para seus modelos em\"",
+        "[recommendation_language] stakeholderImplications[3].en: R1_deontic (\"need to validate\") — \"Startups focused on climate solutions may need to validate whether observed patterns in Brasília represent opportunities or limitations for their models at loca\""
+      ],
+      "sectionId": "climate",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "attempt": 1,
+      "latencyMs": 14439,
+      "decision": "success",
+      "sectionId": "climate",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "decision": "fixed",
+      "remainingErrors": [],
+      "sectionId": "climate",
+      "runId": "odin-20261010-124627-054b",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.0.0"
+    }
+  ],
+  "generatedAt": "2026-10-10T12:48:02.540Z",
+  "validation": {
+    "decision": "blocked",
+    "validator": "semantic",
+    "errors": [
+      "sections.blockchain [snapshot_trend] stakeholderImplications[1].pt: fonte é snapshot; \"evolu\" pressupõe série temporal — \"Empresas com exposição a ativos digitais podem acompanhar a evolução do TVL de protocolos RWA para avaliar oportunidades de tokenização.\"",
+      "sections.blockchain [snapshot_trend] stakeholderImplications[1].en: fonte é snapshot; \"evolu\" pressupõe série temporal — \"Companies exposed to digital assets may track the evolution of RWA protocol TVL to assess tokenization opportunities.\"",
+      "shadow generation gate bloqueou o artefato"
+    ],
+    "factEvidenceCoverage": 1,
+    "generatedSections": 3,
+    "economicLawHighHasNorms": true,
+    "sectionProfileValid": true,
+    "evidenceConsistent": false,
+    "consistencyErrors": [
+      {
+        "sectionId": "blockchain",
+        "rule": "snapshot_trend",
+        "path": "stakeholderImplications[1].pt",
+        "detail": "fonte é snapshot; \"evolu\" pressupõe série temporal — \"Empresas com exposição a ativos digitais podem acompanhar a evolução do TVL de protocolos RWA para avaliar oportunidades de tokenização.\""
+      },
+      {
+        "sectionId": "blockchain",
+        "rule": "snapshot_trend",
+        "path": "stakeholderImplications[1].en",
+        "detail": "fonte é snapshot; \"evolu\" pressupõe série temporal — \"Companies exposed to digital assets may track the evolution of RWA protocol TVL to assess tokenization opportunities.\""
+      }
+    ],
+    "freshnessValid": true,
+    "provenanceReproducible": true,
+    "layersComplete": true,
+    "contractV11Valid": true,
+    "contractV11Errors": [],
+    "validatedAt": "2026-10-10T12:48:02.731Z"
+  }
+}
