@@ -61,7 +61,7 @@ const ui = await import(pathToFileURL(path.join(bundleDir, "bundle.mjs")).href);
   const v = run(dir, "scripts/validate-insights-shadow.mjs", { ODIN_MOCK_SCENARIO: "ok" });
   assert(v.code === 0 && /Shadow gate: PASS/.test(v.out), `[ok] gate deveria passar:\n${v.out.slice(-2500)}`);
   const shadow = await readJson(dir, "public/data/insights.v2.shadow.json");
-  assert(shadow.intelligenceContractVersion === "1.1" && shadow.promptVersion === "4.2.0", "[ok] shadow deveria ser contrato 1.1 / prompt 4.2.0");
+  assert(shadow.intelligenceContractVersion === "1.1" && shadow.promptVersion === "4.3.0", "[ok] shadow deveria ser contrato 1.1 / prompt 4.3.0");
   for (const [id, s] of Object.entries(shadow.data.sections)) {
     assert(s.intelligenceContractVersion === "1.1", `[ok] ${id} não é 1.1`);
     assert(s.decisionLens?.lens === "founder_ceo" && s.decisionLens.implications.length >= 1, `[ok] ${id} sem lente Founder/CEO`);

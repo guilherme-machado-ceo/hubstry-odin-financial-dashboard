@@ -113,6 +113,22 @@ for (const [rule, mutate] of cases) {
     const fixed = structuredClone(e); fixed.decisionLens.implications[0].claimRefs = fixedRefs;
     assert(!cov(fixed).length, `${name}: com claimRefs ${fixedRefs.join(", ")} deveria passar`);
   }
+  // Shadow #35: claim-3 falava só em "dados verificáveis de instalação" (sem "emissões"), e a regra
+  // não tinha métrica para ancorar. Com o contexto 4.3.0 o claim explicita emissões embutidas:
+  // a lente sobre monitoramento de emissões que cita só claims de preço passa a bloquear.
+  {
+    const price0 = c("claim-0", "O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e.", "The CBAM price in Q3 2026 was 82.32 €/tCO2e.");
+    const price1 = c("claim-1", "O preço do CBAM no Q2 2026 foi de 75,28 €/tCO2e, e o preço do Q3 2026 está acima do do Q2 2026.", "The CBAM price in Q2 2026 was 75.28 €/tCO2e, and the Q3 2026 price is above Q2 2026.");
+    const lens35 = { textPt: "Startups com exposição a cadeias de exportação de bens CBAM-cobertos podem usar o preço atual do CBAM para avaliar a possibilidade de investir em sistemas de monitoramento de emissões.", textEn: "Startups exposed to export chains of CBAM-covered goods may use the current CBAM price to assess investing in emissions monitoring systems.", claimRefs: ["claim-0", "claim-1"] };
+    const claim3Old = c("claim-3", "A obrigação formal do CBAM recai sobre o declarante autorizado da UE; exportadores brasileiros podem enfrentar pedidos indiretos de dados verificáveis de instalação para bens cobertos.", "The formal CBAM obligation lies with the authorized EU declarant; Brazilian exporters may face indirect requests for verifiable installation data for covered goods.");
+    const claim3New = c("claim-3", "A obrigação formal do CBAM recai sobre o declarante autorizado da UE; exportadores brasileiros de bens cobertos podem receber de importadores da UE pedidos de dados verificáveis de emissões embutidas por instalação.", "The formal CBAM obligation lies with the authorized EU declarant; Brazilian exporters of covered goods may receive requests from EU importers for verifiable installation-level embedded-emissions data.");
+    assert(!cov(lensCase([price0, price1, claim3Old], lens35)).length, "#35 como gerado: sem métrica no claim-3, a regra não tem como acusar (lacuna documentada)");
+    const e35 = lensCase([price0, price1, claim3New], lens35);
+    assert(cov(e35).some((x) => x.detail.includes("emissões") && x.detail.includes("claim-3")), `#35 com claim-3 explícito: lente só com preço deveria bloquear: ${cov(e35).map(formatContractError).join(" | ")}`);
+    assert(validateModelOutputV11(e35, "carbon", { provenance: base.entry.provenance, evidence: base.evidence }).some((x) => x.startsWith("[lens_claim_coverage]")), "#35: validação da nova tentativa deveria acusar");
+    const fixed35 = structuredClone(e35); fixed35.decisionLens.implications[0].claimRefs = ["claim-0", "claim-3"];
+    assert(!cov(fixed35).length, "#35: citando preço e o claim de emissões deveria passar");
+  }
   // Termo de público, não métrica: "clientes importadores" não exige claim de importador.
   assert(!cov(base.entry).length, "base v1.1 (founders com clientes importadores) não deve acusar lens_claim_coverage");
   // Métrica ausente de todos os claims não é tratada aqui (não há claim a citar).
