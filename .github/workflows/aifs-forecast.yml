@@ -39,10 +39,11 @@ concurrency:
 
 jobs:
   aifs:
+    # Coleta, testes e validacao — somente leitura, inclusive em pull_request.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -64,8 +65,29 @@ jobs:
           name: aifs-forecast
           path: public/data/aifs-forecast.json
           retention-days: 7
-      - name: Commit snapshot (agendado ou manual, somente no main)
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+
+  commit_snapshot:
+    # Gravacao no repositorio — executa APENAS em schedule ou workflow_dispatch
+    # no main; nunca em pull_request. Revalida o artefato antes de gravar.
+    # validate_forecast.py e aifs_core.py usam apenas stdlib; pip nao e necessario.
+    needs: aifs
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Baixar o JSON validado pelo job aifs
+        uses: actions/download-artifact@v4
+        with:
+          name: aifs-forecast
+          path: public/data
+      - name: Revalidar o arquivo antes de gravar (stdlib apenas)
+        run: python3 scripts/forecast/validate_forecast.py public/data/aifs-forecast.json
+      - name: Commit snapshot (main)
         run: |
           git config user.name "odin-data-bot"
           git config user.email "odin-data-bot@users.noreply.github.com"

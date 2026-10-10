@@ -6,7 +6,7 @@ on:
       shadow_run_id:
         description: "GitHub Actions run ID containing the approved ODIN shadow artifact"
         required: true
-        type: string
+        type: number
       approve:
         description: "Explicit human approval to promote this shadow artifact to production"
         required: true
@@ -37,11 +37,19 @@ jobs:
       - name: Download selected shadow artifact
         env:
           GH_TOKEN: ${{ github.token }}
+          SHADOW_RUN_ID: ${{ inputs.shadow_run_id }}
+          GH_REPO: ${{ github.repository }}
         run: |
+          # Defesa em profundidade: valida que o ID contém só dígitos antes
+          # de qualquer comando shell que o utilize.
+          if ! [[ "$SHADOW_RUN_ID" =~ ^[0-9]+$ ]]; then
+            echo "Erro: shadow_run_id deve conter exclusivamente dígitos." >&2
+            exit 1
+          fi
           rm -rf /tmp/odin-shadow
           mkdir -p /tmp/odin-shadow
-          gh run download "${{ inputs.shadow_run_id }}" \
-            --repo "${{ github.repository }}" \
+          gh run download "$SHADOW_RUN_ID" \
+            --repo "$GH_REPO" \
             --name odin-insights-v2-shadow \
             --dir /tmp/odin-shadow
 
