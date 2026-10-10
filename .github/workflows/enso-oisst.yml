@@ -1,13 +1,28 @@
 name: ODIN ENSO Signal (OISST)
 
-# OD-1 — sinal Nino 3.4 a partir do NOAA OISST v2.1 (AWS Open Data).
+# Sinal Nino 3.4 a partir do NOAA OISST v2.1 (AWS Open Data).
 # Sinal diario de MONITORAMENTO; nao e ONI/RONI (indices oficiais NOAA/CPC).
 #
-# Esta etapa NAO grava nada no repositorio: no PR e no disparo manual, roda
-# testes + coleta real + gate e publica o JSON apenas como artefato, para
-# conferencia. Interface (OD-2) e agendamento (OD-3) dependem de nova aprovacao.
+# Gatilhos:
+#   - schedule (main): 1x/dia, grava public/data/enso-oisst.json no repositorio.
+#   - workflow_dispatch (main): idem, sob demanda.
+#   - pull_request: testes + coleta real + gate + diagnostico; publica o JSON
+#     apenas como artefato. NAO grava nada no repositorio.
+# Se qualquer etapa obrigatoria falhar, nada e gravado: o main mantem o ultimo
+# snapshot valido. O diagnostico contra a NOAA/CPC nunca bloqueia.
+#
+# Permissoes separadas por job: "enso" (testes, coleta, gate, diagnostico,
+# artefato) roda SEMPRE com leitura apenas, inclusive em PR. A escrita fica
+# isolada em "commit_snapshot", que so existe em schedule/dispatch no main.
+# A interface (que vai ler este JSON) e assunto de outro PR.
 
 on:
+  schedule:
+    # Cron do GitHub e SEMPRE em UTC (Brasilia = UTC-3).
+    # 09:17 UTC (06:17 BRT): o arquivo preliminar do dia anterior ja saiu
+    # (~1 dia de atraso). Nao colide com 06:17 UTC (ODIN Data Snapshot),
+    # 06:41 UTC seg (ODIN Open Markets), 08:23 e 20:23 UTC (ODIN AIFS Forecast).
+    - cron: "17 9 * * *"
   pull_request:
     paths:
       - "scripts/oisst/**"
@@ -17,10 +32,20 @@ on:
 permissions:
   contents: read
 
+# No maximo uma execucao em andamento por grupo; a seguinte espera (nao ha
+# duas gravacoes simultaneas). Comportamento do GitHub: so UMA execucao fica
+# pendente por grupo; se chegar outra, a pendente mais antiga e descartada
+# (ex.: um disparo manual na fila pode ser substituido pelo agendado).
+concurrency:
+  group: enso-oisst-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
+  cancel-in-progress: false
+
 jobs:
   enso:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,9 +64,51 @@ jobs:
       - name: Diagnostico vs serie semanal NOAA/CPC (nao bloqueia)
         continue-on-error: true
         run: python3 scripts/oisst/diag_cpc.py public/data/enso-oisst.json
-      - name: Publicar JSON para conferencia (artefato; nada vai para o main)
+      - name: Publicar JSON para conferencia (artefato)
         uses: actions/upload-artifact@v4
         with:
           name: enso-oisst
           path: public/data/enso-oisst.json
           retention-days: 7
+
+  commit_snapshot:
+    # Unico job com escrita. Nunca roda em pull_request.
+    needs: enso
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/oisst/requirements.txt
+      - name: Install (versoes exatas)
+        run: pip install -r scripts/oisst/requirements.txt
+      - name: Baixar o JSON validado pelo job enso
+        uses: actions/download-artifact@v4
+        with:
+          name: enso-oisst
+          path: public/data
+      - name: Revalidar o arquivo antes de gravar
+        run: python3 scripts/oisst/validate_enso.py public/data/enso-oisst.json
+      - name: Commit snapshot (main)
+        run: |
+          git config user.name "odin-data-bot"
+          git config user.email "odin-data-bot@users.noreply.github.com"
+          git add public/data/enso-oisst.json
+          if git diff --cached --quiet; then
+            echo "Sem alteracoes no snapshot ENSO/OISST."
+            exit 0
+          fi
+          git commit -m "chore(data): snapshot enso oisst [skip ci]"
+          # Traz o que outro robo tenha gravado no main durante a execucao.
+          # Se o rebase ou o push forem recusados, o passo falha e o main
+          # remoto fica intacto (nada e sobrescrito; a proxima execucao repoe).
+          git pull --rebase origin main
+          git push origin HEAD:main
