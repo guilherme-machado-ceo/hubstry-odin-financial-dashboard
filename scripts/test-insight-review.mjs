@@ -96,10 +96,11 @@ const legacyStale = {
   assert(html.includes("Contexto estratégico PT."), "v2 válido PT deve renderizar o contexto");
 }
 
-// ── 4. v2 vencido → aviso datado, tese ausente ───────────────────────────────
+// ── 4. v2 vencido → aviso datado, tese e contexto ausentes ──────────────────
 {
   const html = render({ entry: entryExpired, legacy: null, updatedAt: null, nowMs: AFTER_TZ }, "pt");
   assert(!html.includes("Tese ODIN PT."), "v2 vencido não deve renderizar a tese");
+  assert(!html.includes("Contexto estratégico PT."), "v2 vencido não deve renderizar o contexto");
   assert(html.includes("revisão"), "v2 vencido deve conter aviso de revisão");
 }
 
@@ -131,11 +132,13 @@ const legacyStale = {
     "v2 vencido + legacy deve mostrar aviso datado");
 }
 
-// ── 8. v2 stale (prazo válido) → aviso genérico, tese ausente ────────────────
+// ── 8. v2 stale (prazo válido) → aviso genérico, tese e contexto ausentes ────
 {
   const html = render({ entry: entryStaleValid, legacy: null, updatedAt: null, nowMs: NOW }, "pt");
   assert(!html.includes("Tese ODIN PT."),
     "v2 stale (prazo válido) não deve renderizar a tese");
+  assert(!html.includes("Contexto estratégico PT."),
+    "v2 stale (prazo válido) não deve renderizar o contexto");
   assert(html.includes("revisão"),
     "v2 stale (prazo válido) deve mostrar aviso genérico");
 }
@@ -147,6 +150,8 @@ const legacyStale = {
     "vencido + stale deve mostrar aviso DATADO (16/10), não genérico");
   assert(!html.includes("Tese ODIN PT."),
     "vencido + stale não deve mostrar a tese");
+  assert(!html.includes("Contexto estratégico PT."),
+    "vencido + stale não deve mostrar o contexto");
 }
 
 // ── 10. Legacy stale → aviso genérico, conteúdo oculto ──────────────────────
