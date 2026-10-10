@@ -21,11 +21,18 @@ LAT = np.arange(-89.875, 90, 0.25)          # 720 centros, como o OISST
 LON = np.arange(0.125, 360, 0.25)           # 1440 centros, 0-360
 TODAY = date(2026, 10, 10)
 META = {"variableLongName": "Daily sea surface temperature anomalies", "variableUnits": "Celsius",
-        "productVersion": "Version v02r01", "climatologyAttributes": None,
+        "productVersion": "Version v02r01", "climatologyPeriod": None, "climatologyDeclaration": None,
         "climatologyNote": core.climatology_note(None), "consistentMetadata": True}
+# Texto no formato do atributo global 'references' do OISST real: a frase da
+# climatologia vem depois de mais de 120 caracteres (o caso que um corte perderia).
+REFERENCES = ("Reynolds, et al.(2007) Daily High-Resolution-Blended Analyses for Sea Surface Temperature "
+              "(available at https://doi.org/10.1175/2007JCLI1824.1). Banzon, et al.(2016) A long-term record "
+              "of blended satellite and in situ sea-surface temperature for climate monitoring, modeling and "
+              "environmental studies. Climatology is based on 1971-2000 OI.v2 SST. Satellite data: Pathfinder AVHRR.")
 
 
-def make_nc(field2d: np.ndarray, lon=LON, version="Version v02r01", long_name="Daily sea surface temperature anomalies") -> bytes:
+def make_nc(field2d: np.ndarray, lon=LON, version="Version v02r01", long_name="Daily sea surface temperature anomalies",
+            references: str | None = None) -> bytes:
     """netCDF4 em memoria imitando o OISST: anom int16, scale 0.01, _FillValue -999."""
     import netCDF4
 
@@ -33,6 +40,8 @@ def make_nc(field2d: np.ndarray, lon=LON, version="Version v02r01", long_name="D
         path = Path(tmp) / "x.nc"
         with netCDF4.Dataset(path, "w") as ds:
             ds.product_version = version
+            if references:
+                ds.references = references
             ds.createDimension("time", 1)
             ds.createDimension("zlev", 1)
             ds.createDimension("lat", len(LAT))
@@ -97,6 +106,18 @@ class TestReadNetCDF(unittest.TestCase):
         self.assertEqual(meta["productVersion"], "Version v02r01")
         self.assertEqual(meta["variableUnits"], "Celsius")
         self.assertIn("não declara", meta["climatologyNote"])  # fixture sem atributo de climatologia
+        self.assertIsNone(meta["climatologyPeriod"])
+
+    def test_climatology_from_global_references(self):
+        """Regressao: a declaracao no atributo global 'references' (texto longo) e extraida."""
+        _, meta = fetch_oisst.read_anomaly(make_nc(box_field(0.5), references=REFERENCES),
+                                           "oisst-avhrr-v02r01.20261008.nc")
+        self.assertEqual(meta["climatologyPeriod"], "1971–2000")
+        self.assertEqual(meta["climatologyDeclaration"]["attribute"], "global:references")
+        self.assertEqual(meta["climatologyDeclaration"]["statement"], "Climatology is based on 1971-2000 OI.v2 SST")
+        self.assertIn("1971–2000", meta["climatologyNote"])
+        self.assertIn("referências são distintas", meta["climatologyNote"])  # CPC usa 1991–2020
+        self.assertNotIn("não declara", meta["climatologyNote"])
 
 
 class TestGate(unittest.TestCase):
@@ -138,7 +159,10 @@ class TestGate(unittest.TestCase):
 
     def test_climatology_note_variants(self):
         self.assertIn("não declara", core.climatology_note(None))
-        self.assertIn("declarada no arquivo", core.climatology_note({"climatology": "1991-2020"}))
+        found = core.extract_climatology({"anom:comment": "Climatology based on 1991-2020 mean"})
+        self.assertEqual(found["period"], "1991–2020")
+        self.assertNotIn("distintas", core.climatology_note(found))
+        self.assertIsNone(core.extract_climatology({"global:title": "OISST v2.1"}))
 
     def test_missing_disclaimer(self):
         p = self.payload(); p["disclaimer"] = "x"

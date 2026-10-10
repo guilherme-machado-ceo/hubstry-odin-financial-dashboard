@@ -136,13 +136,15 @@ def read_anomaly(nc_bytes: bytes, name: str) -> tuple[dict, dict]:
         stats = core.area_weighted_box_mean(field, np.asarray(lat), np.asarray(lon))
         gattrs = {k: str(ds.getncattr(k)) for k in ds.ncattrs()}
         vattrs = {k: str(var.getncattr(k)) for k in var.ncattrs()}
-    clim = {k: v for k, v in {**gattrs, **vattrs}.items() if "climatolog" in k.lower() or "climatolog" in v.lower()}
+    clim = core.extract_climatology({**{f"global:{k}": v for k, v in gattrs.items()},
+                                     **{f"anom:{k}": v for k, v in vattrs.items()}})
     meta = {
         "variableLongName": vattrs.get("long_name"),
         "variableUnits": vattrs.get("units"),
         "productVersion": gattrs.get("product_version") or gattrs.get("version") or gattrs.get("id"),
-        "climatologyAttributes": clim or None,
-        "climatologyNote": core.climatology_note(clim or None),
+        "climatologyPeriod": clim["period"] if clim else None,
+        "climatologyDeclaration": clim,
+        "climatologyNote": core.climatology_note(clim),
     }
     return stats, meta
 

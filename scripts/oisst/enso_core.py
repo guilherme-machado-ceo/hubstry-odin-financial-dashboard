@@ -10,6 +10,7 @@ indices oficiais da NOAA/CPC, e nao declara El Nino ou La Nina.
 from __future__ import annotations
 
 import math
+import re
 from datetime import date, datetime, timedelta, timezone
 
 import numpy as np
@@ -59,12 +60,36 @@ CLIMATOLOGY_UNDECLARED = (
 )
 
 
-def climatology_note(declared: dict | None) -> str:
-    """Documenta a climatologia: declarada no arquivo ou explicitamente nao declarada."""
-    if declared:
-        pairs = "; ".join(f"{k}={v}" for k, v in sorted(declared.items()))
-        return f"Climatologia declarada no arquivo OISST: {pairs}. O valor é usado como fornecido, sem recálculo."
-    return CLIMATOLOGY_UNDECLARED
+CPC_REFERENCE_PERIOD = "1991–2020"
+_SENTENCE_SPLIT = re.compile(r"(?<=\.)\s+|;|\n")  # ponto so encerra frase se seguido de espaco
+_PERIOD = re.compile(r"(1[89]\d{2}|20\d{2})\s*[-–]\s*(1[89]\d{2}|20\d{2})")
+
+
+def extract_climatology(attrs: dict) -> dict | None:
+    """Procura, em qualquer atributo (global ou da variavel), a frase que
+    declara a climatologia. -> {attribute, statement, period} ou None."""
+    for name in sorted(attrs):
+        hits = [x.strip() for x in _SENTENCE_SPLIT.split(str(attrs[name])) if "climatolog" in x.lower()]
+        if hits:
+            statement = hits[0].rstrip(".").strip()
+            p = _PERIOD.search(statement)
+            return {"attribute": name, "statement": statement,
+                    "period": f"{p.group(1)}–{p.group(2)}" if p else None}
+    return None
+
+
+def climatology_note(found: dict | None) -> str:
+    """Documenta a climatologia declarada no arquivo, ou a ausencia de declaracao."""
+    if not found:
+        return CLIMATOLOGY_UNDECLARED
+    period = found["period"] or "não identificado na frase"
+    distinct = (f" A série semanal da NOAA/CPC usa a base {CPC_REFERENCE_PERIOD}: as referências são distintas,"
+                " e a comparação com ela é apenas diagnóstico não bloqueante."
+                if found["period"] != CPC_REFERENCE_PERIOD else
+                " A comparação com a série semanal da NOAA/CPC é diagnóstico não bloqueante.")
+    return (f"Climatologia declarada nos metadados do OISST (atributo '{found['attribute']}'): "
+            f"\"{found['statement']}\". Período de referência: {period}. "
+            f"O valor da anomalia é usado como fornecido, sem recálculo.{distinct}")
 
 
 def normalize_lon(lon: np.ndarray) -> np.ndarray:

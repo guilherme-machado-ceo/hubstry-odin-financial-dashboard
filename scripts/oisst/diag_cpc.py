@@ -65,11 +65,13 @@ def main() -> int:
         lat = np.asarray(ds.variables["lat"][:], dtype="float64")
         lon = np.asarray(ds.variables["lon"][:], dtype="float64")
         sst, anom = box_mean(ds, "sst", lat, lon), box_mean(ds, "anom", lat, lon)
-        attrs = {k: str(ds.getncattr(k))[:120] for k in ds.ncattrs()}
-        vattrs = {k: str(ds.variables["anom"].getncattr(k))[:120] for k in ds.variables["anom"].ncattrs()}
-    notice("OISST arquivo", f"{series[last]['file']} · sst {sst:.2f} °C · anom {anom:+.2f} °C · climatologia implícita (sst−anom) {sst - anom:.2f} °C")
-    clim_hints = {k: v for k, v in {**attrs, **vattrs}.items() if "clim" in k.lower() or "clim" in v.lower() or "base" in k.lower()}
-    notice("OISST metadados", f"anom attrs: {vattrs} · pistas de climatologia: {clim_hints or 'nenhuma declarada'}")
+        attrs = {f"global:{k}": str(ds.getncattr(k)) for k in ds.ncattrs()}
+        vattrs = {f"anom:{k}": str(ds.variables["anom"].getncattr(k)) for k in ds.variables["anom"].ncattrs()}
+    notice("OISST arquivo", f"{series[last]['file']} · sst {sst:.2f} °C · anom {anom:+.2f} °C · referência implícita (sst−anom) {sst - anom:.2f} °C")
+    found = core.extract_climatology({**attrs, **vattrs})
+    notice("OISST climatologia", (f"declarada em '{found['attribute']}': \"{found['statement']}\" · período {found['period']} "
+                                  f"× CPC {core.CPC_REFERENCE_PERIOD} (referências distintas; diagnóstico não bloqueante)")
+           if found else "nenhuma declaração encontrada nos metadados")
 
     cpc = parse_cpc(f.http_get(CPC_URL).decode("latin-1"))
     if not cpc:
@@ -77,7 +79,7 @@ def main() -> int:
         return 0
     week = min(cpc, key=lambda d: abs((d - last).days))
     c_sst, c_ssta = cpc[week]
-    notice("CPC semana mais próxima", f"{week} · SST {c_sst:.1f} °C · SSTA {c_ssta:+.1f} °C · climatologia implícita {c_sst - c_ssta:.1f} °C (base 1991–2020)")
+    notice("CPC semana mais próxima", f"{week} · SST {c_sst:.1f} °C · SSTA {c_ssta:+.1f} °C · referência implícita {c_sst - c_ssta:.1f} °C (base {core.CPC_REFERENCE_PERIOD})")
 
     rows = []
     for wk in sorted(d for d in cpc if d - timedelta(days=3) in series and d + timedelta(days=3) in series)[-6:]:
