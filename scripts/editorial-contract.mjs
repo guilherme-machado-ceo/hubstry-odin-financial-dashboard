@@ -133,7 +133,10 @@ export function checkEconomicLaw(entry, evidence) {
   return errors;
 }
 
-const TREND_WORDS = ["crescimento", "cresceu", "crescente*", "growth", "grew", "growing", "aumento*", "aumentou", "increase*", "expansao", "expansion", "declinio", "decline*", "tendencia*", "trend*", "acelera*", "desacelera*"];
+const TREND_WORDS = ["crescimento", "cresceu", "crescente*", "growth", "grew", "growing", "aumento*", "aumentou", "increase*", "expansao", "expansion", "declinio", "decline*", "tendencia*", "trend*", "acelera*", "desacelera*",
+  // Evolução/trajetória e movimento (run odin-20261010-122912-5356: "evolução do TVL" passou).
+  // "alta"/"queda" só em expressão de movimento: "alta capitalização" não é tendência.
+  "evolu*", "evolv*", "trajetoria*", "trajector*", "variacao", "variacoes", "subiu", "caiu", "em alta", "em queda", "rising", "falling", "rose", "fell", "change over"];
 
 const NEGATION = ["nao", "sem", "nenhum*", "nenhuma", "impossivel", "no", "not", "cannot", "without", "unable"];
 const splitSentencesLocal = (text) => String(text ?? "").split(/(?<=[.;!?])\s+/).filter(Boolean);
