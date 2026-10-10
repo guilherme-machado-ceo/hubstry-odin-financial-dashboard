@@ -174,9 +174,8 @@ function formatReviewedAt(iso: string, locale: string): string {
   try {
     return new Date(iso).toLocaleDateString(
       locale === "pt" ? "pt-BR" : "en-US",
-      locale === "pt"
-        ? { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" }
-        : { month: "short", day: "numeric", timeZone: "America/Sao_Paulo" }
+      { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" }
+      // pt-BR → DD/MM  |  en-US → MM/DD
     );
   } catch {
     return iso;

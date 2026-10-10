@@ -210,12 +210,12 @@ const entryApproved = {
   assert(html.includes("15/10"),
     "badge PT: data deve ser 15/10");
 
-  // 19. EN: badge presente e data legível com mês abreviado
+  // 19. EN: badge presente e data no formato MM/DD
   const htmlEn = render({ entry: entryApproved, legacy: null, updatedAt: null, nowMs: NOW }, "en");
   assert(htmlEn.includes('data-human-reviewed="true"'),
     "badge EN: data-human-reviewed deve estar presente");
-  assert(htmlEn.includes("Oct") && htmlEn.includes("15"),
-    "badge EN: data deve conter mês abreviado e dia 15");
+  assert(htmlEn.includes("10/15"),
+    "badge EN: data deve ser 10/15 (MM/DD)");
 
   // 20. reviewedAt ausente → sem badge
   const noDate = { ...entryApproved, reviewedAt: undefined };
