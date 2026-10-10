@@ -26,7 +26,7 @@
 //  6. Correção editorial pós-revisão classificada como wording | structural;
 //     o critério de aceite do M3 é zero mudanças structural.
 // ============================================================
-import { norm, hasTerm, SOURCE_REGISTRY, watchView } from "./editorial-contract.mjs";
+import { norm, hasTerm, SOURCE_REGISTRY, watchView, checkTemporalShape } from "./editorial-contract.mjs";
 export { watchView };
 import { extractDates, extractNumbers } from "./evidence-consistency.mjs";
 import { checkLayerCompleteness, validateClaim, LEVELS } from "./insights-schema.mjs";
@@ -322,6 +322,9 @@ export function validateModelOutputV11(parsed, sectionId, ctx = {}) {
       ...checkRecommendationLanguage(`stakeholderImplications[${i}].pt`, s?.textPt, legalContext(entry, ctx.evidence)),
       ...checkRecommendationLanguage(`stakeholderImplications[${i}].en`, s?.textEn, legalContext(entry, ctx.evidence)),
     ]),
+    // Mesma função do gate final (checkEditorialContract): a nova tentativa da
+    // seção recebe o erro de tendência em snapshot e pode corrigi-lo.
+    ...checkTemporalShape(entry, ctx.evidence),
   ];
   return [...errors, ...semantic.map(formatContractError)];
 }

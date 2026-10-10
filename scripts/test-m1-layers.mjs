@@ -2,6 +2,7 @@
 import { readFile } from "node:fs/promises";
 import { checkLayerCompleteness, validateModelOutput, NOT_MATERIAL_PT, NOT_MATERIAL_EN } from "./insights-schema.mjs";
 import { checkTemporalShape } from "./editorial-contract.mjs";
+import { validateModelOutputV11 } from "./contract-v11.mjs";
 
 let failures = 0;
 const assert = (c, m) => { if (!c) { failures += 1; console.error("FALHA:", m); } };
@@ -54,6 +55,21 @@ for (const t of ["A amostra tem alta capitalização em poucos protocolos.", "H�
 }
 // A regra só vale para snapshot: séries com dois ou mais pontos podem falar em variação.
 assert(checkTemporalShape({ ...base, pt: "A variação entre os trimestres é positiva." }, { temporalShape: "three_points" }).length === 0, "three_points não é snapshot");
+
+// Run odin-20261010-124627-054b (#33): a frase real passou pela nova tentativa
+// automática e só foi barrada no gate final. Agora a validação da nova tentativa
+// usa a mesma checkTemporalShape do gate e acusa o erro já na seção.
+const run33 = { audience: "corporate", textPt: "Empresas com exposição a ativos digitais podem acompanhar a evolução do TVL de protocolos RWA para avaliar oportunidades de tokenização.", textEn: "Companies exposed to digital assets may track the evolution of RWA protocol TVL to assess tokenization opportunities." };
+const ctxSnap = { provenance: fx.provenance ?? [], events: [], evidence: snap };
+const withRun33 = validateModelOutputV11({ ...ok, stakeholderImplications: [ok.stakeholderImplications?.[0] ?? run33, run33] }, "blockchain", ctxSnap);
+assert(withRun33.some((e) => e.startsWith("[snapshot_trend] stakeholderImplications[1].pt")) && withRun33.some((e) => e.startsWith("[snapshot_trend] stakeholderImplications[1].en")), `#33: validação da nova tentativa deveria acusar snapshot_trend em PT e EN: ${withRun33.join(" | ")}`);
+const safe33 = { audience: "corporate", textPt: safe.textPt, textEn: safe.textEn };
+const withSafe = validateModelOutputV11({ ...ok, stakeholderImplications: [ok.stakeholderImplications?.[0] ?? safe33, safe33] }, "blockchain", ctxSnap);
+assert(!withSafe.some((e) => e.startsWith("[snapshot_trend]")), `forma segura não deveria acusar snapshot_trend: ${withSafe.filter((e) => e.startsWith("[snapshot_trend]")).join(" | ")}`);
+// Mesma regra nas duas camadas: o gate final acusa o mesmo caminho.
+assert(checkTemporalShape({ ...base, stakeholderImplications: [run33, run33] }, snap).some((e) => e.path === "stakeholderImplications[1].pt"), "#33: gate final também acusa");
+// Fora de snapshot, a validação da nova tentativa não aplica a regra.
+assert(!validateModelOutputV11({ ...ok, stakeholderImplications: [run33, run33] }, "carbon", { ...ctxSnap, evidence: { temporalShape: "three_points" } }).some((e) => e.startsWith("[snapshot_trend]")), "three_points não aciona snapshot_trend");
 
 if (failures) { console.error(`M1 layers: ${failures} falha(s)`); process.exit(1); }
 console.log("ODIN M1 layers: PASS (5 camadas, retry de contrato, snapshot)");
