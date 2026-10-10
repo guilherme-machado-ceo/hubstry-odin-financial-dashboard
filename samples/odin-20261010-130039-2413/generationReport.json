@@ -1,0 +1,316 @@
+{
+  "runId": "odin-20261010-130039-2413",
+  "provider": "nvidia",
+  "model": "nvidia/nemotron-3-super-120b-a12b",
+  "schemaVersion": "2.0",
+  "intelligenceContractVersion": "1.1",
+  "promptVersion": "4.1.0",
+  "decision": "shadow_generated",
+  "sections": [
+    {
+      "sectionId": "carbon",
+      "status": "shadow",
+      "latencyMs": 24880,
+      "totalTokens": 3823,
+      "evidence": {
+        "material": "Section: carbon\nValid as of: 2026-10-05\nNext review: 2027-01-06T03:00:00Z\nForma temporal: three_points\nReferências jurídicas disponíveis: Regulation (EU) 2023/956 (norm); 2025 CBAM simplification amendment (norm); European Commission (institution)\nProvenance permitida para esta seção (use estes sourceId literalmente em evidenceRefs e whatToWatch.sourceId):\nsource-carbon-ec | https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en | publica: preço do CBAM, marcos regulatórios, orientações e atos de execução do CBAM | dado: verified, direct\nEventos disponíveis (opcional em claims[].eventRefs): evt-cbam-definitive-start | 2026-01-01 | Start of the definitive CBAM regime; evt-cbam-first-annual-declaration | 2027-09-30 | Deadline of the first annual CBAM declaration\nContext:\nCarbon pricing/CBAM (Regulation (EU) 2023/956, as amended by the 2025 CBAM simplification amendment). Q3 2026 price: 82.32 €/tCO2e; Q2 2026: 75.28 €/tCO2e; the Q3 2026 price is above the Q2 2026 price. Six sectors. De minimis: 50 t/year annual aggregate per importer for covered goods. Definitive period in force since 2026-01-01. First annual CBAM declaration (covering 2026 imports) due by 2027-09-30; this is a declaration deadline, not the start of the definitive regime. In the definitive regime the authorized EU importer is legally responsible for declaring embedded emissions; Brazilian exporters may face indirect requests for verifiable installation-level data. Effects on costs/competitiveness are possibilities. Do not use national per-capita emissions. Source: source-carbon-ec.",
+        "keyDates": [
+          {
+            "id": "cbam-definitive-start",
+            "date": "2026-01-01",
+            "subjectTerms": [
+              "regime definitivo",
+              "período definitivo",
+              "fase definitiva",
+              "definitive regime",
+              "definitive cbam regime",
+              "definitive cbam period",
+              "definitive period",
+              "definitive phase"
+            ],
+            "eventTerms": [
+              "começa",
+              "começou",
+              "inicia",
+              "iniciou",
+              "início",
+              "em vigor",
+              "vigente",
+              "vigora",
+              "desde",
+              "starts",
+              "started",
+              "begins",
+              "began",
+              "start of",
+              "applies",
+              "applied",
+              "in force",
+              "since"
+            ]
+          },
+          {
+            "id": "cbam-first-annual-declaration",
+            "date": "2027-09-30",
+            "subjectTerms": [
+              "primeira declaração",
+              "declaração anual",
+              "first declaration",
+              "annual declaration",
+              "first annual"
+            ],
+            "eventTerms": [
+              "até",
+              "prazo",
+              "devida",
+              "vence",
+              "due",
+              "deadline",
+              "by "
+            ]
+          }
+        ],
+        "legalRefs": [
+          {
+            "id": "eu-reg-2023-956",
+            "kind": "norm",
+            "labels": [
+              "Regulation (EU) 2023/956",
+              "Regulamento (UE) 2023/956",
+              "2023/956"
+            ]
+          },
+          {
+            "id": "cbam-2025-simplification",
+            "kind": "norm",
+            "labels": [
+              "2025 CBAM simplification amendment",
+              "CBAM simplification",
+              "simplification amendment",
+              "simplificação do CBAM",
+              "alteração de 2025",
+              "2025 amendment",
+              "emenda de 2025"
+            ]
+          },
+          {
+            "id": "european-commission",
+            "kind": "institution",
+            "labels": [
+              "European Commission",
+              "Comissão Europeia",
+              "DG TAXUD",
+              "Directorate-General for Taxation and Customs Union",
+              "Direção-Geral da Fiscalidade e da União Aduaneira"
+            ]
+          }
+        ],
+        "temporalShape": "three_points",
+        "comparisons": [
+          {
+            "id": "cbam-price-latest-vs-previous",
+            "observed": 82.32,
+            "reference": 75.28,
+            "unit": "€/tCO2e",
+            "direction": "above"
+          }
+        ],
+        "materialSha256": "sha256:dd2bfe81369c17d62d2673e869a51a1f8733bd81c8666e42bc2990748bc0accb"
+      }
+    },
+    {
+      "sectionId": "blockchain",
+      "status": "shadow",
+      "latencyMs": 1778,
+      "totalTokens": 6357,
+      "evidence": {
+        "material": "Section: blockchain\nValid as of: 2026-10-10T12:26:25.048Z\nNext review: 2026-10-17T13:00:40.498Z\nForma temporal: snapshot\nReferências jurídicas disponíveis: nenhuma\nProvenance permitida para esta seção (use estes sourceId literalmente em evidenceRefs e whatToWatch.sourceId):\nsource-defillama-stablecoins | https://defillama.com/stablecoins | publica: capitalização de mercado de stablecoins, por ativo e total | dado: verified, direct\nsource-defillama-rwa | https://defillama.com/protocols | publica: TVL de protocolos de ativos do mundo real (RWA) | dado: verified, direct\nsource-defillama-coins | https://defillama.com/ | publica: preços de BTC, ETH, SOL, BNB, USDT e USDC | dado: verified, direct\nEventos disponíveis (opcional em claims[].eventRefs): nenhum\nContext:\nDigital assets. Stablecoin market capitalization: US$ 283.8 bilhões; Tether: US$ 184.1 bilhões. This is market capitalization, not international payment volume. RWA sample: Invesco USTB: US$ 597.7 milhões TVL; Ethena USDtb: US$ 470.3 milhões TVL; Re: US$ 405.5 milhões TVL; partial sample of individual protocols, not a sector total. Prices include BTC, ETH, SOL and BNB snapshots. Interpretation may discuss digital dollar rails and local-currency narratives, but cannot claim causation. Temporal shape: single-day snapshot; no time series is available in this dataset, so variation over time cannot be established yet. Suggested What to Watch: the next DefiLlama update of stablecoin market capitalization, which will allow the first temporal comparison. Sources: source-defillama-stablecoins, source-defillama-rwa, source-defillama-coins.",
+        "keyDates": [],
+        "comparisons": [],
+        "legalRefs": [],
+        "temporalShape": "snapshot",
+        "materialSha256": "sha256:ee53e715688e2057c538c0ec0d3e02059c19c124d24b3b4d6a70cc122ef1c266"
+      }
+    },
+    {
+      "sectionId": "climate",
+      "status": "shadow",
+      "latencyMs": 1065,
+      "totalTokens": 5565,
+      "evidence": {
+        "material": "Section: climate\nValid as of: 2026-10-05\nNext review: 2026-10-17T13:00:40.498Z\nForma temporal: window_aggregate\nReferências jurídicas disponíveis: nenhuma\nProvenance permitida para esta seção (use estes sourceId literalmente em evidenceRefs e whatToWatch.sourceId):\nsource-open-meteo-brasilia | https://archive-api.open-meteo.com/v1/archive?latitude=-15.8&longitude=-47.9&start_date=2025-10-06&end_date=2026-10-05&daily=temperature_2m_mean,precipitation_sum&timezone=auto | publica: temperatura média diária e precipitação diária em Brasília | dado: verified, derived\nEventos disponíveis (opcional em claims[].eventRefs): nenhum\nContext:\nClimate vector for Brasília. Rolling 12-month window 2025-10-06 to 2026-10-05; mean temperature 22.4°C (above the 21.4°C reference); precipitation 1361 mm (below the 1550 mm reference). The reference benchmarks (21.4°C and 1550 mm) are dashboard references, not an official climatology. A single city cannot establish impacts on producing regions, commodities or energy. Any transmission to commodities, hydrology, energy or FX must be a hypothesis and should be monitored against producing regions and relevant river basins. Source: source-open-meteo-brasilia.",
+        "keyDates": [],
+        "legalRefs": [],
+        "temporalShape": "window_aggregate",
+        "comparisons": [
+          {
+            "id": "climate-temp-vs-reference",
+            "observed": 22.4,
+            "reference": 21.4,
+            "unit": "°C",
+            "direction": "above"
+          },
+          {
+            "id": "climate-precip-vs-reference",
+            "observed": 1361,
+            "reference": 1550,
+            "unit": "mm",
+            "direction": "below"
+          }
+        ],
+        "materialSha256": "sha256:2053b917987f2576fa53edbaea0af228b564b5e81a476122bab8c6afd42601d8"
+      }
+    }
+  ],
+  "providerEvents": [
+    {
+      "provider": "nvidia",
+      "phase": "generation",
+      "attempt": 1,
+      "latencyMs": 24880,
+      "decision": "success",
+      "sectionId": "carbon",
+      "runId": "odin-20261010-130039-2413",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.1.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "generation",
+      "attempt": 1,
+      "latencyMs": 1778,
+      "decision": "success",
+      "sectionId": "blockchain",
+      "runId": "odin-20261010-130039-2413",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.1.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "decision": "retry",
+      "schemaErrors": [
+        "sections.blockchain camada Contexto: pt/en ausente",
+        "sections.blockchain camada Tese: thesis.pt/en ausente",
+        "sections.blockchain camada Direito Econômico: relevance ausente/inválida",
+        "sections.blockchain camada Stakeholders: mínimo 2 (recebido 0)",
+        "sections.blockchain camada What to Watch: exatamente 1 item (recebido 0)",
+        "confidence inválida",
+        "limitations ausente",
+        "[lens_missing] decisionLens: decisionLens ausente"
+      ],
+      "sectionId": "blockchain",
+      "runId": "odin-20261010-130039-2413",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.1.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "attempt": 1,
+      "latencyMs": 12515,
+      "decision": "success",
+      "sectionId": "blockchain",
+      "runId": "odin-20261010-130039-2413",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.1.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "decision": "fixed",
+      "remainingErrors": [],
+      "sectionId": "blockchain",
+      "runId": "odin-20261010-130039-2413",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.1.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "generation",
+      "attempt": 1,
+      "latencyMs": 1065,
+      "decision": "success",
+      "sectionId": "climate",
+      "runId": "odin-20261010-130039-2413",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.1.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "decision": "retry",
+      "schemaErrors": [
+        "sections.climate camada Contexto: pt/en ausente",
+        "sections.climate camada Tese: thesis.pt/en ausente",
+        "sections.climate camada Direito Econômico: relevance ausente/inválida",
+        "sections.climate camada Stakeholders: mínimo 2 (recebido 0)",
+        "sections.climate camada What to Watch: exatamente 1 item (recebido 0)",
+        "confidence inválida",
+        "limitations ausente",
+        "[lens_missing] decisionLens: decisionLens ausente"
+      ],
+      "sectionId": "climate",
+      "runId": "odin-20261010-130039-2413",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.1.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "attempt": 1,
+      "latencyMs": 8868,
+      "decision": "success",
+      "sectionId": "climate",
+      "runId": "odin-20261010-130039-2413",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.1.0"
+    },
+    {
+      "provider": "nvidia",
+      "phase": "schema_retry",
+      "decision": "fixed",
+      "remainingErrors": [],
+      "sectionId": "climate",
+      "runId": "odin-20261010-130039-2413",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "schemaVersion": "2.0",
+      "intelligenceContractVersion": "1.1",
+      "promptVersion": "4.1.0"
+    }
+  ],
+  "generatedAt": "2026-10-10T13:01:29.786Z",
+  "validation": {
+    "decision": "publish_candidate",
+    "validator": "semantic",
+    "errors": [],
+    "factEvidenceCoverage": 1,
+    "generatedSections": 3,
+    "economicLawHighHasNorms": true,
+    "sectionProfileValid": true,
+    "evidenceConsistent": true,
+    "consistencyErrors": [],
+    "freshnessValid": true,
+    "provenanceReproducible": true,
+    "layersComplete": true,
+    "contractV11Valid": true,
+    "contractV11Errors": [],
+    "validatedAt": "2026-10-10T13:01:30.091Z"
+  }
+}
