@@ -1,0 +1,47 @@
+name: ODIN ENSO Signal (OISST)
+
+# OD-1 — sinal Nino 3.4 a partir do NOAA OISST v2.1 (AWS Open Data).
+# Sinal diario de MONITORAMENTO; nao e ONI/RONI (indices oficiais NOAA/CPC).
+#
+# Esta etapa NAO grava nada no repositorio: no PR e no disparo manual, roda
+# testes + coleta real + gate e publica o JSON apenas como artefato, para
+# conferencia. Interface (OD-2) e agendamento (OD-3) dependem de nova aprovacao.
+
+on:
+  pull_request:
+    paths:
+      - "scripts/oisst/**"
+      - ".github/workflows/enso-oisst.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  enso:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/oisst/requirements.txt
+      - name: Install (versoes exatas)
+        run: pip install -r scripts/oisst/requirements.txt
+      - name: Testes offline
+        run: python3 -m unittest discover -s scripts/oisst -p "test_*.py" -v
+      - name: Coleta real + gate (bucket publico, sem conta AWS)
+        run: python3 scripts/oisst/fetch_oisst.py
+      - name: Gate independente sobre o arquivo gerado
+        run: python3 scripts/oisst/validate_enso.py public/data/enso-oisst.json
+      - name: Diagnostico vs serie semanal NOAA/CPC (nao bloqueia)
+        continue-on-error: true
+        run: python3 scripts/oisst/diag_cpc.py public/data/enso-oisst.json
+      - name: Publicar JSON para conferencia (artefato; nada vai para o main)
+        uses: actions/upload-artifact@v4
+        with:
+          name: enso-oisst
+          path: public/data/enso-oisst.json
+          retention-days: 7
