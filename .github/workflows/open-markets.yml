@@ -2,29 +2,43 @@ name: ODIN Open Markets (dados abertos)
 
 # Coleta diferencial de juros 10a (OCDE MEI via FRED), volatilidade cambial
 # (Fed H.10 via FRED; TRM do Banco de la República) e petróleo (EIA via FRED),
-# sem chave de API, e grava src/data/generated/open-markets.json no próprio
-# branch. Método em scripts/fetch-open-markets.mjs.
+# sem chave de API, e grava src/data/generated/open-markets.json na main.
+# Método em scripts/fetch-open-markets.mjs.
+#
+# Mesmo padrão do AIFS e do ENSO:
+#   - collect (somente leitura): roda em todos os gatilhos, inclusive PR, e
+#     publica o JSON como artefato para conferência. NÃO grava no repositório.
+#   - commit_snapshot (escrita): só em schedule ou workflow_dispatch na main.
+# Em PR, nada é gravado: não há commit do robô na branch do PR.
+# O nome deste workflow é usado pelo pages.yml (workflow_run): não renomear.
+
 on:
   schedule:
     # Segundas, 06:41 UTC (03:41 BRT): OCDE é mensal; câmbio e petróleo, diários.
     - cron: "41 6 * * 1"
   workflow_dispatch:
-  push:
-    branches-ignore: [main]
+  pull_request:
     paths:
       - scripts/fetch-open-markets.mjs
       - .github/workflows/open-markets.yml
 
 permissions:
-  contents: write
+  contents: read
 
+# Uma execução por vez no grupo; a seguinte espera (cancel-in-progress: false).
+# Fila padrão do GitHub (queue: single): no máximo UMA pendente por grupo; se
+# chegar outra, ela substitui a pendente. Escolha consciente: toda execução
+# coleta os dados mais recentes, então substituir uma pendente não perde nada.
 concurrency:
-  group: open-markets-${{ github.ref }}
+  group: open-markets-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
   cancel-in-progress: false
 
 jobs:
   collect:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,7 +46,42 @@ jobs:
           node-version: 22
       - name: Coletar séries abertas
         run: node scripts/fetch-open-markets.mjs
-      - name: Commit do snapshot
+      - name: Publicar JSON para conferência (artefato)
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-markets
+          path: src/data/generated/open-markets.json
+          if-no-files-found: error
+          retention-days: 7
+
+  commit_snapshot:
+    # Único job com escrita. Só em schedule ou workflow_dispatch na main
+    # (lista explícita: um novo tipo de gatilho não ganha escrita por omissão).
+    needs: collect
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Baixar o JSON coletado pelo job collect
+        uses: actions/download-artifact@v4
+        with:
+          name: open-markets
+          path: src/data/generated
+      - name: Conferir integridade do arquivo (existe, não vazio, JSON válido)
+        # Salvaguarda da transferência entre jobs; não é validação semântica.
+        run: |
+          f=src/data/generated/open-markets.json
+          if [ ! -s "$f" ]; then
+            echo "::error::$f ausente ou vazio; nada foi gravado."
+            exit 1
+          fi
+          python3 -m json.tool "$f" > /dev/null
+      - name: Commit do snapshot (main)
         run: |
           git config user.name "odin-data-bot"
           git config user.email "odin-data-bot@users.noreply.github.com"
@@ -42,4 +91,8 @@ jobs:
             exit 0
           fi
           git commit -m "chore(data): open-markets snapshot [skip ci]"
-          git push
+          # Traz o que outro robô tenha gravado no main durante a execução.
+          # Se o rebase ou o push forem recusados, o passo falha e o main
+          # remoto fica intacto (nada é sobrescrito; a próxima execução repõe).
+          git pull --rebase origin main
+          git push origin HEAD:main
