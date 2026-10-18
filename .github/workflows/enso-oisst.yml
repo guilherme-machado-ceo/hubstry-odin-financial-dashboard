@@ -47,8 +47,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -65,7 +65,7 @@ jobs:
         continue-on-error: true
         run: python3 scripts/oisst/diag_cpc.py public/data/enso-oisst.json
       - name: Publicar JSON para conferencia (artefato)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: enso-oisst
           path: public/data/enso-oisst.json
@@ -80,10 +80,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: main
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -91,7 +91,7 @@ jobs:
       - name: Install (versoes exatas)
         run: pip install -r scripts/oisst/requirements.txt
       - name: Baixar o JSON validado pelo job enso
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: enso-oisst
           path: public/data

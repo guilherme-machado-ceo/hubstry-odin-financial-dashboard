@@ -40,14 +40,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Coletar séries abertas
         run: node scripts/fetch-open-markets.mjs
       - name: Publicar JSON para conferência (artefato)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: open-markets
           path: src/data/generated/open-markets.json
@@ -64,11 +64,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: main
       - name: Baixar o JSON coletado pelo job collect
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: open-markets
           path: src/data/generated
