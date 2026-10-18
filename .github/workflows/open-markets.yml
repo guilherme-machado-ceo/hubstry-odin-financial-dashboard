@@ -10,6 +10,10 @@ name: ODIN Open Markets (dados abertos)
 #     publica o JSON como artefato para conferência. NÃO grava no repositório.
 #   - commit_snapshot (escrita): só em schedule ou workflow_dispatch na main.
 # Em PR, nada é gravado: não há commit do robô na branch do PR.
+# Gate (scripts/validate-open-markets.mjs): estrutura, números, coerência e
+# não regressão. Coleta que cobre MENOS países/moedas/petróleos do que o
+# snapshot atual é bloqueada e o snapshot anterior é preservado (opção A,
+# 18/10/2026 — mesmo padrão do AIFS e do ENSO).
 # O nome deste workflow é usado pelo pages.yml (workflow_run): não renomear.
 
 on:
@@ -20,6 +24,8 @@ on:
   pull_request:
     paths:
       - scripts/fetch-open-markets.mjs
+      - scripts/validate-open-markets.mjs
+      - scripts/test-validate-open-markets.mjs
       - .github/workflows/open-markets.yml
 
 permissions:
@@ -44,8 +50,15 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: Testes do gate (offline)
+        run: node scripts/test-validate-open-markets.mjs
+      - name: Guardar o snapshot atual (referência de não regressão)
+        # Sem snapshot anterior o passo falha: o gate exige a referência.
+        run: cp src/data/generated/open-markets.json "$RUNNER_TEMP/open-markets.prev.json"
       - name: Coletar séries abertas
         run: node scripts/fetch-open-markets.mjs
+      - name: Gate (estrutura, números, coerência, não regressão)
+        run: node scripts/validate-open-markets.mjs src/data/generated/open-markets.json --previous "$RUNNER_TEMP/open-markets.prev.json"
       - name: Publicar JSON para conferência (artefato)
         uses: actions/upload-artifact@v6
         with:
@@ -67,22 +80,30 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: main
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      # O artefato vai para uma pasta temporária: o snapshot da main só é
+      # substituído DEPOIS de passar no gate contra ele mesmo.
       - name: Baixar o JSON coletado pelo job collect
         uses: actions/download-artifact@v7
         with:
           name: open-markets
-          path: src/data/generated
+          path: ${{ runner.temp }}/open-markets-new
       - name: Conferir integridade do arquivo (existe, não vazio, JSON válido)
         # Salvaguarda da transferência entre jobs; não é validação semântica.
         run: |
-          f=src/data/generated/open-markets.json
+          f="$RUNNER_TEMP/open-markets-new/open-markets.json"
           if [ ! -s "$f" ]; then
             echo "::error::$f ausente ou vazio; nada foi gravado."
             exit 1
           fi
           python3 -m json.tool "$f" > /dev/null
+      - name: Gate contra o snapshot atual da main (bloqueia antes de gravar)
+        run: node scripts/validate-open-markets.mjs "$RUNNER_TEMP/open-markets-new/open-markets.json" --previous src/data/generated/open-markets.json
       - name: Commit do snapshot (main)
         run: |
+          cp "$RUNNER_TEMP/open-markets-new/open-markets.json" src/data/generated/open-markets.json
           git config user.name "odin-data-bot"
           git config user.email "odin-data-bot@users.noreply.github.com"
           git add src/data/generated/open-markets.json
