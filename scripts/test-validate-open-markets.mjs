@@ -84,6 +84,15 @@ test("CLI: --previous ilegível → exit 1", () => {
 test("CLI: --previous sem caminho → exit 1", () => {
   assert(cli([write("ok4.json", base()), "--previous"]).status === 1, "esperava exit 1");
 });
+for (const [nome, conteudo] of [["{}", "{}"], ["null", "null"], ["[]", "[]"]]) {
+  test(`CLI: --previous com JSON válido mas não snapshot (${nome}) → exit 1`, () => {
+    assert(cli([write(`ok-${nome.length}.json`, base()), "--previous", write(`prev-${nome.length}.json`, conteudo)]).status === 1, "esperava exit 1");
+  });
+}
+test("CLI: --previous estruturalmente inválido (bloco ausente) → exit 1", () => {
+  const prev = base(); delete prev.fxVolatility;
+  assert(cli([write("ok5.json", base()), "--previous", write("prev-sem-fx.json", prev)]).status === 1, "esperava exit 1");
+});
 test("cobertura maior que a atual passa", () => {
   const prev = base(); prev.fxVolatility.currencies.pop();
   assert(regressions(base(), prev).length === 0, "não deveria haver regressão");
