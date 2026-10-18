@@ -20,6 +20,14 @@
 # chamada, 30 s de espera entre elas, ignorando o Retry-After do servidor.
 # Esgotou -> a fonte inteira e abandonada e a proxima e tentada do zero.
 # (O padrao da biblioteca e 500 tentativas x 120 s: travava o workflow.)
+#
+# Segunda rodada (limitada): se TODAS as fontes falharem, espera
+# ROUND_PAUSE_S (180 s) e repete UMA vez a sequencia completa de fontes,
+# com a mesma politica por tentativa. Motivo: em 17/10 e 18/10 as duas
+# fontes recusaram de manha por limitacao de acesso (AWS 503 Slow Down,
+# ECMWF 429 Too Many Requests); uma nova tentativa minutos depois passou.
+# Se a segunda rodada tambem falhar, o script termina com erro e nada e
+# gravado. Pior caso cabe no timeout de 20 min do job.
 # ============================================================
 from __future__ import annotations
 
@@ -27,6 +35,7 @@ import json
 import os
 import sys
 import tempfile
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -40,6 +49,9 @@ OUT_DIR = Path(os.environ.get("ODIN_DATA_DIR", "public/data"))
 OUT_FILE = OUT_DIR / "aifs-forecast.json"
 RETRY_ATTEMPTS = 2   # tentativas por chamada HTTP (inclui a primeira)
 RETRY_WAIT_S = 30    # espera entre tentativas, em segundos
+ROUNDS = 2           # rodadas completas pelas fontes (1 normal + 1 extra)
+ROUND_PAUSE_S = 180  # pausa antes da rodada extra, em segundos
+sleep = time.sleep   # substituivel nos testes (nada de esperar de verdade)
 
 
 def log(msg: str) -> None:
@@ -59,7 +71,22 @@ def make_client(source: str):
 
 def download(target: Path) -> datetime:
     """Baixa o ciclo AIFS mais recente que ja tenha o horizonte completo.
-    Tenta as fontes em ordem (espelho AWS primeiro; portal ECMWF como reserva)."""
+    Ate ROUNDS rodadas pelas fontes; pausa de ROUND_PAUSE_S entre elas."""
+    last_err: Exception | None = None
+    for rodada in range(1, ROUNDS + 1):
+        if rodada > 1:
+            log(f"todas as fontes falharam — pausa de {ROUND_PAUSE_S} s antes da rodada {rodada}/{ROUNDS}")
+            sleep(ROUND_PAUSE_S)
+        try:
+            return _download_round(target)
+        except RuntimeError as err:
+            last_err = err
+    raise RuntimeError(f"nenhuma fonte AIFS disponivel apos {ROUNDS} rodadas: {last_err}")
+
+
+def _download_round(target: Path) -> datetime:
+    """Uma rodada: tenta as fontes em ordem (espelho AWS primeiro; portal
+    ECMWF como reserva). Levanta RuntimeError se todas falharem."""
     steps = list(range(0, HORIZON_HOURS + 1, core.LEAD_STEP_HOURS))
     last_err: Exception | None = None
     for source in SOURCES:
