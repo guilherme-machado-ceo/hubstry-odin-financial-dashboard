@@ -17,6 +17,8 @@
 //     países, moedas ou petróleos do que o snapshot atual. Se cobrir, o gate
 //     bloqueia e o snapshot anterior é preservado (decisão de 18/10/2026,
 //     opção A: mesmo padrão do AIFS e do ENSO).
+//     Com --previous, o arquivo anterior é OBRIGATÓRIO: ausente ou ilegível
+//     também bloqueia. Sem --previous, só os itens 1 a 3 são conferidos.
 //
 // Saída: 0 = aprovado; 1 = bloqueado (nada deve ser gravado).
 // ============================================================
@@ -169,13 +171,17 @@ function main(argv) {
   catch (err) { gh("error", `GATE BLOQUEOU — ${file} ilegível ou JSON inválido (${err.message})`); return 1; }
 
   const errs = validateSnapshot(next);
-  if (prevFile && existsSync(prevFile)) {
-    let prev = null;
-    try { prev = JSON.parse(readFileSync(prevFile, "utf8")); }
-    catch { gh("warning", `snapshot anterior ${prevFile} ilegível; não regressão não verificada`); }
-    if (prev) errs.push(...regressions(next, prev).map((m) => `coleta parcial — ${m} em relação ao snapshot atual`));
-  } else if (prevFile) {
-    gh("warning", `snapshot anterior ${prevFile} não encontrado; não regressão não verificada`);
+  if (pi >= 0) {
+    // Com --previous, a referência é obrigatória: sem ela a não regressão
+    // não pode ser verificada, e o gate BLOQUEIA (não há modo silencioso).
+    if (!prevFile || !existsSync(prevFile)) {
+      errs.push(`snapshot anterior ${prevFile ?? "(não informado)"} não encontrado; não regressão não verificável`);
+    } else {
+      let prev = null;
+      try { prev = JSON.parse(readFileSync(prevFile, "utf8")); }
+      catch (err) { errs.push(`snapshot anterior ${prevFile} ilegível (${err.message}); não regressão não verificável`); }
+      if (prev) errs.push(...regressions(next, prev).map((m) => `coleta parcial — ${m} em relação ao snapshot atual`));
+    }
   }
 
   if (errs.length) {

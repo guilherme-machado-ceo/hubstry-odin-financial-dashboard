@@ -75,6 +75,15 @@ test("CLI: coleta parcial → exit 1 (snapshot anterior preservado)", () => {
   const next = base(); next.fxVolatility.currencies.pop();
   assert(cli([write("parcial.json", next), "--previous", SNAP]).status === 1, "esperava exit 1");
 });
+test("CLI: --previous inexistente → exit 1 (sem modo silencioso)", () => {
+  assert(cli([write("ok2.json", base()), "--previous", path.join(tmp, "nao-existe.json")]).status === 1, "esperava exit 1");
+});
+test("CLI: --previous ilegível → exit 1", () => {
+  assert(cli([write("ok3.json", base()), "--previous", write("prev-ruim.json", "{ quebrado")]).status === 1, "esperava exit 1");
+});
+test("CLI: --previous sem caminho → exit 1", () => {
+  assert(cli([write("ok4.json", base()), "--previous"]).status === 1, "esperava exit 1");
+});
 test("cobertura maior que a atual passa", () => {
   const prev = base(); prev.fxVolatility.currencies.pop();
   assert(regressions(base(), prev).length === 0, "não deveria haver regressão");

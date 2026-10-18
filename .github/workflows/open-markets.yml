@@ -53,8 +53,8 @@ jobs:
       - name: Testes do gate (offline)
         run: node scripts/test-validate-open-markets.mjs
       - name: Guardar o snapshot atual (referência de não regressão)
-        # Sem snapshot anterior, o gate avisa e confere só estrutura e números.
-        run: cp src/data/generated/open-markets.json "$RUNNER_TEMP/open-markets.prev.json" || echo "::warning::sem snapshot anterior"
+        # Sem snapshot anterior o passo falha: o gate exige a referência.
+        run: cp src/data/generated/open-markets.json "$RUNNER_TEMP/open-markets.prev.json"
       - name: Coletar séries abertas
         run: node scripts/fetch-open-markets.mjs
       - name: Gate (estrutura, números, coerência, não regressão)
