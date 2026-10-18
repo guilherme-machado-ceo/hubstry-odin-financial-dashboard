@@ -13,6 +13,8 @@
 //  2. Números: todo valor numérico é finito e com o tipo esperado.
 //  3. Coerência: cada série citada nos blocos existe no catálogo; pb e
 //     tendência batem com a regra do método.
+//     Cobertura mínima: catálogo não vazio e ao menos um país, uma moeda e um
+//     petróleo com dados (vale para a coleta nova e para o snapshot anterior).
 //  4. Não regressão (com --previous): a coleta nova não pode cobrir MENOS
 //     países, moedas ou petróleos do que o snapshot atual. Se cobrir, o gate
 //     bloqueia e o snapshot anterior é preservado (decisão de 18/10/2026,
@@ -137,6 +139,13 @@ export function validateSnapshot(d, { now = new Date() } = {}) {
   }
 
   if (!Array.isArray(d.errors)) e("lista 'errors' ausente");
+
+  // Cobertura mínima: estrutura completa sem dados não é snapshot válido
+  // (como referência, liberaria qualquer coleta; como coleta, apagaria o painel).
+  if (!Object.keys(series).length) e("cobertura mínima: catálogo 'series' vazio");
+  for (const [k, s] of Object.entries(coverage(d))) {
+    if (!s.size) e(`cobertura mínima: nenhum item em ${k}`);
+  }
   return errs;
 }
 

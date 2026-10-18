@@ -93,6 +93,29 @@ test("CLI: --previous estruturalmente inválido (bloco ausente) → exit 1", () 
   const prev = base(); delete prev.fxVolatility;
   assert(cli([write("ok5.json", base()), "--previous", write("prev-sem-fx.json", prev)]).status === 1, "esperava exit 1");
 });
+// ── Cobertura mínima ────────────────────────────────────────────────────────
+const vazio = () => {
+  const d = base();
+  d.series = {};
+  d.yieldDifferential.countries = [];
+  d.fxVolatility.currencies = [];
+  d.oil.brent = null; d.oil.wti = null;
+  return d;
+};
+test("estrutura completa sem dados bloqueia", () => blocked(vazio(), "cobertura mínima"));
+test("CLI: --previous com estrutura completa e cobertura vazia → exit 1", () => {
+  assert(cli([write("ok6.json", base()), "--previous", write("prev-vazio.json", vazio())]).status === 1, "esperava exit 1");
+});
+test("CLI: coleta nova com cobertura vazia → exit 1", () => {
+  assert(cli([write("novo-vazio.json", vazio())]).status === 1, "esperava exit 1");
+});
+for (const [nome, mut] of [
+  ["países", (d) => { d.yieldDifferential.countries = []; }],
+  ["moedas", (d) => { d.fxVolatility.currencies = []; }],
+  ["petróleo", (d) => { d.oil.brent = null; d.oil.wti = null; }],
+]) {
+  test(`bloco sem itens (${nome}) bloqueia`, () => { const d = base(); mut(d); blocked(d, `nenhum item em ${nome === "petróleo" ? "petróleo" : nome}`); });
+}
 test("cobertura maior que a atual passa", () => {
   const prev = base(); prev.fxVolatility.currencies.pop();
   assert(regressions(base(), prev).length === 0, "não deveria haver regressão");
