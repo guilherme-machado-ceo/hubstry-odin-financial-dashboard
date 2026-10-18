@@ -222,20 +222,37 @@ class _FakeClient:
         path.write_bytes(b"GRIB-ECMWF")
 
 
-class TestFailFastFallback(unittest.TestCase):
-    """Politica de rede do PR-C: 2 tentativas x 30 s por fonte, depois fallback."""
+class _NetBase(unittest.TestCase):
+    """Base comum: cliente falso por fonte e pausa entre rodadas simulada."""
 
     def setUp(self):
         import fetch_aifs
         self.mod = fetch_aifs
         self.calls: list = []
-        self._orig = (fetch_aifs.make_client, fetch_aifs.SOURCES, fetch_aifs.OUT_FILE)
+        self.sleeps: list = []
+        self._orig = (fetch_aifs.make_client, fetch_aifs.SOURCES, fetch_aifs.OUT_FILE, fetch_aifs.sleep)
+        fetch_aifs.sleep = self.sleeps.append  # pausa entre rodadas simulada
 
     def tearDown(self):
-        self.mod.make_client, self.mod.SOURCES, self.mod.OUT_FILE = self._orig
+        self.mod.make_client, self.mod.SOURCES, self.mod.OUT_FILE, self.mod.sleep = self._orig
 
     def _fake(self, behaviours: dict):
-        self.mod.make_client = lambda src: _FakeClient(src, self.calls, behaviours[src])
+        """behaviours[fonte]: str (igual em toda rodada) ou lista (um item por rodada)."""
+        uses: dict = {}
+
+        def make(src):
+            b = behaviours[src]
+            if isinstance(b, list):
+                i = uses.get(src, 0)
+                uses[src] = i + 1
+                b = b[i]
+            return _FakeClient(src, self.calls, b)
+
+        self.mod.make_client = make
+
+
+class TestFailFastFallback(_NetBase):
+    """Politica de rede do PR-C: 2 tentativas x 30 s por fonte, depois fallback."""
 
     def test_client_policy(self):
         """Cliente real configurado com retry curto e sem obedecer Retry-After."""
@@ -297,6 +314,61 @@ class TestFailFastFallback(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 self.mod.main()
             self.assertEqual(prod.read_text(), '{"versao": "anterior"}')
+
+
+class TestSecondRound(_NetBase):
+    """Segunda rodada limitada apos pausa (fontes limitando acesso de manha)."""
+
+    def test_round_policy(self):
+        self.assertEqual(self.mod.ROUNDS, 2)
+        self.assertEqual(self.mod.ROUND_PAUSE_S, 180)
+        self.assertEqual(self.mod.RETRY_ATTEMPTS, 2)
+        self.assertEqual(self.mod.RETRY_WAIT_S, 30)
+
+    def test_first_round_ok_no_pause(self):
+        self.mod.SOURCES = ["aws", "ecmwf"]
+        self._fake({"aws": "ok", "ecmwf": "ok"})
+        with tempfile.TemporaryDirectory() as tmp:
+            self.mod.download(Path(tmp) / "aifs.grib2")
+        self.assertEqual(self.sleeps, [])
+        self.assertEqual(self.calls, [("aws", "latest"), ("aws", "retrieve")])
+
+    def test_first_round_fails_second_ok(self):
+        self.mod.SOURCES = ["aws", "ecmwf"]
+        self._fake({"aws": ["down", "ok"], "ecmwf": ["down", "ok"]})
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "aifs.grib2"
+            init = self.mod.download(target)
+            self.assertEqual(target.read_bytes(), b"GRIB-ECMWF")
+        self.assertEqual(init, datetime(2026, 10, 7, 12, tzinfo=timezone.utc))
+        self.assertEqual(self.sleeps, [180])  # exatamente uma pausa
+        self.assertEqual(self.calls, [("aws", "latest"), ("ecmwf", "latest"),
+                                      ("aws", "latest"), ("aws", "retrieve")])
+
+    def test_partial_from_round_one_discarded(self):
+        """Sobra parcial da 1a rodada nao contamina a 2a."""
+        self.mod.SOURCES = ["aws", "ecmwf"]
+        self._fake({"aws": ["partial", "ok"], "ecmwf": ["down", "down"]})
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "aifs.grib2"
+            self.mod.download(target)  # FakeClient "ok" falha se achar sobra
+            self.assertEqual(target.read_bytes(), b"GRIB-ECMWF")
+        self.assertEqual(self.sleeps, [180])
+
+    def test_both_rounds_fail_production_untouched(self):
+        self.mod.SOURCES = ["aws", "ecmwf"]
+        self._fake({"aws": "partial", "ecmwf": "down"})
+        with tempfile.TemporaryDirectory() as tmp:
+            prod = Path(tmp) / "aifs-forecast.json"
+            prod.write_text('{"versao": "anterior"}')
+            self.mod.OUT_FILE = prod
+            with self.assertRaises(RuntimeError) as ctx:
+                self.mod.main()
+            self.assertEqual(prod.read_text(), '{"versao": "anterior"}')
+            self.assertFalse((Path(tmp) / "aifs.grib2").exists())
+        self.assertIn("2 rodadas", str(ctx.exception))
+        self.assertEqual(self.sleeps, [180])  # uma pausa so, sem rodada extra
+        self.assertEqual(len(self.calls), 6)   # 2 rodadas x (aws latest+retrieve, ecmwf latest)
 
 
 if __name__ == "__main__":
