@@ -1,0 +1,31 @@
+name: ODIN Data & UI Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fixtures:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install dependencies (render test das camadas M2)
+        run: npm ci --no-audit --no-fund
+      - name: Section layers M2 (camadas sem IA, render PT/EN)
+        run: node scripts/test-section-layers.mjs
+      - name: Auditoria das fontes públicas
+        run: node scripts/test-data-audit.mjs
+      - name: Vocabulário controlado da interface (PT/EN)
+        run: node scripts/test-vocabulary.mjs
+      - name: Dados abertos, procedência e retiradas
+        run: node scripts/test-open-markets.mjs
+      - name: Security baseline (least privilege do AIFS)
+        run: node scripts/test-security-baseline.mjs

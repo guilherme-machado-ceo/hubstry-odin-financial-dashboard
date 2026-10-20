@@ -22,7 +22,6 @@ on:
       - "ODIN Data Snapshot"
       - "ODIN Open Markets (dados abertos)"
       - "ODIN AIFS Forecast"
-      - "ODIN Insights Controlled Promotion"
     types: [completed]
     branches: [main]
   workflow_dispatch:
