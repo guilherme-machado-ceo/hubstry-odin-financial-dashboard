@@ -19,6 +19,7 @@ const runId = (() => {
   const s = new Date().toISOString().slice(0,19).replace(/[-:T]/g,"");
   return `odin-${s.slice(0,8)}-${s.slice(8)}-${randomBytes(2).toString("hex")}`;
 })();
+const comparisonId = process.env.ODIN_COMPARISON_ID || null;
 const sha256 = (s) => "sha256:" + createHash("sha256").update(String(s)).digest("hex");
 const provider = getProviderConfig();
 const telemetry = [];
@@ -258,7 +259,7 @@ for (const item of await contexts()) {
   } catch (error) {
     reportSections.push({ sectionId: item.id, status: "failed_controlled", decision: "preserve", errorType: error?.name || "Error", errorMessage: String(error?.message || error).slice(0, 500), providerEvents: sectionEvents });
     await mkdir(OUT_DIR,{recursive:true});
-    await writeFile(path.join(OUT_DIR, "generationReport.json"), JSON.stringify({ runId, provider: provider.name, model: provider.model, schemaVersion: SCHEMA_VERSION, intelligenceContractVersion: INTELLIGENCE_CONTRACT_VERSION, promptVersion: PROMPT_VERSION, decision: "failed_controlled", sections: reportSections, providerEvents: telemetry, generatedAt: new Date().toISOString() }, null, 2)+"\n");
+    await writeFile(path.join(OUT_DIR, "generationReport.json"), JSON.stringify({ runId, comparisonId, provider: provider.name, model: provider.model, schemaVersion: SCHEMA_VERSION, intelligenceContractVersion: INTELLIGENCE_CONTRACT_VERSION, promptVersion: PROMPT_VERSION, decision: "failed_controlled", sections: reportSections, providerEvents: telemetry, generatedAt: new Date().toISOString() }, null, 2)+"\n");
     throw error;
   }
 }
@@ -268,6 +269,7 @@ const payload={
   intelligenceContractVersion:INTELLIGENCE_CONTRACT_VERSION,
   status:"shadow",
   runId,
+  comparisonId,
   generatedAt:new Date().toISOString(),
   provider:provider.name, model:provider.model, promptVersion:PROMPT_VERSION,
   data:{sections:Object.fromEntries(results.map(x=>[x.sectionId,x]))}
@@ -275,6 +277,7 @@ const payload={
 const REPORT_FILE = path.join(OUT_DIR, "generationReport.json");
 const report = {
   runId,
+  comparisonId,
   provider: provider.name,
   model: provider.model,
   schemaVersion: SCHEMA_VERSION,
