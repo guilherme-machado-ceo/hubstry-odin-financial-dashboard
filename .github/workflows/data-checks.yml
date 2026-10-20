@@ -1,4 +1,4 @@
-name: ODIN Section Profile Fixtures
+name: ODIN Data & UI Checks
 
 on:
   pull_request:

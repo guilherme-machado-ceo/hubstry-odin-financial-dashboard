@@ -11,15 +11,17 @@ const assert = (condition, message) => {
   if (!condition) { failures += 1; console.error("FALHA:", message); }
 };
 
-const entry = 'import { renderToStaticMarkup } from "react-dom/server";\\n' +
-  'import { createElement } from "react";\\n' +
-  'import SectionLayers from "@/components/SectionLayers";\\n' +
-  'import HeroSection from "@/components/HeroSection";\\n' +
-  'import { setLocale } from "@/i18n";\\n' +
-  'export { GLOSSARY } from "@/data/glossary";\\n' +
-  'export { SECTION_LAYERS } from "@/data/sectionLayers";\\n' +
-  'export function renderLayers(id, locale) { setLocale(locale); return renderToStaticMarkup(createElement(SectionLayers, { id, region: id === "spreads" ? "BRICS" : "all" })); }\\n' +
-  'export function renderHero(locale) { setLocale(locale); return renderToStaticMarkup(createElement(HeroSection, { regionFilter: "all", onRegionChange: () => {} })); }\\n';
+const entry = [
+  'import { renderToStaticMarkup } from "react-dom/server";',
+  'import { createElement } from "react";',
+  'import SectionLayers from "@/components/SectionLayers";',
+  'import HeroSection from "@/components/HeroSection";',
+  'import { setLocale } from "@/i18n";',
+  'export { GLOSSARY } from "@/data/glossary";',
+  'export { SECTION_LAYERS } from "@/data/sectionLayers";',
+  'export function renderLayers(id, locale) { setLocale(locale); return renderToStaticMarkup(createElement(SectionLayers, { id, region: id === "spreads" ? "BRICS" : "all" })); }',
+  'export function renderHero(locale) { setLocale(locale); return renderToStaticMarkup(createElement(HeroSection, { regionFilter: "all", onRegionChange: () => {} })); }',
+].join("\n");
 
 const outdir = path.join(root, "node_modules/.cache/odin-vocabulary");
 await mkdir(outdir, { recursive: true });
