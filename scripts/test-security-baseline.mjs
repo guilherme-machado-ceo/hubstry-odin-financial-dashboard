@@ -156,8 +156,9 @@ assert(
 {
   const run = (value) => spawnSync("bash", ["-c", `PROVIDER="$1"\n${caseBlock}\necho "$ARTIFACT"`, "_", value], { encoding: "utf8" });
   const probe = run("nvidia");
-  if (probe.error) {
-    assert(false, "S1-13: não foi possível executar bash para exercitar o mapeamento: " + probe.error.message);
+  if (probe.error || probe.status === null) {
+    // Nunca pular sem aviso: sem bash a verificação falha de forma explícita.
+    assert(false, "S1-13 requer bash no PATH; no Windows, use o Git Bash ou rode na CI" + (probe.error ? ` (${probe.error.message})` : ""));
   } else {
     for (const [k, v] of ALLOWED_ARTIFACTS) {
       const r = run(k);
