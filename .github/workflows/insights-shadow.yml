@@ -2,29 +2,50 @@ name: ODIN Insights Shadow
 
 # MVP Readiness Gate: chamadas ao LLM (Nemotron) só por disparo manual.
 # Nenhuma geração shadow automática em PR antes dos gates determinísticos.
-# M3 (contrato v1.1): toda geração — aprovada OU bloqueada pelo gate — é salva
-# como amostra de calibração no branch `shadow-samples`
-# (samples/<runId>/), sem tocar em main nem no M1 publicado.
+# B1: cada disparo gera duas leituras em paralelo (NVIDIA e MaaS) sobre o mesmo
+# commit, com falha isolada. Um job agregador salva todas as amostras — aprovadas
+# OU bloqueadas pelo gate — no branch `shadow-samples`
+# (samples/<comparisonId>/<provider>/), sem tocar em main nem no M1 publicado.
 on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # apenas para gravar a amostra no branch shadow-samples
+  contents: read
+
+env:
+  ODIN_COMPARISON_ID: ${{ github.run_id }}
 
 jobs:
   shadow:
+    # Segredos só para código de main: outra branch nunca roda a geração.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        provider: [nvidia, maas]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Generate NVIDIA shadow artifact
+        if: matrix.provider == 'nvidia'
         env:
           AI_PROVIDER: nvidia
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           NVIDIA_MODEL: nvidia/nemotron-3-super-120b-a12b
+          AI_TIMEOUT_MS: 45000
+        run: node scripts/generate-insights-shadow.mjs
+      - name: Generate MaaS shadow artifact
+        if: matrix.provider == 'maas'
+        env:
+          AI_PROVIDER: maas
+          MAAS_KEY: ${{ secrets.MAAS_KEY }}
+          MAAS_MODEL: deepseek-v4-flash
           AI_TIMEOUT_MS: 45000
         run: node scripts/generate-insights-shadow.mjs
       - name: Validate shadow artifact
@@ -37,13 +58,98 @@ jobs:
           if [ -f public/data/insights.v2.shadow.json ]; then
             node scripts/review-summary.mjs public/data/insights.v2.shadow.json public/data/generationReport.json > /dev/null
           else
-            echo "Nenhum artefato shadow gerado — ver logs da geração." >> "$GITHUB_STEP_SUMMARY"
+            echo "Nenhum artefato shadow gerado (${{ matrix.provider }}) — ver logs da geração." >> "$GITHUB_STEP_SUMMARY"
           fi
-      - name: Salvar amostra de calibração (branch shadow-samples)
-        if: always() && hashFiles('public/data/generationReport.json') != ''
+      # NVIDIA mantém os nomes originais (o workflow de promoção depende deles).
+      - name: Upload shadow artifact (NVIDIA)
+        if: matrix.provider == 'nvidia'
+        uses: actions/upload-artifact@v6
+        with:
+          name: odin-insights-v2-shadow
+          path: |
+            public/data/insights.v2.shadow.json
+            public/data/generationReport.json
+            public/data/evidence/
+          if-no-files-found: error
+      - name: Upload blocked shadow artifact (NVIDIA — diagnóstico, não promovível)
+        if: failure() && matrix.provider == 'nvidia' && hashFiles('public/data/insights.v2.shadow.json') != ''
+        uses: actions/upload-artifact@v6
+        with:
+          name: odin-insights-v2-shadow-blocked
+          path: |
+            public/data/insights.v2.shadow.json
+            public/data/generationReport.json
+            public/data/evidence/
+          if-no-files-found: warn
+      - name: Upload shadow artifact (MaaS)
+        if: matrix.provider == 'maas'
+        uses: actions/upload-artifact@v6
+        with:
+          name: odin-insights-v2-shadow-maas
+          path: |
+            public/data/insights.v2.shadow.json
+            public/data/generationReport.json
+            public/data/evidence/
+          if-no-files-found: error
+      - name: Upload blocked shadow artifact (MaaS — diagnóstico, não promovível)
+        if: failure() && matrix.provider == 'maas' && hashFiles('public/data/insights.v2.shadow.json') != ''
+        uses: actions/upload-artifact@v6
+        with:
+          name: odin-insights-v2-shadow-maas-blocked
+          path: |
+            public/data/insights.v2.shadow.json
+            public/data/generationReport.json
+            public/data/evidence/
+          if-no-files-found: warn
+
+  aggregate:
+    # Um único commit/push no branch shadow-samples com as amostras dos dois provedores.
+    needs: shadow
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write   # apenas para gravar as amostras no branch shadow-samples
+    steps:
+      - uses: actions/checkout@v5
+      - name: Baixar artefatos disponíveis
+        uses: actions/download-artifact@v5
+        continue-on-error: true
+        with:
+          pattern: odin-insights-v2-shadow*
+          path: /tmp/artifacts
+      - name: Salvar amostras e resumo (branch shadow-samples)
         run: |
-          RUN=$(node -e "console.log(JSON.parse(require('fs').readFileSync('public/data/generationReport.json','utf8')).runId)")
-          SRC="$PWD"
+          CMP="$ODIN_COMPARISON_ID"
+          STAGE=/tmp/stage
+          mkdir -p "$STAGE"
+          {
+            echo "### Comparação de provedores — $CMP"
+            echo ""
+            echo "| Provedor | Status | runId |"
+            echo "|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          FOUND=0
+          for P in nvidia maas; do
+            if [ "$P" = "nvidia" ]; then BASE=odin-insights-v2-shadow; else BASE=odin-insights-v2-shadow-maas; fi
+            DIR=""; STATUS="falhou"
+            if [ -d "/tmp/artifacts/$BASE" ]; then DIR="/tmp/artifacts/$BASE"; STATUS="gerado"
+            elif [ -d "/tmp/artifacts/$BASE-blocked" ]; then DIR="/tmp/artifacts/$BASE-blocked"; STATUS="bloqueado pelo gate"; fi
+            RUNID="-"
+            if [ -n "$DIR" ]; then
+              FOUND=1
+              mkdir -p "$STAGE/$P"
+              cp -r "$DIR"/. "$STAGE/$P/"
+              if [ -f "$DIR/generationReport.json" ]; then
+                RUNID=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1],'utf8')).runId ?? '-')" "$DIR/generationReport.json")
+              fi
+            fi
+            echo "| $P | $STATUS | $RUNID |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          if [ "$FOUND" = "0" ]; then
+            echo "Nenhum artefato disponível — nada a commitar." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           git config --global user.name "odin-data-bot"
           git config --global user.email "odin-data-bot@users.noreply.github.com"
           git worktree add --detach /tmp/samples
@@ -53,30 +159,9 @@ jobs:
           else
             git checkout -q --orphan shadow-samples && git rm -rq --cached . && rm -rf -- * .github
           fi
-          mkdir -p "samples/$RUN"
-          cp "$SRC/public/data/generationReport.json" "samples/$RUN/"
-          [ -f "$SRC/public/data/insights.v2.shadow.json" ] && cp "$SRC/public/data/insights.v2.shadow.json" "samples/$RUN/"
-          [ -d "$SRC/public/data/evidence/$RUN" ] && cp -r "$SRC/public/data/evidence/$RUN" "samples/$RUN/evidence"
-          git add "samples/$RUN"
-          git commit -q -m "sample: $RUN [skip ci]"
+          mkdir -p "samples/$CMP"
+          cp -r "$STAGE"/. "samples/$CMP/"
+          git add "samples/$CMP"
+          git commit -q -m "sample: $CMP [skip ci]"
           git push -q origin shadow-samples
-          echo "Amostra salva: shadow-samples/samples/$RUN" >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload shadow artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: odin-insights-v2-shadow
-          path: |
-            public/data/insights.v2.shadow.json
-            public/data/generationReport.json
-            public/data/evidence/
-          if-no-files-found: error
-      - name: Upload blocked shadow artifact (diagnóstico — não promovível)
-        if: failure() && hashFiles('public/data/insights.v2.shadow.json') != ''
-        uses: actions/upload-artifact@v6
-        with:
-          name: odin-insights-v2-shadow-blocked
-          path: |
-            public/data/insights.v2.shadow.json
-            public/data/generationReport.json
-            public/data/evidence/
-          if-no-files-found: warn
+          echo "Amostras salvas: shadow-samples/samples/$CMP/{nvidia,maas}" >> "$GITHUB_STEP_SUMMARY"
