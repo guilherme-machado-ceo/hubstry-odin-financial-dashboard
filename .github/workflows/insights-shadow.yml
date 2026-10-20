@@ -52,7 +52,8 @@ jobs:
           AI_PROVIDER: maas
           MAAS_KEY: ${{ secrets.MAAS_KEY }}
           MAAS_MODEL: glm-5.2
-          AI_TIMEOUT_MS: 45000
+          AI_TIMEOUT_MS: 120000
+          AI_MAX_TRANSPORT_ATTEMPTS: 1
         run: node scripts/generate-insights-shadow.mjs
       - name: Validate shadow artifact
         run: node scripts/validate-insights-shadow.mjs

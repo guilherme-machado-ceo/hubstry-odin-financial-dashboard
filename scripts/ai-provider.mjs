@@ -151,6 +151,10 @@ export async function chatJson({ system, user, temperature = 0.3, maxTokens = 70
     body.chat_template_kwargs = { enable_thinking: reasoning };
   }
 
+  if (config.name === "maas" && String(config.model).startsWith("glm")) {
+    body.chat_template_kwargs = { thinking: false };
+  }
+
   const timeoutMs = Number(process.env.AI_TIMEOUT_MS || 45000);
   const first = await requestCompletion({ config, body, timeoutMs, phase: "generation", onEvent });
   let parsed;
