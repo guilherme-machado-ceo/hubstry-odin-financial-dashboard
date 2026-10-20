@@ -91,26 +91,55 @@ assert(cmpErrors(both[0], CBAM_LEGACY).length === 0, "caminho legado sem rótulo
 mustBlock("Em comparação com o Q2 2026 (75,28 €/tCO2e), o preço ficou acima.", CBAM, "atribuição ambígua");
 // Sujeito explícito em cada oração: afirmação verdadeira passa mesmo com as duas direções.
 mustPass("O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e, acima dos 75,28 €/tCO2e do Q2 2026, e o Q2 2026 ficou abaixo do Q3 2026.");
-// Vínculo período ↔ valor e expressões da referência (revisão do PR #72).
+// Vínculo período ↔ valor (algoritmo por orações/pareamento) e expressões da referência (revisão do PR #72).
 const WRONG = "valor associado ao período errado";
-mustBlock("O preço do CBAM no Q2 2026 foi de 82,32 €/tCO2e, acima do preço de 75,28 €/tCO2e no Q3 2026.", CBAM, WRONG);
-mustBlock("The CBAM price in Q2 2026 was 82.32 €/tCO2e, above the 75.28 €/tCO2e price in Q3 2026.", CBAM, WRONG);
-mustBlock("O preço do CBAM subiu de 82,32 €/tCO2e em Q2 2026 para 75,28 €/tCO2e em Q3 2026.", CBAM, WRONG);
-mustBlock("O preço do CBAM no Q3 2026 foi de 75,28 €/tCO2e.", CBAM, WRONG);
-mustBlock("Q2 2026 (82,32 €/tCO2e) e Q3 2026 (75,28 €/tCO2e).", CBAM, WRONG);
+const MUST_BLOCK = [
+  "O preço do CBAM no Q2 2026 foi de 82,32 €/tCO2e, acima do preço de 75,28 €/tCO2e no Q3 2026.",
+  "The CBAM price in Q2 2026 was 82.32 €/tCO2e, above the 75.28 €/tCO2e price in Q3 2026.",
+  "O preço do CBAM subiu de 82,32 €/tCO2e em Q2 2026 para 75,28 €/tCO2e em Q3 2026.",
+  "O preço do CBAM no Q3 2026 foi de 75,28 €/tCO2e.",
+  "Q2 2026 (82,32 €/tCO2e) e Q3 2026 (75,28 €/tCO2e).",
+  "Entre Q2 2026 e Q3 2026, o preço passou de 82,32 para 75,28 €/tCO2e.",
+  "Between Q2 2026 and Q3 2026, the price went from 82.32 to 75.28 €/tCO2e.",
+  "Os preços do Q2 2026 e do Q3 2026 foram, respectivamente, 82,32 e 75,28 €/tCO2e.",
+  "The prices in Q2 2026 and Q3 2026 were 82.32 and 75.28 €/tCO2e, respectively.",
+  "O preço do CBAM no Q2 2026 foi de 82,32 €/tCO2e, comparado ao Q3 2026.",
+  "The CBAM price in Q2 2026 was 82.32 €/tCO2e, compared with Q3 2026.",
+  "O preço subiu 9,4% no Q3 2026 frente ao Q2 2026, de 82,32 para 75,28 €/tCO2e.",
+  "CBAM price in Q3 2026: 75.28 €/tCO2e (above Q2 2026: 82.32 €/tCO2e).",
+];
+for (const t of MUST_BLOCK) mustBlock(t, CBAM, WRONG);
+// Valor certo no período certo, mas direção errada: bloqueio pela lógica de direção.
+mustBlock("O preço do CBAM no Q2 2026 foi de 75,28 €/tCO2e, acima do preço do Q3 2026.", CBAM, "contradiz");
 mustBlock("O preço do CBAM subiu de 75,28 €/tCO2e em Q2 2026 para 82,32 €/tCO2e em Q3 2026, mantendo-se abaixo do trimestre anterior.", CBAM, "contradiz");
-mustPass("O preço do CBAM subiu de 75,28 €/tCO2e em Q2 2026 para 82,32 €/tCO2e em Q3 2026, mantendo-se acima do trimestre anterior.");
-mustPass("The CBAM price rose from 75.28 €/tCO2e in Q2 2026 to 82.32 €/tCO2e in Q3 2026, remaining above the previous quarter.");
 mustBlock("The CBAM price rose from 75.28 €/tCO2e in Q2 2026 to 82.32 €/tCO2e in Q3 2026, remaining below the PREVIOUS QUARTER.", CBAM, "contradiz");
-mustPass("Em comparação com o Q2 2026 (75,28 €/tCO2e), o Q3 2026 ficou acima, em 82,32 €/tCO2e.");
-mustPass("Q2 2026 (75,28 €/tCO2e) e Q3 2026 (82,32 €/tCO2e).");
-mustPass("O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e.");
-mustPass("O preço do Q3 2026 ficou acima das expectativas do mercado, em 82,32 €/tCO2e.");
-mustPass("O preço do Q3 2026 foi de 82,32 €/tCO2e, acima das expectativas, e superior ao do Q2 2026.");
-// Valor sem rótulo vizinho não é restringido pelo vínculo.
-mustPass("A variação foi de 82,32 menos 75,28 €/tCO2e.");
-// Limite conhecido (falso positivo conservador): enumeração de rótulos antes dos valores.
-mustBlock("Entre Q2 2026 e Q3 2026, o preço passou de 75,28 €/tCO2e para 82,32 €/tCO2e.", CBAM, WRONG);
+// Contagens diferentes em "respectivamente" e oração com dois períodos e um valor: ambíguo.
+mustBlock("Os preços do Q2 2026 e do Q3 2026 foram, respectivamente, 75,28 €/tCO2e.", CBAM, "atribuição ambígua");
+mustBlock("O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e acima do trimestre anterior.", CBAM, "atribuição ambígua");
+const MUST_PASS = [
+  "O preço do CBAM no Q2 2026 foi de 75,28 €/tCO2e, abaixo do preço do Q3 2026.",
+  "The CBAM price in Q2 2026 was 75.28 €/tCO2e, below the Q3 2026 price.",
+  "O preço do CBAM subiu de 75,28 €/tCO2e em Q2 2026 para 82,32 €/tCO2e em Q3 2026, mantendo-se acima do trimestre anterior.",
+  "The CBAM price rose from 75.28 €/tCO2e in Q2 2026 to 82.32 €/tCO2e in Q3 2026, remaining above the previous quarter.",
+  "O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e, acima dos 75,28 €/tCO2e do Q2 2026.",
+  "Em comparação com o Q2 2026 (75,28 €/tCO2e), o Q3 2026 ficou acima, em 82,32 €/tCO2e.",
+  "Q2 2026 (75,28 €/tCO2e) e Q3 2026 (82,32 €/tCO2e).",
+  "O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e.",
+  "O preço do Q3 2026 foi de 82,32 €/tCO2e, acima das expectativas, e superior ao do Q2 2026.",
+  "Entre Q2 2026 e Q3 2026, o preço passou de 75,28 para 82,32 €/tCO2e.",
+  "Between Q2 2026 and Q3 2026, the price went from 75.28 to 82.32 €/tCO2e.",
+  "Os preços do Q2 2026 e do Q3 2026 foram, respectivamente, 75,28 e 82,32 €/tCO2e.",
+  "The prices in Q2 2026 and Q3 2026 were 75.28 and 82.32 €/tCO2e, respectively.",
+  "O preço subiu 9,4% no Q3 2026 frente ao Q2 2026, de 75,28 para 82,32 €/tCO2e.",
+  "O preço do CBAM no Q2 2026 foi de 75,28 €/tCO2e, comparado ao Q3 2026.",
+  "CBAM price in Q3 2026: 82.32 €/tCO2e (above Q2 2026: 75.28 €/tCO2e).",
+  "No Q3 2026, o preço do CBAM, de 82,32 €/tCO2e, ficou acima do trimestre anterior.",
+  // extras: sem rótulo vizinho, sem relação com a comparação, variantes de rótulo
+  "O preço do Q3 2026 ficou acima das expectativas do mercado, em 82,32 €/tCO2e.",
+  "A variação foi de 82,32 menos 75,28 €/tCO2e.",
+  "O preço do CBAM no Q3 de 2026 foi de 82,32 €/tCO2e, acima dos 75,28 €/tCO2e do Q2 de 2026.",
+];
+for (const t of MUST_PASS) mustPass(t, CBAM);
 // Sem rótulos (clima: referência fixa): comportamento anterior preservado.
 const CLIMATE = { id: "climate-temp-vs-reference", observed: 23.1, reference: 21.4, unit: "°C", direction: "above" };
 mustPass("A temperatura média de 23,1 °C ficou acima da referência de 21,4 °C.", CLIMATE);

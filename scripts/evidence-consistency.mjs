@@ -23,13 +23,19 @@
 //     é a referência. Cada palavra de direção é avaliada separadamente. Sem
 //     objeto identificável, a atribuição é ambígua e bloqueia (conservador).
 //     A referência também é reconhecida por referenceAliases ("trimestre
-//     anterior", "previous quarter"…). Vínculo período↔valor: um valor ao lado
-//     de um rótulo do outro lado ("Q2 2026 … 82,32" com 82,32 de Q3) bloqueia
-//     com "valor associado ao período errado", mesmo sem palavra de direção.
+//     anterior", "previous quarter"…). Vínculo período↔valor (mesmo sem palavra
+//     de direção): com "respectivamente/respectively", rótulos e valores são
+//     pareados em ordem; sem ela, a frase é dividida em orações (vírgula fora de
+//     decimais, ";" e conectores como "para/to/e/and/comparado/frente/contra";
+//     não em ":" nem parênteses) e em cada oração um único período exige que
+//     todo valor seja dele, dois períodos exigem pareamento em ordem com a mesma
+//     quantidade de valores (senão "atribuição ambígua"); "de X … para Y" /
+//     "from X … to Y" exige X = referência e Y = observado. Violações bloqueiam
+//     com "valor associado ao período errado".
 //     Limites: sem análise sintática (âncora mais próxima); rótulos fora do
-//     padrão (ex.: "T2") só valem pelo valor; uma enumeração de rótulos antes
-//     dos valores ("Entre Q2 2026 e Q3 2026, passou de 75,28 para 82,32") é
-//     bloqueada pelo vínculo (falso positivo conservador).
+//     padrão (ex.: "T2") só valem pelo valor; como a vírgula divide orações, um
+//     adjunto de período separado do valor por vírgula ("No Q2 2026, o preço foi
+//     de 82,32") deixa rótulo e valor livres e NÃO é detectado.
 
 import { checkEditorialContract } from "./editorial-contract.mjs";
 
@@ -207,15 +213,15 @@ function comparisonAnchors(sentence, cmp) {
   const anchors = [];
   for (const m of sentence.matchAll(new RegExp(NUM_RE.source, "gu"))) {
     const cands = numberCandidates(m[0]);
-    if (cands.includes(cmp.observed)) anchors.push({ side: "observed", kind: "value", pos: m.index });
-    if (cands.includes(cmp.reference)) anchors.push({ side: "reference", kind: "value", pos: m.index });
+    if (cands.includes(cmp.observed)) anchors.push({ side: "observed", kind: "value", pos: m.index, end: m.index + m[0].length });
+    if (cands.includes(cmp.reference)) anchors.push({ side: "reference", kind: "value", pos: m.index, end: m.index + m[0].length });
   }
   for (const [side, label] of [["observed", cmp.observedLabel], ["reference", cmp.referenceLabel]]) {
-    for (const m of sentence.matchAll(labelRegex(label))) anchors.push({ side, kind: "label", pos: m.index });
+    for (const m of sentence.matchAll(labelRegex(label))) anchors.push({ side, kind: "label", pos: m.index, end: m.index + m[0].length });
   }
   for (const alias of cmp.referenceAliases ?? []) {
     if (typeof alias !== "string" || !alias.trim()) continue;
-    for (const m of sentence.matchAll(new RegExp(`(?<![\\p{L}\\d])${escapeRe(alias.trim())}(?![\\p{L}\\d])`, "giu"))) anchors.push({ side: "reference", kind: "label", pos: m.index });
+    for (const m of sentence.matchAll(new RegExp(`(?<![\\p{L}\\d])${escapeRe(alias.trim())}(?![\\p{L}\\d])`, "giu"))) anchors.push({ side: "reference", kind: "label", pos: m.index, end: m.index + m[0].length });
   }
   return anchors.sort((a, b) => a.pos - b.pos);
 }
@@ -223,21 +229,77 @@ function comparisonAnchors(sentence, cmp) {
 const hasPeriodLabels = (cmp) => typeof cmp.observedLabel === "string" && cmp.observedLabel.trim() !== ""
   && typeof cmp.referenceLabel === "string" && cmp.referenceLabel.trim() !== "";
 
+const WRONG_PERIOD = "valor associado ao período errado";
+const AMBIGUOUS = "atribuição ambígua";
+// Divide em orações em vírgula (exceto decimal "82,32"), ";" e conectores. Não divide em ":" nem em parênteses.
+const CLAUSE_SPLIT_RE = /(?<!\d),|,(?!\d)|;|\s(?:para|to|e|and|comparad[oa]s?|compared|frente|versus|vs|enquanto|while|contra|against)\s/gi;
+const RESPECTIVELY_RE = /respectivamente|respectively/i;
+
+/** Compara lado a lado rótulos e valores de um grupo; devolve o problema ou null. */
+function pairProblem(labels, values) {
+  if (!labels.length || !values.length) return null; // sem valores ou sem rótulos: livres
+  const periods = new Set(labels.map((l) => l.side));
+  if (periods.size === 1) return values.every((v) => v.side === labels[0].side) ? null : WRONG_PERIOD;
+  if (labels.length !== values.length) return AMBIGUOUS;
+  return labels.every((l, i) => l.side === values[i].side) ? null : WRONG_PERIOD;
+}
+
+/** "de X … para Y" / "from X … to Y" com X e Y valores da comparação: X é a referência, Y o observado. */
+function fromToProblem(sentence, anchors) {
+  const values = anchors.filter((a) => a.kind === "value");
+  for (const [i, x] of values.entries()) {
+    if (!/(?<![\p{L}\d])(?:de|from)\s*$/iu.test(sentence.slice(0, x.pos))) continue;
+    for (const y of values.slice(i + 1)) {
+      const between = sentence.slice(x.end, y.pos);
+      if (/[.;]/.test(between)) break;
+      if (!/\s(?:para|to)\s+\D{0,12}$/i.test(between)) continue;
+      if (x.side !== "reference" || y.side !== "observed") return WRONG_PERIOD;
+      break;
+    }
+  }
+  return null;
+}
+
+/**
+ * Vínculo período ↔ valor. "respectivamente/respectively": pareia em ordem todos os rótulos com
+ * todos os valores. Caso contrário, por oração: um único período → todo valor é dele; os dois
+ * períodos → pareia em ordem (mesma quantidade) ou é ambíguo. Sem valores ou sem rótulos, livre.
+ */
+function bindingProblem(sentence, anchors) {
+  const labels = anchors.filter((a) => a.kind === "label");
+  const values = anchors.filter((a) => a.kind === "value");
+  if (RESPECTIVELY_RE.test(sentence)) {
+    if (labels.length && values.length) {
+      if (labels.length !== values.length) return AMBIGUOUS;
+      return labels.every((l, i) => l.side === values[i].side) ? null : WRONG_PERIOD;
+    }
+  } else {
+    const cuts = [...sentence.matchAll(CLAUSE_SPLIT_RE)].map((m) => [m.index, m.index + m[0].length]);
+    const bounds = [[0, 0], ...cuts, [sentence.length, sentence.length]];
+    let ambiguous = false;
+    for (let k = 0; k < bounds.length - 1; k++) {
+      const [from, to] = [bounds[k][1], bounds[k + 1][0]];
+      const inClause = (a) => a.pos >= from && a.pos < to;
+      const problem = pairProblem(labels.filter(inClause), values.filter(inClause));
+      if (problem === WRONG_PERIOD) return WRONG_PERIOD;
+      if (problem === AMBIGUOUS) ambiguous = true;
+    }
+    const fromTo = fromToProblem(sentence, anchors);
+    if (fromTo) return fromTo;
+    return ambiguous ? AMBIGUOUS : null;
+  }
+  return fromToProblem(sentence, anchors);
+}
+
 /** Atribuição determinística para comparações com rótulos de período. */
 function checkLabeledComparison(cmp, sentence, path) {
   const anchors = comparisonAnchors(sentence, cmp);
   if (!anchors.length) return [];
   const head = `${cmp.id}: ${cmp.observedLabel} ${cmp.observed} ${cmp.unit} está ${cmp.direction === "above" ? "ACIMA" : "ABAIXO"} de ${cmp.referenceLabel} ${cmp.reference} ${cmp.unit}`;
   const fail = (why) => [{ rule: "comparison_direction", path, detail: `${head} — ${why} — "${sentence}"` }];
-  // Vínculo período ↔ valor (vale para qualquer frase, com ou sem palavra de direção):
-  // um valor cujo vizinho imediato na lista de âncoras (anterior ou seguinte) é um rótulo
-  // precisa ter pelo menos um desses rótulos do seu próprio lado. Valores sem rótulo vizinho
-  // não são restringidos.
-  for (const [i, a] of anchors.entries()) {
-    if (a.kind !== "value") continue;
-    const near = [anchors[i - 1], anchors[i + 1]].filter((n) => n?.kind === "label");
-    if (near.length && !near.some((n) => n.side === a.side)) return fail("valor associado ao período errado");
-  }
+  // Vínculo período ↔ valor (vale para qualquer frase, com ou sem palavra de direção).
+  const binding = bindingProblem(sentence, anchors);
+  if (binding) return fail(binding);
   const occurrences = [...sentence.matchAll(DIRECTION_RE)].map((m) => ({ kind: kindOf(m[0]), term: m[0], start: m.index, end: m.index + m[0].length }));
   if (!occurrences.length || cmp.direction === "equal") return [];
   const refValue = anchors.some((a) => a.side === "reference" && a.kind === "value");
