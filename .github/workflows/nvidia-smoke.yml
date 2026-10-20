@@ -20,4 +20,5 @@ jobs:
       - name: NVIDIA API contract smoke test
         env:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NVIDIA_MODEL: nvidia/nemotron-3.5-lightning-30b-a3b
         run: node scripts/nvidia-smoke.mjs

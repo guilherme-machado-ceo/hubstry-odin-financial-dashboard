@@ -43,7 +43,7 @@ jobs:
         env:
           AI_PROVIDER: nvidia
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-          NVIDIA_MODEL: nvidia/nemotron-3-super-120b-a12b
+          NVIDIA_MODEL: nvidia/nemotron-3.5-lightning-30b-a3b
           AI_TIMEOUT_MS: 45000
         run: node scripts/generate-insights-shadow.mjs
       - name: Generate MaaS shadow artifact
@@ -51,7 +51,7 @@ jobs:
         env:
           AI_PROVIDER: maas
           MAAS_KEY: ${{ secrets.MAAS_KEY }}
-          MAAS_MODEL: deepseek-v4-flash
+          MAAS_MODEL: glm-5.2
           AI_TIMEOUT_MS: 45000
         run: node scripts/generate-insights-shadow.mjs
       - name: Validate shadow artifact
