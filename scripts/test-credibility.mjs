@@ -1,6 +1,6 @@
 // ODIN — teste de credibilidade pré-prospecção, sem rede e sem LLM.
 // Cobre: selo CBAM (renderizado via CarbonBadge + funções puras), textos
-// duráveis, remoção de Bloomberg e links comerciais no rodapé e no Briefing.
+// duráveis, remoção de Bloomberg e links comerciais no rodapé.
 //
 // CarbonBadge é o sub-componente exportado por CarbonPricingSection.tsx que
 // encapsula exatamente o JSX do selo. Testá-lo via renderToStaticMarkup
@@ -18,7 +18,6 @@ const entry = `
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import Footer from "@/components/Footer";
-import { BriefingView } from "@/components/BriefingODIN";
 import { CarbonBadge } from "@/components/CarbonPricingSection";
 import { setLocale, t } from "@/i18n";
 import { CBAM_CERT_PRICES, selectLastPublished, formatBadgeDate, formatBadgePrice } from "@/data/carbonData";
@@ -26,18 +25,6 @@ import { CBAM_CERT_PRICES, selectLastPublished, formatBadgeDate, formatBadgePric
 export function renderFooter(locale) {
   setLocale(locale);
   return renderToStaticMarkup(createElement(Footer, { onSourceClick: () => {} }));
-}
-export function renderBriefing(locale) {
-  setLocale(locale);
-  const items = [{
-    sectionId: "carbon", titlePt: "Carbono", titleEn: "Carbon",
-    happenedPt: "Q3 subiu.", happenedEn: "Q3 rose.",
-    whyPt: "Importa.", whyEn: "Matters.",
-    watchSignalPt: "Sinal.", watchSignalEn: "Signal.",
-    watchWhyPt: "Por quê.", watchWhyEn: "Why.",
-    anchor: "#carbon", validAsOf: "2026-10-05", sourceUrl: null,
-  }];
-  return renderToStaticMarkup(createElement(BriefingView, { items, locale, updatedAt: null }));
 }
 export function renderBadge(cert, locale) {
   setLocale(locale);
@@ -62,7 +49,7 @@ await build({
 });
 
 const mod = await import(pathToFileURL(path.join(outdir, "bundle.mjs")).href);
-const { renderFooter, renderBriefing, renderBadge, getT, CBAM_CERT_PRICES, selectLastPublished, formatBadgeDate, formatBadgePrice } = mod;
+const { renderFooter, renderBadge, getT, CBAM_CERT_PRICES, selectLastPublished, formatBadgeDate, formatBadgePrice } = mod;
 
 let failures = 0;
 const assert = (c, m) => { if (!c) { failures += 1; console.error("FALHA:", m); } };
@@ -199,16 +186,5 @@ assert(priceEn === "€82.32",
   assert(htmlEn.includes("demo"), "rodapé EN: texto 'demo'");
 }
 
-// ── G. Briefing — link comercial ─────────────────────────────────────────────
-{
-  const htmlPt = renderBriefing("pt");
-  const htmlEn = renderBriefing("en");
-
-  assert(htmlPt.includes("data-demo-link"), "Briefing PT deve conter data-demo-link");
-  assert(htmlEn.includes("data-demo-link"), "Briefing EN deve conter data-demo-link");
-  assert(htmlPt.includes(DEMO_HREF), "Briefing PT deve conter link comercial");
-  assert(htmlEn.includes(DEMO_HREF), "Briefing EN deve conter link comercial");
-}
-
 if (failures) { console.error(`credibility: ${failures} falha(s)`); process.exit(1); }
-console.log("ODIN credibility: PASS — 26 casos testados (CarbonBadge renderizado, funções puras, textos, rodapé, Briefing)");
+console.log("ODIN credibility: PASS — CarbonBadge renderizado, funções puras, textos e rodapé");

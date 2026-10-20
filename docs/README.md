@@ -1,14 +1,6 @@
 # ODIN — Documentação e Auditoria
 
-> **Atualização (set/2026):** a cadeia vigente é a do pipeline v2 — shadow no
-> GitHub Actions, gate determinístico, evidência por run em
-> `public/data/evidence/<runId>/`, revisão humana e promoção controlada
-> (ver `README.md`, seções "Pipeline" e "Proveniência e auditoria"). As
-> referências abaixo a `insights.json` e a run logs em `logs/` descrevem o
-> gerador legado v2.x (execução local); esses logs não são versionados no
-> repositório.
-
-Estrutura **docs-as-code**: toda decisão, mudança e execução relevante é
+Estrutura **docs-as-code**: toda decisão, mudança e verificação relevante é
 registrada em arquivos versionados junto ao código.
 
 > Auditabilidade aqui significa **registros versionados, identificáveis
@@ -23,22 +15,20 @@ registrada em arquivos versionados junto ao código.
 |---------|----------|
 | `adr/` | Architecture Decision Records — uma decisão por arquivo, com contexto, alternativas rejeitadas e consequências |
 | `adr/0000-template.md` | Template para novas decisões (inclui política de edição) |
+| `data-audit.md` | Auditoria das fontes públicas: status, evidência e data de cada dado curado |
 | `../CHANGELOG.md` | Linha do tempo das mudanças (formato Keep a Changelog) |
-| `../logs/insights-runs-AAAA-MM.jsonl` | Run logs mensais do gerador ODIN Insights (uma linha JSON por execução) |
 
 ## Cadeia de auditoria ponta a ponta
 
-1. **Geração** — cada seção de `public/data/insights.json` carrega
-   `promptVersion`, `generatedAt`, `generationStatus` e `runId`;
-2. **Execução** — cada run anexa uma linha ao log do mês com o MESMO
-   `runId` (liga log↔artefato sem depender de correlação por horário),
-   latência, status, `errorType`, tokens e hashes SHA-256 de
-   entrada/saída (prova qual snapshot alimentou o modelo);
-3. **Publicação** — cada push dispara deploy na Vercel vinculado ao SHA
-   do commit;
+1. **Dado** — cada dado curado tem registro em `src/data/dataAudit.ts`
+   (status, URL oficial, data da evidência); `scripts/test-data-audit.mjs`
+   falha no CI se o código divergir das evidências;
+2. **Coleta** — os snapshots e dados abertos são gerados por workflows
+   versionados, com gate de validação antes de gravar;
+3. **Publicação** — cada push na `main` dispara deploy vinculado ao SHA do
+   commit;
 4. **Revisão** — achados de revisão viram issues (label por natureza do
-   revisor) fechadas pelos commits de correção, e regras no prompt com
-   entrada no CHANGELOG.
+   revisor) fechadas pelos commits de correção, com entrada no CHANGELOG.
 
 ## Convenções
 
@@ -48,30 +38,7 @@ registrada em arquivos versionados junto ao código.
   `human-review`, `security-review`, `data-quality`, `methodology`;
 - Documentos em PT-BR; código e mensagens de commit sem acentos;
 - ADR aceito nunca é editado substancialmente — ver política no
-  `adr/0000-template.md`;
-- `insights.json` e os run logs são artefatos de auditoria — sempre
-  commitados; edição manual só como contingência documentada no
-  CHANGELOG.
-
-## Política de conteúdo dos logs
-
-Os run logs contêm **apenas metadados operacionais**: runId, modelo,
-versões, status, latência, tokens, timestamps, hashes, tipo de erro.
-Nunca registrar: chaves, headers, prompts ou respostas completos, dados
-pessoais, payloads confidenciais, URLs assinadas ou mensagens de erro
-que revelem credenciais.
-
-Convenção semântica: `tokens: null` = consumo **indeterminado**
-(falha/timeout); zero só quando a API confirma zero. O log é o **registro
-técnico de consumo reportado pela API**, reconciliável com o painel do
-provedor — a referência de cobrança é o painel comercial (retries,
-cache e arredondamentos podem divergir).
-
-Rotação: um arquivo por mês (`insights-runs-AAAA-MM.jsonl`). Se o volume
-crescer, migrar para armazenamento dedicado — política a registrar em
-ADR futuro.
-
-Consulta do consumo acumulado: `npm run insights:usage`.
+  `adr/0000-template.md`.
 
 ## Endurecimento do repositório (configuração manual nas Settings)
 

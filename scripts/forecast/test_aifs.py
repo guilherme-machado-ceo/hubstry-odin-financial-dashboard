@@ -55,6 +55,7 @@ class TestConversion(unittest.TestCase):
 
 
 class TestRisk(unittest.TestCase):
+    # Regressao da formula do indice de risco (herdada do antigo snapshot Earth-2).
     def test_same_formula_as_earth2(self):
         pts = [{"t2mC": 40.0, "wind10mMs": 5.0, "mslHPa": 1010.0},
                {"t2mC": 30.0, "wind10mMs": 5.0, "mslHPa": 1000.0}]

@@ -3,6 +3,40 @@
 Todas as mudanças notáveis deste projeto são documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [Remoção da camada de insights por LLM] — 2026-10-20
+
+Decisão de produto: o ODIN deixa de gerar leituras por modelo de linguagem e de
+usar NVIDIA e Huawei MaaS. Passa a ser um dashboard de dados determinístico.
+Etapa 1 (#73): interface e workflows. Etapa 2 (esta): limpeza do repositório.
+
+### Removido
+- **Geração, gate, promoção, proveniência, revisão e correções editoriais** dos
+  insights, com os scripts (`ai-provider`, geradores, validadores, promoção,
+  `evidence-consistency`, `contract-v11`, `editorial-contract`, perfis de seção,
+  uso de tokens, `nvidia-smoke`), os testes correspondentes, `contracts/`,
+  os manifestos de `editorial-corrections/` e os artefatos
+  `public/data/insights.json`, `insights.v2.json` e `evidence/`.
+- **Earth-2**: `scripts/earth2/` e `public/data/earth2-forecast.json`
+  (a seção de previsão usa o ECMWF AIFS desde o AIFS-2).
+- **Documentação de insights**: contratos de inteligência (v1 e v1.1) e os ADRs
+  de MaaS, ODIN Insights vNext, versionamento de prompt, proveniência por seção,
+  section profiles e merge de seções.
+- **`public/data/sources/cbam-carbon.json`**: `src/data/carbonData.ts` passa a
+  ser a única fonte do preço do CBAM (revisão manual trimestral a partir da
+  fonte oficial); `dataAudit.ts` e `docs/data-audit.md` apontam para ele.
+- Comandos `insights:usage`, `insights:validate` e `insights:consistency`.
+
+### Alterado
+- `README.md` e `docs/README.md` descrevem só arquitetura e operação dos dados.
+- `scripts/test-credibility.mjs` deixa de testar o Briefing (removido no #73) e
+  passa a rodar no `data-checks.yml`.
+- Comentários de `Earth2ForecastSection.tsx`, `aifs_core.py` e `test_aifs.py` não
+  citam mais arquivos nem provedores removidos (sem mudança de comportamento).
+
+### Mantido
+Seções de dados, "Fontes e sinais", auditoria das fontes, vocabulário
+controlado, workflows de dados e o ECMWF AIFS.
+
 ## [AIFS-2 · seção de previsão passa a exibir o ECMWF AIFS] — 2026-10-07
 
 Escopo restrito à apresentação da previsão. Nemotron, Insights, demais seções

@@ -27,5 +27,7 @@ jobs:
         run: node scripts/test-vocabulary.mjs
       - name: Dados abertos, procedência e retiradas
         run: node scripts/test-open-markets.mjs
+      - name: Credibilidade (selo CBAM, textos duráveis e rodapé)
+        run: node scripts/test-credibility.mjs
       - name: Security baseline (least privilege do AIFS)
         run: node scripts/test-security-baseline.mjs
