@@ -21,10 +21,15 @@
 //     primeira âncora (valor ou rótulo do período) depois da palavra de direção;
 //     o sujeito é o outro lado, e a direção esperada se inverte quando o sujeito
 //     é a referência. Cada palavra de direção é avaliada separadamente. Sem
-//     âncora depois da palavra, ou com objetos diferentes numa mesma frase, a
-//     atribuição é ambígua e bloqueia (conservador). Limite: a âncora é a mais
-//     próxima, não há análise sintática — rótulos fora do padrão (ex.: "T2")
-//     só são reconhecidos pelo valor.
+//     objeto identificável, a atribuição é ambígua e bloqueia (conservador).
+//     A referência também é reconhecida por referenceAliases ("trimestre
+//     anterior", "previous quarter"…). Vínculo período↔valor: um valor ao lado
+//     de um rótulo do outro lado ("Q2 2026 … 82,32" com 82,32 de Q3) bloqueia
+//     com "valor associado ao período errado", mesmo sem palavra de direção.
+//     Limites: sem análise sintática (âncora mais próxima); rótulos fora do
+//     padrão (ex.: "T2") só valem pelo valor; uma enumeração de rótulos antes
+//     dos valores ("Entre Q2 2026 e Q3 2026, passou de 75,28 para 82,32") é
+//     bloqueada pelo vínculo (falso positivo conservador).
 
 import { checkEditorialContract } from "./editorial-contract.mjs";
 
@@ -193,16 +198,24 @@ function labelRegex(label) {
   return new RegExp(escapeRe(String(label).trim()), "gi");
 }
 
-/** Âncoras de cada lado da comparação na frase: valor numérico ou rótulo do período. */
+/**
+ * Âncoras de cada lado da comparação na frase, ordenadas por posição:
+ * kind "value" (número) ou "label" (rótulo do período ou alias da referência,
+ * ex.: "trimestre anterior", sem diferenciar maiúsculas de minúsculas).
+ */
 function comparisonAnchors(sentence, cmp) {
   const anchors = [];
   for (const m of sentence.matchAll(new RegExp(NUM_RE.source, "gu"))) {
     const cands = numberCandidates(m[0]);
-    if (cands.includes(cmp.observed)) anchors.push({ side: "observed", pos: m.index });
-    if (cands.includes(cmp.reference)) anchors.push({ side: "reference", pos: m.index });
+    if (cands.includes(cmp.observed)) anchors.push({ side: "observed", kind: "value", pos: m.index });
+    if (cands.includes(cmp.reference)) anchors.push({ side: "reference", kind: "value", pos: m.index });
   }
   for (const [side, label] of [["observed", cmp.observedLabel], ["reference", cmp.referenceLabel]]) {
-    for (const m of sentence.matchAll(labelRegex(label))) anchors.push({ side, pos: m.index });
+    for (const m of sentence.matchAll(labelRegex(label))) anchors.push({ side, kind: "label", pos: m.index });
+  }
+  for (const alias of cmp.referenceAliases ?? []) {
+    if (typeof alias !== "string" || !alias.trim()) continue;
+    for (const m of sentence.matchAll(new RegExp(`(?<![\\p{L}\\d])${escapeRe(alias.trim())}(?![\\p{L}\\d])`, "giu"))) anchors.push({ side: "reference", kind: "label", pos: m.index });
   }
   return anchors.sort((a, b) => a.pos - b.pos);
 }
@@ -213,18 +226,38 @@ const hasPeriodLabels = (cmp) => typeof cmp.observedLabel === "string" && cmp.ob
 /** Atribuição determinística para comparações com rótulos de período. */
 function checkLabeledComparison(cmp, sentence, path) {
   const anchors = comparisonAnchors(sentence, cmp);
-  if (!anchors.some((a) => a.side === "reference")
-    && !(anchors.some((a) => a.side === "observed") && [...sentence.matchAll(labelRegex(cmp.referenceLabel))].length)) return [];
-  const occurrences = [...sentence.matchAll(DIRECTION_RE)].map((m) => ({ kind: kindOf(m[0]), term: m[0], end: m.index + m[0].length }));
-  if (!occurrences.length || cmp.direction === "equal") return [];
+  if (!anchors.length) return [];
   const head = `${cmp.id}: ${cmp.observedLabel} ${cmp.observed} ${cmp.unit} está ${cmp.direction === "above" ? "ACIMA" : "ABAIXO"} de ${cmp.referenceLabel} ${cmp.reference} ${cmp.unit}`;
   const fail = (why) => [{ rule: "comparison_direction", path, detail: `${head} — ${why} — "${sentence}"` }];
-  const objects = occurrences.map((o) => ({ ...o, object: anchors.find((a) => a.pos >= o.end)?.side ?? null }));
-  if (objects.some((o) => o.object === null) || new Set(objects.map((o) => o.object)).size > 1) return fail("atribuição ambígua");
+  // Vínculo período ↔ valor (vale para qualquer frase, com ou sem palavra de direção):
+  // um valor cujo vizinho imediato na lista de âncoras (anterior ou seguinte) é um rótulo
+  // precisa ter pelo menos um desses rótulos do seu próprio lado. Valores sem rótulo vizinho
+  // não são restringidos.
+  for (const [i, a] of anchors.entries()) {
+    if (a.kind !== "value") continue;
+    const near = [anchors[i - 1], anchors[i + 1]].filter((n) => n?.kind === "label");
+    if (near.length && !near.some((n) => n.side === a.side)) return fail("valor associado ao período errado");
+  }
+  const occurrences = [...sentence.matchAll(DIRECTION_RE)].map((m) => ({ kind: kindOf(m[0]), term: m[0], start: m.index, end: m.index + m[0].length }));
+  if (!occurrences.length || cmp.direction === "equal") return [];
+  const refValue = anchors.some((a) => a.side === "reference" && a.kind === "value");
+  const refLabel = anchors.some((a) => a.side === "reference" && a.kind === "label");
+  if (!(refValue || (refLabel && anchors.some((a) => a.side === "observed")))) return [];
   const inverse = { above: "below", below: "above" };
-  for (const o of objects) {
+  for (const o of occurrences) {
+    const before = anchors.filter((a) => a.pos < o.start);
+    const after = anchors.filter((a) => a.pos >= o.end);
+    // Sujeito provável: o último rótulo antes da palavra. Um valor depois dela que só repete o
+    // lado do sujeito ("o Q3 2026 ficou acima, em 82,32") não é o objeto da comparação.
+    const subject = [...before].reverse().find((a) => a.kind === "label")?.side ?? null;
+    let object = after.find((a) => !(a.kind === "value" && a.side === subject))?.side ?? null;
+    if (object === null && subject !== null) {
+      const other = subject === "observed" ? "reference" : "observed";
+      if (before.some((a) => a.side === other)) object = other; // "Em comparação com o Q2 2026 (75,28), o Q3 2026 ficou acima"
+    }
+    if (object === null) return fail("atribuição ambígua");
     // objeto = referência → sujeito = observado (direção como calculada); objeto = observado → sujeito = referência (inverte).
-    const expected = o.object === "reference" ? cmp.direction : inverse[cmp.direction];
+    const expected = object === "reference" ? cmp.direction : inverse[cmp.direction];
     if (o.kind !== expected) return fail(`"${o.term}" contradiz a direção esperada (${expected})`);
   }
   return [];
@@ -238,9 +271,10 @@ export function checkComparisons(entry, comparisons = []) {
       const nums = new Set(extractNumbers(sentence).flatMap((x) => x.candidates));
       const hasAbove = includesAny(sentence, ABOVE);
       const hasBelow = includesAny(sentence, BELOW);
-      if (!hasAbove && !hasBelow) continue;
       for (const cmp of comparisons) {
+        // Com rótulos de período, o vínculo período↔valor vale mesmo sem palavra de direção.
         if (hasPeriodLabels(cmp)) { errors.push(...checkLabeledComparison(cmp, sentence, path)); continue; }
+        if (!hasAbove && !hasBelow) continue;
         if (!nums.has(cmp.reference)) continue;
         const ok = cmp.direction === "above" ? hasAbove : cmp.direction === "below" ? hasBelow : true;
         if (!ok) errors.push({ rule: "comparison_direction", path, detail: `${cmp.id}: ${cmp.observed} ${cmp.unit} está ${cmp.direction === "above" ? "ACIMA" : "ABAIXO"} de ${cmp.reference} ${cmp.unit} — "${sentence}"` });

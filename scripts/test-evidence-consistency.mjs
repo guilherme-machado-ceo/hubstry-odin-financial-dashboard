@@ -56,7 +56,7 @@ assert(annual.length === 0, `"declaração anual" sem métrica de preço não é
 
 // Comparações com atribuição determinística (dados reais do CBAM: Q3 2026 = 82,32 é o
 // observado; Q2 2026 = 75,28 é a referência; direção "above").
-const CBAM = { id: "cbam-price-latest-vs-previous", observed: 82.32, reference: 75.28, unit: "€/tCO2e", direction: "above", observedLabel: "Q3 2026", referenceLabel: "Q2 2026" };
+const CBAM = { id: "cbam-price-latest-vs-previous", observed: 82.32, reference: 75.28, unit: "€/tCO2e", direction: "above", observedLabel: "Q3 2026", referenceLabel: "Q2 2026", referenceAliases: ["trimestre anterior", "período anterior", "previous quarter", "prior quarter", "previous period"] };
 const CBAM_LEGACY = { id: CBAM.id, observed: CBAM.observed, reference: CBAM.reference, unit: CBAM.unit, direction: CBAM.direction };
 const cmpErrors = (text, cmp = CBAM) => checkComparisons({ pt: text }, [cmp]);
 const mustPass = (text, cmp) => { const e = cmpErrors(text, cmp); assert(e.length === 0, `deveria passar: "${text}" → ${e.map(formatConsistencyError).join(" | ")}`); };
@@ -87,9 +87,30 @@ const both = [
 for (const s of both) mustBlock(s);
 // Documenta o limite anterior: sem rótulos, a mesma frase contraditória ainda passaria.
 assert(cmpErrors(both[0], CBAM_LEGACY).length === 0, "caminho legado sem rótulos mantém a limitação documentada");
-// Ambiguidade: sem âncora depois da palavra de direção → bloqueio conservador.
-mustBlock("Em comparação com o Q2 2026 (75,28 €/tCO2e), o preço do Q3 2026 ficou acima.", CBAM, "atribuição ambígua");
-mustBlock("O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e, acima dos 75,28 €/tCO2e do Q2 2026, e o Q2 2026 ficou abaixo do Q3 2026.", CBAM, "atribuição ambígua");
+// Ambiguidade: sem objeto identificável → bloqueio conservador.
+mustBlock("Em comparação com o Q2 2026 (75,28 €/tCO2e), o preço ficou acima.", CBAM, "atribuição ambígua");
+// Sujeito explícito em cada oração: afirmação verdadeira passa mesmo com as duas direções.
+mustPass("O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e, acima dos 75,28 €/tCO2e do Q2 2026, e o Q2 2026 ficou abaixo do Q3 2026.");
+// Vínculo período ↔ valor e expressões da referência (revisão do PR #72).
+const WRONG = "valor associado ao período errado";
+mustBlock("O preço do CBAM no Q2 2026 foi de 82,32 €/tCO2e, acima do preço de 75,28 €/tCO2e no Q3 2026.", CBAM, WRONG);
+mustBlock("The CBAM price in Q2 2026 was 82.32 €/tCO2e, above the 75.28 €/tCO2e price in Q3 2026.", CBAM, WRONG);
+mustBlock("O preço do CBAM subiu de 82,32 €/tCO2e em Q2 2026 para 75,28 €/tCO2e em Q3 2026.", CBAM, WRONG);
+mustBlock("O preço do CBAM no Q3 2026 foi de 75,28 €/tCO2e.", CBAM, WRONG);
+mustBlock("Q2 2026 (82,32 €/tCO2e) e Q3 2026 (75,28 €/tCO2e).", CBAM, WRONG);
+mustBlock("O preço do CBAM subiu de 75,28 €/tCO2e em Q2 2026 para 82,32 €/tCO2e em Q3 2026, mantendo-se abaixo do trimestre anterior.", CBAM, "contradiz");
+mustPass("O preço do CBAM subiu de 75,28 €/tCO2e em Q2 2026 para 82,32 €/tCO2e em Q3 2026, mantendo-se acima do trimestre anterior.");
+mustPass("The CBAM price rose from 75.28 €/tCO2e in Q2 2026 to 82.32 €/tCO2e in Q3 2026, remaining above the previous quarter.");
+mustBlock("The CBAM price rose from 75.28 €/tCO2e in Q2 2026 to 82.32 €/tCO2e in Q3 2026, remaining below the PREVIOUS QUARTER.", CBAM, "contradiz");
+mustPass("Em comparação com o Q2 2026 (75,28 €/tCO2e), o Q3 2026 ficou acima, em 82,32 €/tCO2e.");
+mustPass("Q2 2026 (75,28 €/tCO2e) e Q3 2026 (82,32 €/tCO2e).");
+mustPass("O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e.");
+mustPass("O preço do Q3 2026 ficou acima das expectativas do mercado, em 82,32 €/tCO2e.");
+mustPass("O preço do Q3 2026 foi de 82,32 €/tCO2e, acima das expectativas, e superior ao do Q2 2026.");
+// Valor sem rótulo vizinho não é restringido pelo vínculo.
+mustPass("A variação foi de 82,32 menos 75,28 €/tCO2e.");
+// Limite conhecido (falso positivo conservador): enumeração de rótulos antes dos valores.
+mustBlock("Entre Q2 2026 e Q3 2026, o preço passou de 75,28 €/tCO2e para 82,32 €/tCO2e.", CBAM, WRONG);
 // Sem rótulos (clima: referência fixa): comportamento anterior preservado.
 const CLIMATE = { id: "climate-temp-vs-reference", observed: 23.1, reference: 21.4, unit: "°C", direction: "above" };
 mustPass("A temperatura média de 23,1 °C ficou acima da referência de 21,4 °C.", CLIMATE);
