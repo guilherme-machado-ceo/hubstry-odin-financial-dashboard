@@ -16,6 +16,7 @@ permissions:
 concurrency:
   group: odin-insights-shadow
   cancel-in-progress: false
+  queue: max
 
 env:
   ODIN_COMPARISON_ID: ${{ github.run_id }}
