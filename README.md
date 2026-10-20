@@ -143,7 +143,7 @@ O ODIN usa apenas dados abertos (OSINT — Open Source Intelligence); nenhuma fo
 | BIS, IMF WEO, CEPAL, NDB, CIPS, TCX | Séries de títulos e dívida | curadoria manual em `src/data/*.ts` (status por dado em `dataAudit.ts`) |
 | ECMWF AIFS — Open Data | Previsão meteorológica por IA (substituiu NVIDIA Earth-2/FourCastNet, cujo endpoint hospedado deixou de aceitar estado inicial próprio) | snapshot validado por gate, sem chave |
 | **NVIDIA — Nemotron** | Geração das camadas ODIN (provider ativo) | API, chave em *secrets* do Actions |
-| **Huawei Cloud MaaS** (Model as a Service, via Digiti) | Provider alternativo configurado (`AI_PROVIDER=maas`) | API, chave em variável de ambiente |
+| **Huawei Cloud MaaS** (Model as a Service, via Digiti) | Provider alternativo configurado (`AI_PROVIDER=maas`); roda em paralelo à NVIDIA na geração sombra | API, chave em variável de ambiente |
 
 Nenhuma chave de API é exposta no navegador.
 
