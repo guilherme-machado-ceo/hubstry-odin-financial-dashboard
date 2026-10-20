@@ -9,10 +9,7 @@
     "build:kimi": "tsc -b && vite build",
     "build:github": "tsc -b && VITE_BASE_PATH=/hubstry-odin-financial-dashboard/ vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "insights:usage": "node scripts/insights-usage.mjs",
-    "insights:validate": "node scripts/validate-insights.mjs",
-    "insights:consistency": "node scripts/test-evidence-consistency.mjs"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",

@@ -3,9 +3,9 @@
 Sem rede e sem bibliotecas de GRIB: so cidades, montagem do payload, score de
 risco e a validacao deterministica. E o que os testes exercitam.
 
-O formato do JSON e o mesmo de public/data/earth2-forecast.json (interface
-Earth2Snapshot em src/components/Earth2ForecastSection.tsx), para que a secao
-do site possa trocar de fonte depois sem mudar componente.
+O formato do JSON e o consumido pela interface Earth2Snapshot em
+src/components/Earth2ForecastSection.tsx (contrato herdado do antigo snapshot
+Earth-2, ja removido do repositorio).
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ ATTRIBUTION = (
     "responsabiliza por erros ou omissões."
 )
 
-# Mesmas cidades de scripts/earth2/fetch_earth2.py e do ClimateVectorChart.tsx
+# Mesmas cidades do ClimateVectorChart.tsx
 CITIES = [
     {"city": "Beijing",     "cityPt": "Pequim",      "country": "China",        "flag": "CN",  "lat": 39.9,  "lon": 116.4},
     {"city": "Moscow",      "cityPt": "Moscou",      "country": "Russia",       "flag": "RU",  "lat": 55.8,  "lon": 37.6},
@@ -69,8 +69,8 @@ def to_point(init_time: datetime, lead_h: int, t2m_k: float, u10: float,
 
 
 def risk_from_forecast(points: list[dict]) -> dict:
-    """Mesma formula de scripts/earth2/fetch_earth2.py (estresse termico +
-    vento + tendencia de pressao), para manter o indice comparavel."""
+    """Indice de risco (estresse termico + vento + tendencia de pressao),
+    com a formula herdada do antigo snapshot Earth-2 para manter a serie comparavel."""
     if len(points) < 2:
         return {"riskScore": 0, "type": "normal"}
     t_max = max(p["t2mC"] for p in points)

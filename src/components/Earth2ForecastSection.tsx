@@ -10,9 +10,8 @@ import { Radio, Thermometer, Wind, Gauge, Satellite } from "lucide-react";
 // PREVISAO POR IA — ECMWF AIFS (dado aberto, CC BY 4.0)
 // Consome public/data/aifs-forecast.json, gerado pelo workflow
 // "ODIN AIFS Forecast" (scripts/forecast/fetch_aifs.py) e aprovado
-// pelo gate deterministico antes de gravar. Mesmo contrato de dados
-// do antigo snapshot Earth-2 (aposentado: o endpoint hospedado da
-// NVIDIA deixou de aceitar estado inicial proprio).
+// pelo gate deterministico antes de gravar. Mantem o contrato de dados
+// do antigo snapshot Earth-2 (aposentado e removido do repositorio).
 // Padrao snapshot: zero chamada de API no cliente.
 // ============================================================
 
