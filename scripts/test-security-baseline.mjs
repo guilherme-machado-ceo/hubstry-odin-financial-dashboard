@@ -2,6 +2,9 @@
 // Lê os arquivos YAML como texto; não precisa de rede, LLM nem segredos.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 
 const root = process.cwd();
 let failures = 0;
@@ -90,6 +93,118 @@ assert(
   "S1-8: input approve deve continuar do tipo boolean"
 );
 
+// ── S1 (provedor): promoção por provedor ─────────────────────────────────────
+// Analisa os comandos efetivos (linhas de comentário YAML/shell são ignoradas) e
+// executa de fato o bloco de validação/mapeamento e a verificação de provider.
+
+const stripComments = (src) => src.split(/\r?\n/).filter((l) => !/^\s*#/.test(l)).join("\n");
+const promoteCode = stripComments(promote);
+const downloadCode = stripComments(downloadStep);
+const ALLOWED_ARTIFACTS = new Map([["nvidia", "odin-insights-v2-shadow"], ["maas", "odin-insights-v2-shadow-maas"]]);
+
+// S1-9. Input provider: choice com nvidia e maas, padrão nvidia
+assert(
+  /provider:\s*\n(?:\s+\w+:.*\n)*?\s+type:\s*choice\s*\n\s+options:\s*\n\s+-\s*nvidia\s*\n\s+-\s*maas\s*\n\s+default:\s*nvidia/.test(promote.replace(/\r\n/g, "\n")),
+  "S1-9: input provider deve ser type: choice com options nvidia e maas e default nvidia"
+);
+
+// S1-10. provider só entra por env (KEY: ${{ inputs.provider }}), nunca em comando shell
+{
+  const occurrences = [...promote.matchAll(/\$\{\{\s*inputs\.provider\s*\}\}/g)];
+  assert(occurrences.length >= 2, "S1-10: inputs.provider deve ser atribuído a PROVIDER nos passos de download e de verificação");
+  for (const m of occurrences) {
+    const line = lineOf(promote, m.index);
+    assert(/^\s+PROVIDER:\s*\$\{\{\s*inputs\.provider\s*\}\}\s*$/.test(line),
+      "S1-10: inputs.provider fora de atribuição PROVIDER: na linha: " + JSON.stringify(line.trim()));
+  }
+}
+
+// S1-11. Validação + mapeamento do provedor ocorrem antes do gh run download, e só existem os dois destinos
+const caseBlock = downloadCode.match(/case "\$PROVIDER" in[\s\S]*?\n\s*esac/)?.[0] ?? "";
+assert(caseBlock.length > 0, "S1-11: bloco case \"$PROVIDER\" não encontrado no passo de download");
+assert(
+  caseBlock.length > 0 && downloadCode.indexOf(caseBlock) < downloadCode.indexOf("gh run download"),
+  "S1-11: o bloco de validação do provedor deve vir antes do gh run download"
+);
+{
+  const arms = [...caseBlock.matchAll(/^\s*([\w*]+)\)\s*(.*)$/gm)].map((m) => [m[1], m[2]]);
+  assert(JSON.stringify(arms.map(([k]) => k)) === JSON.stringify(["nvidia", "maas", "*"]),
+    "S1-11: o case deve ter exatamente os ramos nvidia, maas e * (rejeição): " + JSON.stringify(arms.map(([k]) => k)));
+  for (const [k, v] of ALLOWED_ARTIFACTS) {
+    assert(arms.find(([a]) => a === k)?.[1].includes(`ARTIFACT="${v}"`), `S1-11: ${k} deve mapear para ${v}`);
+  }
+  assert(/\*\)[\s\S]*exit 1/.test(caseBlock), "S1-11: o ramo * deve sair com exit 1");
+}
+
+// S1-12. Comandos efetivos de gh run download: só --name "$ARTIFACT"; ARTIFACT só recebe os dois nomes; nunca -blocked
+{
+  const flat = promoteCode.replace(/\\\r?\n\s*/g, " ");
+  const downloads = flat.split("\n").filter((l) => /gh\s+run\s+download|download-artifact/.test(l));
+  assert(downloads.length > 0, "S1-12: nenhum comando gh run download encontrado");
+  for (const cmd of downloads) {
+    assert(/gh run download/.test(cmd) && !/download-artifact/.test(cmd), "S1-12: download deve usar gh run download com --name: " + cmd.trim());
+    assert(/--name "\$ARTIFACT"/.test(cmd) && (cmd.match(/--name/g) ?? []).length === 1, "S1-12: gh run download deve usar --name \"$ARTIFACT\" uma única vez: " + cmd.trim());
+    assert(!/--pattern|\s-p\s|blocked/.test(cmd), "S1-12: gh run download não pode usar --pattern nem apontar para artefato bloqueado: " + cmd.trim());
+  }
+  const assigned = [...promoteCode.matchAll(/\bARTIFACT=("[^"]*"|\S+)/g)].map((m) => m[1].replace(/"/g, ""));
+  assert(assigned.length === ALLOWED_ARTIFACTS.size && assigned.every((v) => [...ALLOWED_ARTIFACTS.values()].includes(v)),
+    "S1-12: ARTIFACT só pode receber os nomes dos artefatos promovíveis: " + JSON.stringify(assigned));
+  assert(!assigned.some((v) => /blocked/.test(v)), "S1-12: nenhum caminho pode apontar para artefato -blocked");
+}
+
+// S1-13. O bloco de mapeamento, executado de verdade, aceita nvidia/maas e rejeita o resto
+{
+  const run = (value) => spawnSync("bash", ["-c", `PROVIDER="$1"\n${caseBlock}\necho "$ARTIFACT"`, "_", value], { encoding: "utf8" });
+  const probe = run("nvidia");
+  if (probe.error) {
+    assert(false, "S1-13: não foi possível executar bash para exercitar o mapeamento: " + probe.error.message);
+  } else {
+    for (const [k, v] of ALLOWED_ARTIFACTS) {
+      const r = run(k);
+      assert(r.status === 0 && r.stdout.trim() === v, `S1-13: provider ${k} deve resultar em ${v} (obteve status ${r.status}, "${r.stdout.trim()}")`);
+    }
+    for (const bad of ["", "NVIDIA", "nvidia-blocked", "maas-blocked", "odin-insights-v2-shadow-blocked", "nvidia; echo x", "../maas", "*"]) {
+      const r = run(bad);
+      assert(r.status !== 0 && r.stdout.trim() === "", `S1-13: provider inválido ${JSON.stringify(bad)} deve ser rejeitado antes do download`);
+    }
+  }
+}
+
+// S1-14. Verificação de provider (input = shadow = relatório) antes do gate de promoção
+{
+  const stepRe = (name) => new RegExp(`- name: ${name}[\\s\\S]*?(?=\\n      - name:|$)`);
+  const verifyStep = promote.match(stepRe("Verify artifact provider matches input"))?.[0] ?? "";
+  assert(verifyStep.length > 0, "S1-14: passo 'Verify artifact provider matches input' não encontrado");
+  const iDownload = promote.indexOf("- name: Download selected shadow artifact");
+  const iVerify = promote.indexOf("- name: Verify artifact provider matches input");
+  const iPromote = promote.indexOf("- name: Promote through ODIN gate");
+  assert(iDownload >= 0 && iDownload < iVerify && iVerify < iPromote,
+    "S1-14: a verificação de provider deve vir depois do download e antes do passo que executa promote-insights.mjs");
+  assert(!promote.slice(0, iPromote).includes("promote-insights.mjs"), "S1-14: promote-insights.mjs não pode rodar antes da verificação de provider");
+  assert(/PROVIDER:\s*\$\{\{\s*inputs\.provider\s*\}\}/.test(verifyStep), "S1-14: a verificação deve receber PROVIDER por env");
+  const script = verifyStep.match(/node -e '\r?\n([\s\S]*?)\r?\n\s*' "\$PROVIDER" "\$shadow_file" "\$report_file"/)?.[1] ?? "";
+  assert(script.includes("insights.v2.shadow") || /shadowPath/.test(script), "S1-14: não foi possível extrair o script de verificação");
+  const dir = mkdtempSync(path.join(tmpdir(), "odin-provider-"));
+  try {
+    const attempt = (want, shadowProvider, reportProvider) => {
+      const shadowPath = path.join(dir, "insights.v2.shadow.json");
+      const reportPath = path.join(dir, "generationReport.json");
+      writeFileSync(shadowPath, JSON.stringify(shadowProvider === undefined ? {} : { provider: shadowProvider }));
+      writeFileSync(reportPath, JSON.stringify(reportProvider === undefined ? {} : { provider: reportProvider }));
+      return spawnSync(process.execPath, ["-e", script, want, shadowPath, reportPath], { encoding: "utf8" }).status;
+    };
+    assert(attempt("nvidia", "nvidia", "nvidia") === 0, "S1-14: provider igual nos três deve passar (nvidia)");
+    assert(attempt("maas", "maas", "maas") === 0, "S1-14: provider igual nos três deve passar (maas)");
+    assert(attempt("maas", "nvidia", "maas") !== 0, "S1-14: shadow divergente do input deve bloquear");
+    assert(attempt("maas", "maas", "nvidia") !== 0, "S1-14: relatório divergente do input deve bloquear");
+    assert(attempt("nvidia", "maas", "maas") !== 0, "S1-14: ambos divergentes do input devem bloquear");
+    assert(attempt("nvidia", undefined, "nvidia") !== 0, "S1-14: shadow sem provider deve bloquear");
+    assert(attempt("nvidia", "nvidia", undefined) !== 0, "S1-14: relatório sem provider deve bloquear");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 // ── S2: aifs-forecast.yml ────────────────────────────────────────────────────
 
 const aifs = await readFile(
@@ -169,4 +284,4 @@ assert(
 );
 
 if (failures) { console.error(`security-baseline: ${failures} falha(s)`); process.exit(1); }
-console.log("ODIN security-baseline: PASS — S1 (8 verificações) + S2 (11 verificações)");
+console.log("ODIN security-baseline: PASS — S1 (14 verificações) + S2 (11 verificações)");

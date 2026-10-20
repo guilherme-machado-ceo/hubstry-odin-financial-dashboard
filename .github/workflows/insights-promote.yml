@@ -7,6 +7,14 @@ on:
         description: "GitHub Actions run ID containing the approved ODIN shadow artifact"
         required: true
         type: number
+      provider:
+        description: "Provider whose shadow artifact will be promoted"
+        required: true
+        type: choice
+        options:
+          - nvidia
+          - maas
+        default: nvidia
       approve:
         description: "Explicit human approval to promote this shadow artifact to production"
         required: true
@@ -38,6 +46,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           SHADOW_RUN_ID: ${{ inputs.shadow_run_id }}
+          PROVIDER: ${{ inputs.provider }}
           GH_REPO: ${{ github.repository }}
         run: |
           # Defesa em profundidade: valida que o ID contém só dígitos antes
@@ -46,12 +55,43 @@ jobs:
             echo "Erro: shadow_run_id deve conter exclusivamente dígitos." >&2
             exit 1
           fi
+          # Provedor → artefato promovível. Valor fora da lista falha aqui, antes
+          # de qualquer download; só estes dois nomes podem ser baixados.
+          case "$PROVIDER" in
+            nvidia) ARTIFACT="odin-insights-v2-shadow" ;;
+            maas) ARTIFACT="odin-insights-v2-shadow-maas" ;;
+            *)
+              echo "Erro: provider deve ser nvidia ou maas." >&2
+              exit 1
+              ;;
+          esac
           rm -rf /tmp/odin-shadow
           mkdir -p /tmp/odin-shadow
           gh run download "$SHADOW_RUN_ID" \
             --repo "$GH_REPO" \
-            --name odin-insights-v2-shadow \
+            --name "$ARTIFACT" \
             --dir /tmp/odin-shadow
+
+      - name: Verify artifact provider matches input
+        env:
+          PROVIDER: ${{ inputs.provider }}
+        run: |
+          # O provider gravado no artefato e no relatório de geração deve ser o
+          # escolhido; qualquer divergência falha antes do gate de promoção.
+          shadow_file="$(find /tmp/odin-shadow -name insights.v2.shadow.json -type f -print -quit)"
+          report_file="$(find /tmp/odin-shadow -name generationReport.json -type f -print -quit)"
+          test -n "$shadow_file"
+          test -n "$report_file"
+          node -e '
+            const fs = require("fs");
+            const [want, shadowPath, reportPath] = process.argv.slice(1);
+            const shadow = JSON.parse(fs.readFileSync(shadowPath, "utf8")).provider;
+            const report = JSON.parse(fs.readFileSync(reportPath, "utf8")).provider;
+            if (shadow !== want || report !== want) {
+              console.error("Erro: provider divergente — input=" + want + " shadow=" + shadow + " report=" + report);
+              process.exit(1);
+            }
+          ' "$PROVIDER" "$shadow_file" "$report_file"
 
       - name: Promote through ODIN gate
         env:
