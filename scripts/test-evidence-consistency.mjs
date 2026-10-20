@@ -4,7 +4,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import {
-  checkEvidenceConsistency, formatConsistencyError, extractDates, numberCandidates,
+  checkEvidenceConsistency, formatConsistencyError, extractDates, numberCandidates, checkComparisons,
 } from "./evidence-consistency.mjs";
 
 const dir = path.resolve(process.cwd(), "contracts/consistency/fixtures");
@@ -53,6 +53,52 @@ const notMaterial = checkEconomicLaw({ ...base, economicLaw: { relevance: "not_m
 assert(notMaterial.length === 0, "not_material com listas vazias deve passar");
 const annual = checkWatch({ whatToWatch: [{ signal: "Prazo da primeira declaração anual do CBAM", source: "source-carbon-ec", expectedDate: "2027-09-30", whyItMatters: "x" }] }, { material: "due by 2027-09-30", keyDates: [] });
 assert(annual.length === 0, `"declaração anual" sem métrica de preço não é erro de cadência: ${annual.map(formatConsistencyError)}`);
+
+// Comparações com atribuição determinística (dados reais do CBAM: Q3 2026 = 82,32 é o
+// observado; Q2 2026 = 75,28 é a referência; direção "above").
+const CBAM = { id: "cbam-price-latest-vs-previous", observed: 82.32, reference: 75.28, unit: "€/tCO2e", direction: "above", observedLabel: "Q3 2026", referenceLabel: "Q2 2026" };
+const CBAM_LEGACY = { id: CBAM.id, observed: CBAM.observed, reference: CBAM.reference, unit: CBAM.unit, direction: CBAM.direction };
+const cmpErrors = (text, cmp = CBAM) => checkComparisons({ pt: text }, [cmp]);
+const mustPass = (text, cmp) => { const e = cmpErrors(text, cmp); assert(e.length === 0, `deveria passar: "${text}" → ${e.map(formatConsistencyError).join(" | ")}`); };
+const mustBlock = (text, cmp, detail) => {
+  const e = cmpErrors(text, cmp);
+  assert(e.length > 0 && e.every((x) => x.rule === "comparison_direction"), `deveria bloquear: "${text}"`);
+  if (detail) assert(e.some((x) => x.detail.includes(detail)), `deveria citar "${detail}": "${text}"`);
+};
+for (const [q2, q3] of [["Q2 2026", "Q3 2026"], ["Q2 de 2026", "Q3 de 2026"]]) {
+  // pt — a frase real do GLM (run 39483714772) é a primeira da variante "Q2 2026".
+  mustPass(`O preço do CBAM no ${q2} foi de 75,28 €/tCO2e, abaixo do preço do ${q3}.`);
+  mustPass(`O preço do CBAM no ${q3} foi de 82,32 €/tCO2e, acima dos 75,28 €/tCO2e do ${q2}.`);
+  mustBlock(`O preço do CBAM no ${q3} foi de 82,32 €/tCO2e, abaixo dos 75,28 €/tCO2e do ${q2}.`);
+  mustBlock(`O preço do CBAM no ${q2} foi de 75,28 €/tCO2e, acima do preço do ${q3}.`);
+  // en
+  mustPass(`The CBAM price in ${q2} was 75.28 €/tCO2e, below the ${q3} price.`);
+  mustPass(`The CBAM price in ${q3} was 82.32 €/tCO2e, above the 75.28 €/tCO2e of ${q2}.`);
+  mustBlock(`The CBAM price in ${q3} was 82.32 €/tCO2e, below the 75.28 €/tCO2e of ${q2}.`);
+  mustBlock(`The CBAM price in ${q2} was 75.28 €/tCO2e, above the ${q3} price.`);
+}
+// Frases com as duas direções: uma afirmação contraditória nunca é aprovada.
+const both = [
+  "O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e, acima dos 75,28 €/tCO2e do Q2 2026 e abaixo dos 75,28 €/tCO2e do Q2 2026.",
+  "O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e, acima do Q2 2026 (75,28 €/tCO2e) e abaixo do Q2 2026.",
+  "The Q3 2026 price of 82.32 €/tCO2e is above the 75.28 €/tCO2e of Q2 2026 and below the 75.28 €/tCO2e of Q2 2026.",
+  "The Q3 2026 price of 82.32 €/tCO2e is below the 75.28 €/tCO2e of Q2 2026 and above the 75.28 €/tCO2e of Q2 2026.",
+];
+for (const s of both) mustBlock(s);
+// Documenta o limite anterior: sem rótulos, a mesma frase contraditória ainda passaria.
+assert(cmpErrors(both[0], CBAM_LEGACY).length === 0, "caminho legado sem rótulos mantém a limitação documentada");
+// Ambiguidade: sem âncora depois da palavra de direção → bloqueio conservador.
+mustBlock("Em comparação com o Q2 2026 (75,28 €/tCO2e), o preço do Q3 2026 ficou acima.", CBAM, "atribuição ambígua");
+mustBlock("O preço do CBAM no Q3 2026 foi de 82,32 €/tCO2e, acima dos 75,28 €/tCO2e do Q2 2026, e o Q2 2026 ficou abaixo do Q3 2026.", CBAM, "atribuição ambígua");
+// Sem rótulos (clima: referência fixa): comportamento anterior preservado.
+const CLIMATE = { id: "climate-temp-vs-reference", observed: 23.1, reference: 21.4, unit: "°C", direction: "above" };
+mustPass("A temperatura média de 23,1 °C ficou acima da referência de 21,4 °C.", CLIMATE);
+mustBlock("A temperatura média de 23,1 °C ficou abaixo da referência de 21,4 °C.", CLIMATE);
+// Frase sem relação com a comparação não é afetada.
+mustPass("A variação mensal do preço ficou acima de 1,5 €/tCO2e.");
+// Integração: o gate completo propaga o resultado.
+const gate = (pt) => checkEvidenceConsistency({ sectionId: "carbon", claims: [], pt }, { material: "Q2 2026 75,28 Q3 2026 82,32", keyDates: [], comparisons: [CBAM] }).filter((e) => e.rule === "comparison_direction");
+assert(gate("O preço do CBAM no Q2 2026 foi de 75,28 €/tCO2e, acima do preço do Q3 2026.").length > 0, "gate completo deve bloquear a frase 4");
 
 // Fixtures de regressão.
 for (const file of (await readdir(dir)).filter(f => f.endsWith(".json")).sort()) {

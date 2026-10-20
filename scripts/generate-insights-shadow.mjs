@@ -187,7 +187,7 @@ const blockchainContext = `Digital assets. Stablecoin market capitalization: ${f
         legalRefs: cbam.legalReferences ?? [],
         temporalShape: cbam.temporalShape ?? "two_points",
         comparisons: previous ? [
-          { id:"cbam-price-latest-vs-previous", observed:latest.eurPerTCO2e, reference:previous.eurPerTCO2e, unit:"€/tCO2e", direction:carbonDir },
+          { id:"cbam-price-latest-vs-previous", observed:latest.eurPerTCO2e, reference:previous.eurPerTCO2e, unit:"€/tCO2e", direction:carbonDir, observedLabel:label(latest.period), referenceLabel:label(previous.period) },
         ] : [],
       },
     },
