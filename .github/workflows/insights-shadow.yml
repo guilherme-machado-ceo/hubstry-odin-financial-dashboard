@@ -12,6 +12,11 @@ on:
 permissions:
   contents: read
 
+# Disparos manuais em fila: nunca disputam o push no branch shadow-samples.
+concurrency:
+  group: odin-insights-shadow
+  cancel-in-progress: false
+
 env:
   ODIN_COMPARISON_ID: ${{ github.run_id }}
 
@@ -72,7 +77,7 @@ jobs:
             public/data/evidence/
           if-no-files-found: error
       - name: Upload blocked shadow artifact (NVIDIA — diagnóstico, não promovível)
-        if: failure() && matrix.provider == 'nvidia' && hashFiles('public/data/insights.v2.shadow.json') != ''
+        if: failure() && matrix.provider == 'nvidia' && hashFiles('public/data/generationReport.json') != ''
         uses: actions/upload-artifact@v6
         with:
           name: odin-insights-v2-shadow-blocked
@@ -92,7 +97,7 @@ jobs:
             public/data/evidence/
           if-no-files-found: error
       - name: Upload blocked shadow artifact (MaaS — diagnóstico, não promovível)
-        if: failure() && matrix.provider == 'maas' && hashFiles('public/data/insights.v2.shadow.json') != ''
+        if: failure() && matrix.provider == 'maas' && hashFiles('public/data/generationReport.json') != ''
         uses: actions/upload-artifact@v6
         with:
           name: odin-insights-v2-shadow-maas-blocked
@@ -126,25 +131,43 @@ jobs:
           {
             echo "### Comparação de provedores — $CMP"
             echo ""
-            echo "| Provedor | Status | runId |"
-            echo "|---|---|---|"
+            echo "| Provedor | Status | runId | Erro |"
+            echo "|---|---|---|---|"
           } >> "$GITHUB_STEP_SUMMARY"
           FOUND=0
           for P in nvidia maas; do
             if [ "$P" = "nvidia" ]; then BASE=odin-insights-v2-shadow; else BASE=odin-insights-v2-shadow-maas; fi
-            DIR=""; STATUS="falhou"
-            if [ -d "/tmp/artifacts/$BASE" ]; then DIR="/tmp/artifacts/$BASE"; STATUS="gerado"
-            elif [ -d "/tmp/artifacts/$BASE-blocked" ]; then DIR="/tmp/artifacts/$BASE-blocked"; STATUS="bloqueado pelo gate"; fi
-            RUNID="-"
-            if [ -n "$DIR" ]; then
+            DIR=""; BLOCKED=0
+            if [ -d "/tmp/artifacts/$BASE" ]; then DIR="/tmp/artifacts/$BASE"
+            elif [ -d "/tmp/artifacts/$BASE-blocked" ]; then DIR="/tmp/artifacts/$BASE-blocked"; BLOCKED=1; fi
+            RUNID="-"; DETAIL=""
+            if [ -z "$DIR" ]; then
+              STATUS="sem artefato"
+            else
               FOUND=1
               mkdir -p "$STAGE/$P"
-              cp -r "$DIR"/. "$STAGE/$P/"
+              [ -f "$DIR/insights.v2.shadow.json" ] && cp "$DIR/insights.v2.shadow.json" "$STAGE/$P/"
               if [ -f "$DIR/generationReport.json" ]; then
+                cp "$DIR/generationReport.json" "$STAGE/$P/"
                 RUNID=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1],'utf8')).runId ?? '-')" "$DIR/generationReport.json")
+                # Somente a evidência do runId deste provedor.
+                if [ "$RUNID" != "-" ] && [ -d "$DIR/evidence/$RUNID" ]; then
+                  mkdir -p "$STAGE/$P/evidence"
+                  cp -r "$DIR/evidence/$RUNID" "$STAGE/$P/evidence/$RUNID"
+                fi
+              fi
+              if [ "$BLOCKED" = "0" ]; then
+                STATUS="gerado"
+              elif [ -f "$DIR/insights.v2.shadow.json" ]; then
+                STATUS="bloqueado pelo gate"
+              else
+                STATUS="falhou na geração"
+                if [ -f "$DIR/generationReport.json" ]; then
+                  DETAIL=$(node -e "const r=JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));const s=(r.sections||[]).find(x=>x.errorMessage);console.log(String(s?s.errorMessage:'').replace(/[|\r\n]+/g,' ').slice(0,200))" "$DIR/generationReport.json")
+                fi
               fi
             fi
-            echo "| $P | $STATUS | $RUNID |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| $P | $STATUS | $RUNID | $DETAIL |" >> "$GITHUB_STEP_SUMMARY"
           done
           if [ "$FOUND" = "0" ]; then
             echo "Nenhum artefato disponível — nada a commitar." >> "$GITHUB_STEP_SUMMARY"
