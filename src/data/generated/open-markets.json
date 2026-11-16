@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "methodVersion": "1.0.0",
-  "retrievedAt": "2026-11-09T16:49:05.913Z",
+  "retrievedAt": "2026-11-16T16:22:07.989Z",
   "series": {
     "IRLTLT01USM156N": {
       "sourceId": "fred",
@@ -48,64 +48,64 @@
       "title": "Brazilian Reals to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
       "url": "https://fred.stlouisfed.org/series/DEXBZUS",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-10-30",
-      "n": 2978
+      "lastDate": "2026-11-06",
+      "n": 2983
     },
     "DEXMXUS": {
       "sourceId": "fred",
       "title": "Mexican Pesos to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
       "url": "https://fred.stlouisfed.org/series/DEXMXUS",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-10-30",
-      "n": 2978
+      "lastDate": "2026-11-06",
+      "n": 2983
     },
     "DEXINUS": {
       "sourceId": "fred",
       "title": "Indian Rupees to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
       "url": "https://fred.stlouisfed.org/series/DEXINUS",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-10-30",
-      "n": 2978
+      "lastDate": "2026-11-06",
+      "n": 2983
     },
     "DEXCHUS": {
       "sourceId": "fred",
       "title": "Chinese Yuan Renminbi to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
       "url": "https://fred.stlouisfed.org/series/DEXCHUS",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-10-30",
-      "n": 2978
+      "lastDate": "2026-11-06",
+      "n": 2983
     },
     "DEXSFUS": {
       "sourceId": "fred",
       "title": "South African Rand to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
       "url": "https://fred.stlouisfed.org/series/DEXSFUS",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-10-30",
-      "n": 2978
+      "lastDate": "2026-11-06",
+      "n": 2983
     },
     "TRM-COP": {
       "sourceId": "banrep-trm",
       "title": "Tasa Representativa del Mercado (TRM), COP por US$",
       "url": "https://www.datos.gov.co/d/32sa-8pi3",
       "firstDate": "2014-12-02",
-      "lastDate": "2026-11-07",
-      "n": 2827
+      "lastDate": "2026-11-14",
+      "n": 2831
     },
     "DCOILBRENTEU": {
       "sourceId": "fred",
       "title": "Crude Oil Prices: Brent - Europe (EIA)",
       "url": "https://fred.stlouisfed.org/series/DCOILBRENTEU",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-11-03",
-      "n": 3028
+      "lastDate": "2026-11-11",
+      "n": 3034
     },
     "DCOILWTICO": {
       "sourceId": "fred",
       "title": "Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma (EIA)",
       "url": "https://fred.stlouisfed.org/series/DCOILWTICO",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-11-03",
-      "n": 2976
+      "lastDate": "2026-11-11",
+      "n": 2982
     }
   },
   "yieldDifferential": {
@@ -280,11 +280,11 @@
         },
         "ytd": {
           "from": "2026-01-02",
-          "to": "2026-10-30",
-          "n": 209,
-          "vol": 14.2
+          "to": "2026-11-06",
+          "n": 214,
+          "vol": 14.1
         },
-        "lastDate": "2026-10-30"
+        "lastDate": "2026-11-06"
       },
       {
         "code": "MXN",
@@ -308,11 +308,11 @@
         },
         "ytd": {
           "from": "2026-01-02",
-          "to": "2026-10-30",
-          "n": 209,
-          "vol": 8.9
+          "to": "2026-11-06",
+          "n": 214,
+          "vol": 9.1
         },
-        "lastDate": "2026-10-30"
+        "lastDate": "2026-11-06"
       },
       {
         "code": "INR",
@@ -336,11 +336,11 @@
         },
         "ytd": {
           "from": "2026-01-02",
-          "to": "2026-10-30",
-          "n": 209,
+          "to": "2026-11-06",
+          "n": 214,
           "vol": 5.5
         },
-        "lastDate": "2026-10-30"
+        "lastDate": "2026-11-06"
       },
       {
         "code": "CNY",
@@ -364,11 +364,11 @@
         },
         "ytd": {
           "from": "2026-01-02",
-          "to": "2026-10-30",
-          "n": 209,
+          "to": "2026-11-06",
+          "n": 214,
           "vol": 2.1
         },
-        "lastDate": "2026-10-30"
+        "lastDate": "2026-11-06"
       },
       {
         "code": "ZAR",
@@ -392,11 +392,11 @@
         },
         "ytd": {
           "from": "2026-01-02",
-          "to": "2026-10-30",
-          "n": 209,
-          "vol": 12.5
+          "to": "2026-11-06",
+          "n": 214,
+          "vol": 12.4
         },
-        "lastDate": "2026-10-30"
+        "lastDate": "2026-11-06"
       },
       {
         "code": "COP",
@@ -420,11 +420,11 @@
         },
         "ytd": {
           "from": "2026-01-03",
-          "to": "2026-11-07",
-          "n": 201,
+          "to": "2026-11-14",
+          "n": 205,
           "vol": 12.7
         },
-        "lastDate": "2026-11-07"
+        "lastDate": "2026-11-14"
       }
     ],
     "gaps": [
@@ -484,8 +484,8 @@
         "2025": 69.14
       },
       "latest": {
-        "date": "2026-11-03",
-        "value": 107.03
+        "date": "2026-11-11",
+        "value": 92.14
       }
     },
     "wti": {
@@ -504,8 +504,8 @@
         "2025": 65.39
       },
       "latest": {
-        "date": "2026-11-03",
-        "value": 99.64
+        "date": "2026-11-11",
+        "value": 89.62
       }
     }
   },
