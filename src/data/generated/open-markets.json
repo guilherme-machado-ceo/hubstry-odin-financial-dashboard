@@ -1,111 +1,111 @@
 {
   "schemaVersion": "1.0",
   "methodVersion": "1.0.0",
-  "retrievedAt": "2026-11-16T16:22:07.989Z",
+  "retrievedAt": "2026-11-23T18:42:32.226Z",
   "series": {
     "IRLTLT01USM156N": {
       "sourceId": "fred",
       "title": "Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for United States (OECD MEI)",
       "url": "https://fred.stlouisfed.org/series/IRLTLT01USM156N",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-09-01",
-      "n": 142
+      "lastDate": "2026-10-01",
+      "n": 143
     },
     "IRLTLT01MXM156N": {
       "sourceId": "fred",
       "title": "Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for Mexico (OECD MEI)",
       "url": "https://fred.stlouisfed.org/series/IRLTLT01MXM156N",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-09-01",
-      "n": 108
+      "lastDate": "2026-10-01",
+      "n": 109
     },
     "INDIRLTLT01STM": {
       "sourceId": "fred",
       "title": "Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for India (OECD MEI)",
       "url": "https://fred.stlouisfed.org/series/INDIRLTLT01STM",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-09-01",
-      "n": 142
+      "lastDate": "2026-10-01",
+      "n": 143
     },
     "IRLTLT01ZAM156N": {
       "sourceId": "fred",
       "title": "Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for South Africa (OECD MEI)",
       "url": "https://fred.stlouisfed.org/series/IRLTLT01ZAM156N",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-09-01",
-      "n": 142
+      "lastDate": "2026-10-01",
+      "n": 143
     },
     "IRLTLT01CLM156N": {
       "sourceId": "fred",
       "title": "Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for Chile (OECD MEI)",
       "url": "https://fred.stlouisfed.org/series/IRLTLT01CLM156N",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-09-01",
-      "n": 142
+      "lastDate": "2026-10-01",
+      "n": 143
     },
     "DEXBZUS": {
       "sourceId": "fred",
       "title": "Brazilian Reals to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
       "url": "https://fred.stlouisfed.org/series/DEXBZUS",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-11-06",
-      "n": 2983
+      "lastDate": "2026-11-13",
+      "n": 2987
     },
     "DEXMXUS": {
       "sourceId": "fred",
       "title": "Mexican Pesos to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
       "url": "https://fred.stlouisfed.org/series/DEXMXUS",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-11-06",
-      "n": 2983
+      "lastDate": "2026-11-13",
+      "n": 2987
     },
     "DEXINUS": {
       "sourceId": "fred",
       "title": "Indian Rupees to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
       "url": "https://fred.stlouisfed.org/series/DEXINUS",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-11-06",
-      "n": 2983
+      "lastDate": "2026-11-13",
+      "n": 2987
     },
     "DEXCHUS": {
       "sourceId": "fred",
       "title": "Chinese Yuan Renminbi to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
       "url": "https://fred.stlouisfed.org/series/DEXCHUS",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-11-06",
-      "n": 2983
+      "lastDate": "2026-11-13",
+      "n": 2987
     },
     "DEXSFUS": {
       "sourceId": "fred",
       "title": "South African Rand to U.S. Dollar Spot Exchange Rate (Federal Reserve H.10)",
       "url": "https://fred.stlouisfed.org/series/DEXSFUS",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-11-06",
-      "n": 2983
+      "lastDate": "2026-11-13",
+      "n": 2987
     },
     "TRM-COP": {
       "sourceId": "banrep-trm",
       "title": "Tasa Representativa del Mercado (TRM), COP por US$",
       "url": "https://www.datos.gov.co/d/32sa-8pi3",
       "firstDate": "2014-12-02",
-      "lastDate": "2026-11-14",
-      "n": 2831
+      "lastDate": "2026-11-21",
+      "n": 2835
     },
     "DCOILBRENTEU": {
       "sourceId": "fred",
       "title": "Crude Oil Prices: Brent - Europe (EIA)",
       "url": "https://fred.stlouisfed.org/series/DCOILBRENTEU",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-11-11",
-      "n": 3034
+      "lastDate": "2026-11-17",
+      "n": 3038
     },
     "DCOILWTICO": {
       "sourceId": "fred",
       "title": "Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma (EIA)",
       "url": "https://fred.stlouisfed.org/series/DCOILWTICO",
       "firstDate": "2014-12-01",
-      "lastDate": "2026-11-11",
-      "n": 2982
+      "lastDate": "2026-11-17",
+      "n": 2986
     }
   },
   "yieldDifferential": {
@@ -122,12 +122,12 @@
         "countryPt": "México",
         "seriesId": "IRLTLT01MXM156N",
         "latest": {
-          "month": "2026-09",
-          "localPct": 9.35,
-          "usPct": 4.99,
-          "bps": 436
+          "month": "2026-10",
+          "localPct": 9.25,
+          "usPct": 5.13,
+          "bps": 412
         },
-        "delta12mBps": -31,
+        "delta12mBps": -53,
         "trend": "narrowing",
         "annual": {}
       },
@@ -137,13 +137,13 @@
         "countryPt": "Índia",
         "seriesId": "INDIRLTLT01STM",
         "latest": {
-          "month": "2026-09",
-          "localPct": 7.06,
-          "usPct": 4.99,
-          "bps": 207
+          "month": "2026-10",
+          "localPct": 7.38,
+          "usPct": 5.13,
+          "bps": 225
         },
-        "delta12mBps": -40,
-        "trend": "narrowing",
+        "delta12mBps": -17,
+        "trend": "stable",
         "annual": {
           "2015": 564,
           "2016": 536,
@@ -164,12 +164,12 @@
         "countryPt": "África do Sul",
         "seriesId": "IRLTLT01ZAM156N",
         "latest": {
-          "month": "2026-09",
-          "localPct": 8.95,
-          "usPct": 4.99,
-          "bps": 396
+          "month": "2026-10",
+          "localPct": 8.94,
+          "usPct": 5.13,
+          "bps": 381
         },
-        "delta12mBps": -179,
+        "delta12mBps": -166,
         "trend": "narrowing",
         "annual": {
           "2015": 602,
@@ -191,12 +191,12 @@
         "countryPt": "Chile",
         "seriesId": "IRLTLT01CLM156N",
         "latest": {
-          "month": "2026-09",
-          "localPct": 6.01,
-          "usPct": 4.99,
-          "bps": 102
+          "month": "2026-10",
+          "localPct": 6.05,
+          "usPct": 5.13,
+          "bps": 92
         },
-        "delta12mBps": -50,
+        "delta12mBps": -60,
         "trend": "narrowing",
         "annual": {
           "2015": 234,
@@ -280,11 +280,11 @@
         },
         "ytd": {
           "from": "2026-01-02",
-          "to": "2026-11-06",
-          "n": 214,
+          "to": "2026-11-13",
+          "n": 218,
           "vol": 14.1
         },
-        "lastDate": "2026-11-06"
+        "lastDate": "2026-11-13"
       },
       {
         "code": "MXN",
@@ -308,11 +308,11 @@
         },
         "ytd": {
           "from": "2026-01-02",
-          "to": "2026-11-06",
-          "n": 214,
+          "to": "2026-11-13",
+          "n": 218,
           "vol": 9.1
         },
-        "lastDate": "2026-11-06"
+        "lastDate": "2026-11-13"
       },
       {
         "code": "INR",
@@ -336,11 +336,11 @@
         },
         "ytd": {
           "from": "2026-01-02",
-          "to": "2026-11-06",
-          "n": 214,
+          "to": "2026-11-13",
+          "n": 218,
           "vol": 5.5
         },
-        "lastDate": "2026-11-06"
+        "lastDate": "2026-11-13"
       },
       {
         "code": "CNY",
@@ -364,11 +364,11 @@
         },
         "ytd": {
           "from": "2026-01-02",
-          "to": "2026-11-06",
-          "n": 214,
+          "to": "2026-11-13",
+          "n": 218,
           "vol": 2.1
         },
-        "lastDate": "2026-11-06"
+        "lastDate": "2026-11-13"
       },
       {
         "code": "ZAR",
@@ -392,11 +392,11 @@
         },
         "ytd": {
           "from": "2026-01-02",
-          "to": "2026-11-06",
-          "n": 214,
-          "vol": 12.4
+          "to": "2026-11-13",
+          "n": 218,
+          "vol": 12.5
         },
-        "lastDate": "2026-11-06"
+        "lastDate": "2026-11-13"
       },
       {
         "code": "COP",
@@ -420,11 +420,11 @@
         },
         "ytd": {
           "from": "2026-01-03",
-          "to": "2026-11-14",
-          "n": 205,
-          "vol": 12.7
+          "to": "2026-11-21",
+          "n": 209,
+          "vol": 13
         },
-        "lastDate": "2026-11-14"
+        "lastDate": "2026-11-21"
       }
     ],
     "gaps": [
@@ -484,8 +484,8 @@
         "2025": 69.14
       },
       "latest": {
-        "date": "2026-11-11",
-        "value": 92.14
+        "date": "2026-11-17",
+        "value": 92.94
       }
     },
     "wti": {
@@ -504,8 +504,8 @@
         "2025": 65.39
       },
       "latest": {
-        "date": "2026-11-11",
-        "value": 89.62
+        "date": "2026-11-17",
+        "value": 89.53
       }
     }
   },
